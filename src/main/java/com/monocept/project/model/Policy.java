@@ -1,44 +1,49 @@
 package com.monocept.project.model;
 
+import com.monocept.project.enums.PolicyStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import com.monocept.project.enums.Role;
-
 @Entity
-@Table(name = "users")
+@Table(name = "policies")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class Policy {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
+    private Long policyId;
 
-    @Column(nullable = false, length = 100)
-    private String fullName;
+    @Column(nullable = false, unique = true, length = 50)
+    private String policyNumber;
 
-    @Column(nullable = false, unique = true, length = 100)
-    private String email;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", nullable = false)
+    private Customer customer;
 
-    @Column(nullable = false, length = 255)
-    private String password;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "plan_id", nullable = false)
+    private PolicyPlan policyPlan;
 
-    @Column(nullable = false, length = 15)
-    private String mobileNumber;
+    @Column(nullable = false)
+    private LocalDate startDate;
+
+    @Column(nullable = false)
+    private LocalDate endDate;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private Role role;
+    private PolicyStatus policyStatus;
 
     @Column(nullable = false)
-    private Boolean activeStatus = true;
+    private Double totalPremiumPaid = 0.0;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdDate;

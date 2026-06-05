@@ -1,22 +1,12 @@
 package com.monocept.project.model;
 
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Table(name = "customers")
@@ -25,34 +15,34 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Customer {
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long customerId;
-	
-	@OneToOne
-	@JoinColumn(name = "user_id", nullable = false, unique = true)
-	private User user;
-	
-	@Column(nullable = false)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long customerId;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private User linkedUser;
+
+    @Column(nullable = false)
     private LocalDate dateOfBirth;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 255)
     private String address;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String city;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String state;
 
-    @Column(nullable = false)
-    private String pincode;
+    @Column(nullable = false, length = 10)
+    private String pinCode;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String nomineeName;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private String nomineeRelation;
 
     @Column(nullable = false, updatable = false)
@@ -62,13 +52,13 @@ public class Customer {
     private LocalDateTime updatedDate;
 
     @PrePersist
-    public void beforeSave() {
+    protected void onCreate() {
         createdDate = LocalDateTime.now();
         updatedDate = LocalDateTime.now();
     }
 
     @PreUpdate
-    public void beforeUpdate() {
+    protected void onUpdate() {
         updatedDate = LocalDateTime.now();
     }
 }

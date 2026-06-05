@@ -1,44 +1,51 @@
 package com.monocept.project.model;
 
+import com.monocept.project.enums.ClaimStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import com.monocept.project.enums.Role;
-
 @Entity
-@Table(name = "users")
+@Table(name = "claims")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class Claim {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
+    private Long claimId;
 
-    @Column(nullable = false, length = 100)
-    private String fullName;
+    @Column(nullable = false, unique = true, length = 50)
+    private String claimNumber;
 
-    @Column(nullable = false, unique = true, length = 100)
-    private String email;
-
-    @Column(nullable = false, length = 255)
-    private String password;
-
-    @Column(nullable = false, length = 15)
-    private String mobileNumber;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private Role role;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "policy_id", nullable = false)
+    private Policy policy;
 
     @Column(nullable = false)
-    private Boolean activeStatus = true;
+    private Double claimAmount;
+
+    @Column(nullable = false, length = 500)
+    private String claimReason;
+
+    @Column(nullable = false)
+    private LocalDate incidentDate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private ClaimStatus claimStatus;
+
+    @Column(length = 500)
+    private String agentRemarks;
+
+    @Column(length = 500)
+    private String adminRemarks;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdDate;
