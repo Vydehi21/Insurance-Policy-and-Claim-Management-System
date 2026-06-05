@@ -1,13 +1,17 @@
 package com.monocept.project.model;
 
-import com.monocept.project.enums.PolicyStatus;
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+
+import com.monocept.project.enums.PolicyStatus;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "policies")
@@ -16,35 +20,43 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Policy {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long policyId;
-
-    @Column(nullable = false, unique = true, length = 50)
-    private String policyNumber;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "customer_id", nullable = false)
-    private Customer customer;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "plan_id", nullable = false)
-    private PolicyPlan policyPlan;
-
-    @Column(nullable = false)
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long policyId;
+	
+	@Column(nullable = false, unique = true)
+	private String policyNumber;
+	
+	@ManyToOne
+	@JoinColumn(name = "customer_id", nullable = false)
+	private Customer customer;
+	
+	@ManyToOne
+	@JoinColumn(name = "plan_id", nullable = false)
+	private PolicyPlan policyPlan;
+	
+	@OneToMany(mappedBy = "policy",
+			   cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+	private List<PremiumPayment> premiumPayments;
+	
+	@OneToMany(mappedBy = "policy",
+			   cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+	private List<Claim> claims;
+	
+	@Column(nullable = false)
     private LocalDate startDate;
 
     @Column(nullable = false)
     private LocalDate endDate;
-
+    
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private PolicyStatus policyStatus;
-
     @Column(nullable = false)
-    private Double totalPremiumPaid = 0.0;
-
+    private PolicyStatus policyStatus = PolicyStatus.PENDING_PAYMENT;
+    
+    @Column(nullable = false)
+    private BigDecimal totalPremiumPaid = BigDecimal.ZERO;
+    
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdDate;
 
@@ -52,13 +64,13 @@ public class Policy {
     private LocalDateTime updatedDate;
 
     @PrePersist
-    protected void onCreate() {
+    public void beforeSave() {
         createdDate = LocalDateTime.now();
         updatedDate = LocalDateTime.now();
     }
 
     @PreUpdate
-    protected void onUpdate() {
+    public void beforeUpdate() {
         updatedDate = LocalDateTime.now();
     }
 }

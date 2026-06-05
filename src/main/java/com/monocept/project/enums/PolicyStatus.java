@@ -1,5 +1,8 @@
 package com.monocept.project.enums;
 
-public class PolicyStatus {
-
+public enum PolicyStatus {
+	PENDING_PAYMENT,
+	ACTIVE,
+	EXPIRED,
+	CANCELLED
 }

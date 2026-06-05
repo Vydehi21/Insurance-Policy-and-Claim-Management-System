@@ -1,11 +1,12 @@
 package com.monocept.project.model;
 
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "claim_documents")
@@ -14,29 +15,29 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ClaimDocument {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long documentId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "claim_id", nullable = false)
-    private Claim claim;
-
-    @Column(nullable = false, length = 100)
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long documentId;
+	
+	@ManyToOne
+	@JoinColumn(name = "claim_id", nullable = false)
+	private Claim claim;
+	
+	@Column(nullable = false)
     private String documentName;
 
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false)
     private String documentType;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
     private String documentReference;
 
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false)
     private LocalDateTime uploadedDate;
 
     @PrePersist
-    protected void onCreate() {
+    public void beforeSave() {
         uploadedDate = LocalDateTime.now();
     }
 }

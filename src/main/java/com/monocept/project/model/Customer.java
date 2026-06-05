@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "customers")
@@ -15,16 +16,16 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Customer {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long customerId;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
-    private User linkedUser;
-
-    @Column(nullable = false)
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long customerId;
+	
+	@OneToOne
+	@JoinColumn(name = "user_id", nullable = false, unique = true)
+	private User user;
+	
+	@Column(nullable = false)
     private LocalDate dateOfBirth;
 
     @Column(nullable = false, length = 255)
@@ -61,4 +62,9 @@ public class Customer {
     protected void onUpdate() {
         updatedDate = LocalDateTime.now();
     }
+    
+    @OneToMany(mappedBy = "customer", 
+    		   cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private List<Policy> policies;
+    
 }

@@ -32,9 +32,9 @@ public class InsuranceProduct {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long productId;
+	private Long productId;
 	
-	@Column(nullable = false)
+	@Column(nullable = false, unique = true)
 	private String productName;
 	
 	@Enumerated(EnumType.STRING)
@@ -48,7 +48,7 @@ public class InsuranceProduct {
     private Boolean active = true;
 
     @OneToMany(mappedBy = "insuranceProduct",
-               cascade = CascadeType.ALL)
+               cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<PolicyPlan> plans;
 
     @Column(nullable = false, updatable = false)

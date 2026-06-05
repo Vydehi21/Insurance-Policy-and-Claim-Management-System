@@ -1,13 +1,16 @@
 package com.monocept.project.model;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 import com.monocept.project.enums.PaymentMode;
 import com.monocept.project.enums.PaymentStatus;
+
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "premium_payments")
@@ -16,40 +19,38 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PremiumPayment {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long paymentId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "policy_id", nullable = false)
-    private Policy policy;
-
-    @Column(nullable = false)
-    private Double amount;
-
-    @Column(nullable = false)
-    private LocalDateTime paymentDate;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private PaymentMode paymentMode;
-
-    @Column(unique = true, length = 100)
-    private String transactionReference;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private PaymentStatus paymentStatus;
-
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdDate;
-
-    @PrePersist
-    protected void onCreate() {
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long paymentId;
+	
+	@ManyToOne
+	@JoinColumn(name = "policy_id", nullable = false)
+	private Policy policy;
+	
+	@Column(nullable = false)
+	private BigDecimal amount;
+	
+	@Column(nullable = false)
+	private LocalDateTime paymentDate;
+	
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private PaymentMode paymentMode;
+	
+	@Column(nullable = false, unique = true)
+	private String transactionReference;
+	
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private PaymentStatus paymentStatus;
+	
+	@Column(nullable = false, updatable = false)
+	private LocalDateTime createdDate;
+	
+	@PrePersist
+    public void beforeSave() {
         createdDate = LocalDateTime.now();
-        if (paymentDate == null) {
-            paymentDate = LocalDateTime.now();
-        }
+        if(paymentDate == null) paymentDate = LocalDateTime.now();
     }
 }

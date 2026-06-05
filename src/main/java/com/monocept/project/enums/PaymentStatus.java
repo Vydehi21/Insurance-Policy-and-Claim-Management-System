@@ -1,5 +1,7 @@
 package com.monocept.project.enums;
 
-public class PaymentStatus {
-
+public enum PaymentStatus {
+	SUCCESS,
+	FAILED,
+	PENDING
 }

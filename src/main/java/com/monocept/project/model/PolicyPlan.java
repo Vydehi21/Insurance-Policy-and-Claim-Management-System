@@ -1,13 +1,16 @@
 package com.monocept.project.model;
 
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.monocept.project.enums.PremiumType;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "policy_plans")
@@ -17,50 +20,55 @@ import com.monocept.project.enums.PremiumType;
 @AllArgsConstructor
 public class PolicyPlan {
 
-    @Id
+	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long planId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
+	
+	@ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
     private InsuranceProduct insuranceProduct;
-
-    @Column(nullable = false, length = 100)
+	
+	@Column(nullable = false)
     private String planName;
-
+	
+	@Column(nullable = false)
+    private BigDecimal coverageAmount;
+	
+	@Column(nullable = false)
+    private BigDecimal premiumAmount;
+	
+	@Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Double coverageAmount;
-
-    @Column(nullable = false)
-    private Double premiumAmount;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
     private PremiumType premiumType;
-
-    @Column(nullable = false)
-    private Integer duration;
-
-    @Column(columnDefinition = "TEXT")
+	
+	@Column(nullable = false)
+	private Integer duration;
+	
+	@Column(nullable = false)
     private String termsAndConditions;
-
-    @Column(nullable = false)
+	
+	@Column(nullable = false)
     private Boolean activeStatus = true;
-
-    @Column(nullable = false, updatable = false)
+	
+	@Column(nullable = false, updatable = false)
     private LocalDateTime createdDate;
 
     @Column(nullable = false)
     private LocalDateTime updatedDate;
 
     @PrePersist
-    protected void onCreate() {
+    public void beforeSave() {
         createdDate = LocalDateTime.now();
         updatedDate = LocalDateTime.now();
     }
 
     @PreUpdate
-    protected void onUpdate() {
+    public void beforeUpdate() {
         updatedDate = LocalDateTime.now();
     }
+    
+    @OneToMany(mappedBy = "policyPlan", 
+    		   cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private List<Policy> policies;
+    
 }
