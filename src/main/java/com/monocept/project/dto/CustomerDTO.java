@@ -1,0 +1,50 @@
+package com.monocept.project.dto;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import java.time.LocalDate;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class CustomerDTO {
+
+    private Long customerId;
+
+    @NotNull(message = "Linked User ID is required")
+    private Long userId;
+
+    @NotNull(message = "Date of birth is required")
+    private LocalDate dateOfBirth;
+
+    @NotBlank(message = "Address is required")
+    @Size(max = 255, message = "Address must not exceed 255 characters")
+    private String address;
+
+    @NotBlank(message = "City is required")
+    @Size(max = 100, message = "City must not exceed 100 characters")
+    private String city;
+
+    @NotBlank(message = "State is required")
+    @Size(max = 100, message = "State must not exceed 100 characters")
+    private String state;
+
+    @NotBlank(message = "Pin code is required")
+    @Size(max = 10, message = "Pin code must not exceed 10 characters")
+    private String pinCode;
+
+    @NotBlank(message = "Nominee name is required")
+    @Size(max = 100, message = "Nominee name must not exceed 100 characters")
+    private String nomineeName;
+
+    @NotBlank(message = "Nominee relation is required")
+    @Size(max = 50, message = "Nominee relation must not exceed 50 characters")
+    private String nomineeRelation;
+}
+
