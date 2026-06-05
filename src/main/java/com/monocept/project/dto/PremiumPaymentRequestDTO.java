@@ -9,29 +9,25 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PremiumPaymentDTO {
+public class PremiumPaymentRequestDTO {
 
-    private Long paymentId;
-
-    @NotNull(message = "Policy ID association is required")
+    @NotNull(message = "Policy reference is required")
     private Long policyId;
 
-    @NotNull(message = "Payment amount is required")
-    @Min(value = 1, message = "Payment amount must be greater than zero")
+    @NotNull(message = "Amount is required")
+    @Min(value = 1, message = "Amount must be greater than zero")
     private Double amount;
-
-    private LocalDateTime paymentDate;
 
     @NotNull(message = "Payment mode is required")
     private PaymentMode paymentMode;
 
-    @Size(max = 100, message = "Transaction reference must not exceed 100 characters")
+    @NotNull(message = "Transaction reference is required")
+    @Size(max = 100)
     private String transactionReference;
 
     @NotNull(message = "Payment status is required")

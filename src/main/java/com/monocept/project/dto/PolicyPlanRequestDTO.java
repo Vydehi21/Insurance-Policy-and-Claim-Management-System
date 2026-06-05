@@ -1,6 +1,6 @@
 package com.monocept.project.dto;
 
-import com.monocept.project.enums.*;
+import com.monocept.project.enums.PremiumType;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -14,11 +14,9 @@ import lombok.AllArgsConstructor;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PolicyPlanDTO {
+public class PolicyPlanRequestDTO {
 
-    private Long planId;
-
-    @NotNull(message = "Product ID association is required")
+    @NotNull(message = "Product reference ID is required")
     private Long productId;
 
     @NotBlank(message = "Plan name is required")
@@ -26,20 +24,23 @@ public class PolicyPlanDTO {
     private String planName;
 
     @NotNull(message = "Coverage amount is required")
-    @Min(value = 0, message = "Coverage amount cannot be negative")
+    @Min(value = 1, message = "Coverage amount must be greater than zero")
     private Double coverageAmount;
 
     @NotNull(message = "Premium amount is required")
-    @Min(value = 0, message = "Premium amount cannot be negative")
+    @Min(value = 1, message = "Premium amount must be greater than zero")
     private Double premiumAmount;
 
     @NotNull(message = "Premium type is required")
     private PremiumType premiumType;
 
-    @NotNull(message = "Plan duration is required")
-    @Min(value = 1, message = "Duration must be at least 1 year")
+    @NotNull(message = "Duration is required")
+    @Min(value = 1, message = "Duration must be greater than zero")
     private Integer duration;
 
+    @NotBlank(message = "Terms and conditions are required")
     private String termsAndConditions;
+
+    @NotNull(message = "Active status is required")
     private Boolean activeStatus;
 }
