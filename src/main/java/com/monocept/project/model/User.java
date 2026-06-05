@@ -1,9 +1,11 @@
 package com.monocept.project.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.monocept.project.enums.Role;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -11,6 +13,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -30,7 +33,7 @@ public class User {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long userId;
+	private Long userId;
 	
 	@Column(nullable = false)
 	private String fullName;
@@ -68,7 +71,10 @@ public class User {
     	updatedDate = LocalDateTime.now();
     }
     
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "user",
+    		  cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Customer customer;
     
+    @OneToMany(mappedBy = "user")
+    private List<ClaimStatusHistory> claimStatusHistories;
 }

@@ -2,13 +2,16 @@ package com.monocept.project.model;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -28,7 +31,7 @@ public class Customer {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long customerId;
+	private Long customerId;
 	
 	@OneToOne
 	@JoinColumn(name = "user_id", nullable = false, unique = true)
@@ -71,4 +74,9 @@ public class Customer {
     public void beforeUpdate() {
         updatedDate = LocalDateTime.now();
     }
+    
+    @OneToMany(mappedBy = "customer", 
+    		   cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private List<Policy> policies;
+    
 }

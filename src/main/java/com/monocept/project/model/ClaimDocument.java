@@ -1,0 +1,51 @@
+package com.monocept.project.model;
+
+import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+@Table(name = "claim_documents")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class ClaimDocument {
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long documentId;
+	
+	@ManyToOne
+	@JoinColumn(name = "claim_id", nullable = false)
+	private Claim claim;
+	
+	@Column(nullable = false)
+    private String documentName;
+
+    @Column(nullable = false)
+    private String documentType;
+
+    @Column(nullable = false)
+    private String documentReference;
+
+    @Column(nullable = false)
+    private LocalDateTime uploadedDate;
+
+    @PrePersist
+    public void beforeSave() {
+        uploadedDate = LocalDateTime.now();
+    }
+}
