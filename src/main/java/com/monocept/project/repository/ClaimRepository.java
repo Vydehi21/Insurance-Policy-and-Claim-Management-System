@@ -11,8 +11,10 @@ import java.util.Optional;
 @Repository
 public interface ClaimRepository extends JpaRepository<Claim, Long> {
     Optional<Claim> findByClaimNumber(String claimNumber);
-    Page<Claim> findByPolicy_PolicyId(Long policyId, Pageable pageable);
+    boolean existsByClaimNumber(String claimNumber);
     Page<Claim> findByClaimStatus(ClaimStatus claimStatus, Pageable pageable);
     Page<Claim> findByPolicy_Customer_CustomerId(Long customerId, Pageable pageable);
+    Page<Claim> findByPolicy_Customer_CustomerIdAndClaimStatus(Long customerId, ClaimStatus claimStatus, Pageable pageable);
+    Page<Claim> findByPolicy_PolicyId(Long policyId, Pageable pageable);
     Page<Claim> findByClaimNumberContainingIgnoreCase(String claimNumber, Pageable pageable);
 }

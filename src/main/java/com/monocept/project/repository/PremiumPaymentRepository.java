@@ -11,7 +11,9 @@ import java.util.Optional;
 @Repository
 public interface PremiumPaymentRepository extends JpaRepository<PremiumPayment, Long> {
     Optional<PremiumPayment> findByTransactionReference(String transactionReference);
+    boolean existsByTransactionReference(String transactionReference);
     Page<PremiumPayment> findByPolicy_PolicyId(Long policyId, Pageable pageable);
     Page<PremiumPayment> findByPaymentStatus(PaymentStatus paymentStatus, Pageable pageable);
+    Page<PremiumPayment> findByPolicy_PolicyIdAndPaymentStatus(Long policyId, PaymentStatus paymentStatus, Pageable pageable);
     Page<PremiumPayment> findByTransactionReferenceContainingIgnoreCase(String transactionReference, Pageable pageable);
 }

@@ -11,7 +11,9 @@ import java.util.Optional;
 @Repository
 public interface PolicyRepository extends JpaRepository<Policy, Long> {
     Optional<Policy> findByPolicyNumber(String policyNumber);
-    Page<Policy> findByCustomer_CustomerId(Long customerId, Pageable pageable);
+    boolean existsByPolicyNumber(String policyNumber);
     Page<Policy> findByPolicyStatus(PolicyStatus policyStatus, Pageable pageable);
+    Page<Policy> findByCustomer_CustomerId(Long customerId, Pageable pageable);
+    Page<Policy> findByCustomer_CustomerIdAndPolicyStatus(Long customerId, PolicyStatus policyStatus, Pageable pageable);
     Page<Policy> findByPolicyNumberContainingIgnoreCase(String policyNumber, Pageable pageable);
 }
