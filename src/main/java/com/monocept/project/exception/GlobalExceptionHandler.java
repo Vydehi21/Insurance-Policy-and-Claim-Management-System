@@ -1,7 +1,6 @@
 package com.monocept.project.exception;
 
 import java.nio.file.AccessDeniedException;
-
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -16,292 +15,251 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import com.monocept.project.config.AppConfig;
-import com.monocept.project.repository.ClaimDocumentRepository;
+import com.monocept.project.dto.ErrorResponseDTO;
+import com.monocept.project.dto.ValidationErrorResponseDTO;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-	
-	private final ClaimDocumentRepository claimDocumentRepository;
-	private final AppConfig appConfig;
-	GlobalExceptionHandler(AppConfig appConfig, ClaimDocumentRepository claimDocumentRepository) {
-		this.appConfig = appConfig;
-		this.claimDocumentRepository = claimDocumentRepository;
-	}
 
-	@ExceptionHandler(ResourceNotFoundException.class)
-	public ResponseEntity<Map<String, Object>> handleResourceNotFound(ResourceNotFoundException ex){
-		log.warn("Resource not found: {}", ex.getMessage());
-		return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
-	}
-	
-	@ExceptionHandler(DuplicateResourceException.class)
-	public ResponseEntity<Map<String, Object>> handleDuplicateResponse(DuplicateResourceException ex){
-		log.warn("Duplicate resource: {}", ex.getMessage());
-		return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
-	}
-	
-	@ExceptionHandler(AuthenticationException.class)
-	public ResponseEntity<Map<String, Object>> handleAuthentication(AuthenticationException ex){
-		log.warn("Authentication failed: {}", ex.getMessage());
-		return buildResponse(HttpStatus.UNAUTHORIZED, ex.getMessage());
-	}
-	
-	@ExceptionHandler(AuthorizationException.class)
-	public ResponseEntity<Map<String, Object>> handleAuthtorization(AuthorizationException ex){
-		log.warn("Authorization failed: {}", ex.getMessage());
-		return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage());
-	}
-	
-	@ExceptionHandler(InvalidStatusException.class)
-    public ResponseEntity<Map<String, Object>> handleInvalidStatus(InvalidStatusException ex) {
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponseDTO> handleResourceNotFound(
+            ResourceNotFoundException ex,
+            HttpServletRequest request) {
+
+        log.warn("Resource not found: {}", ex.getMessage());
+
+        return buildResponse(
+                HttpStatus.NOT_FOUND,
+                ex.getMessage(),
+                request.getRequestURI());
+    }
+
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<ErrorResponseDTO> handleDuplicateResponse(
+            DuplicateResourceException ex,
+            HttpServletRequest request) {
+
+        log.warn("Duplicate resource: {}", ex.getMessage());
+
+        return buildResponse(
+                HttpStatus.CONFLICT,
+                ex.getMessage(),
+                request.getRequestURI());
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponseDTO> handleAuthentication(
+            AuthenticationException ex,
+            HttpServletRequest request) {
+
+        log.warn("Authentication failed: {}", ex.getMessage());
+
+        return buildResponse(
+                HttpStatus.UNAUTHORIZED,
+                ex.getMessage(),
+                request.getRequestURI());
+    }
+
+    @ExceptionHandler(InvalidJwtTokenException.class)
+    public ResponseEntity<ErrorResponseDTO> handleInvalidJwt(
+            InvalidJwtTokenException ex,
+            HttpServletRequest request) {
+
+        log.warn("Invalid JWT token: {}", ex.getMessage());
+
+        return buildResponse(
+                HttpStatus.UNAUTHORIZED,
+                ex.getMessage(),
+                request.getRequestURI());
+    }
+
+    @ExceptionHandler(ExpiredJwtTokenException.class)
+    public ResponseEntity<ErrorResponseDTO> handleExpiredJwt(
+            ExpiredJwtTokenException ex,
+            HttpServletRequest request) {
+
+        log.warn("Expired JWT token: {}", ex.getMessage());
+
+        return buildResponse(
+                HttpStatus.UNAUTHORIZED,
+                ex.getMessage(),
+                request.getRequestURI());
+    }
+
+    @ExceptionHandler(AuthorizationException.class)
+    public ResponseEntity<ErrorResponseDTO> handleAuthorization(
+            AuthorizationException ex,
+            HttpServletRequest request) {
+
+        log.warn("Authorization failed: {}", ex.getMessage());
+
+        return buildResponse(
+                HttpStatus.FORBIDDEN,
+                ex.getMessage(),
+                request.getRequestURI());
+    }
+
+    @ExceptionHandler(InvalidStatusException.class)
+    public ResponseEntity<ErrorResponseDTO> handleInvalidStatus(
+            InvalidStatusException ex,
+            HttpServletRequest request) {
+
         log.warn("Invalid status: {}", ex.getMessage());
-        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage(),
+                request.getRequestURI());
     }
-	
-	@ExceptionHandler(BusinessRuleException.class)
-    public ResponseEntity<Map<String, Object>> handleBusinessRule(BusinessRuleException ex) {
+
+    @ExceptionHandler(BusinessRuleException.class)
+    public ResponseEntity<ErrorResponseDTO> handleBusinessRule(
+            BusinessRuleException ex,
+            HttpServletRequest request) {
+
         log.warn("Business rule violation: {}", ex.getMessage());
-        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage(),
+                request.getRequestURI());
     }
-	
-	@ExceptionHandler(InvalidRequestException.class)
-    public ResponseEntity<Map<String, Object>> handleInvalidRequest(InvalidRequestException ex) {
+
+    @ExceptionHandler(InvalidRequestException.class)
+    public ResponseEntity<ErrorResponseDTO> handleInvalidRequest(
+            InvalidRequestException ex,
+            HttpServletRequest request) {
+
         log.warn("Invalid request: {}", ex.getMessage());
-        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage(),
+                request.getRequestURI());
     }
-	
-	@ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, Object>> handleIllegalArgument(IllegalArgumentException ex) {
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponseDTO> handleIllegalArgument(
+            IllegalArgumentException ex,
+            HttpServletRequest request) {
+
         log.warn("Illegal argument: {}", ex.getMessage());
-        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage(),
+                request.getRequestURI());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ValidationErrorResponseDTO> handleValidation(
+            MethodArgumentNotValidException ex,
+            HttpServletRequest request) {
+
         log.warn("Validation failed");
+
         Map<String, String> validationErrors = new LinkedHashMap<>();
+
         for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
-            validationErrors.put(fieldError.getField(), fieldError.getDefaultMessage());
+            validationErrors.put(
+                    fieldError.getField(),
+                    fieldError.getDefaultMessage()
+            );
         }
-        Map<String, Object> error = new LinkedHashMap<>();
-        error.put("timestamp", LocalDateTime.now());
-        error.put("status", HttpStatus.BAD_REQUEST.value());
-        error.put("error", "Validation Failed");
-        error.put("messages", validationErrors);
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+
+        ValidationErrorResponseDTO response =
+                new ValidationErrorResponseDTO(
+                        LocalDateTime.now(),
+                        HttpStatus.BAD_REQUEST.value(),
+                        "Validation Failed",
+                        validationErrors,
+                        request.getRequestURI()
+                );
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<Map<String, Object>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
-        log.warn("Invalid path variable or request parameter: {}", ex.getMessage());
-        return buildResponse(HttpStatus.BAD_REQUEST, "Invalid input. Please provide valid data.");
+    public ResponseEntity<ErrorResponseDTO> handleTypeMismatch(
+            MethodArgumentTypeMismatchException ex,
+            HttpServletRequest request) {
+
+        log.warn("Invalid parameter: {}", ex.getMessage());
+
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                "Invalid input. Please provide valid data.",
+                request.getRequestURI());
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<Map<String, Object>> handleInvalidJson(HttpMessageNotReadableException ex) {
+    public ResponseEntity<ErrorResponseDTO> handleInvalidJson(
+            HttpMessageNotReadableException ex,
+            HttpServletRequest request) {
+
         log.warn("Invalid JSON request body");
-        return buildResponse(HttpStatus.BAD_REQUEST, "Invalid JSON request body.");
+
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                "Invalid JSON request body.",
+                request.getRequestURI());
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<Map<String, Object>> handleDataIntegrity(DataIntegrityViolationException ex) {
+    public ResponseEntity<ErrorResponseDTO> handleDataIntegrity(
+            DataIntegrityViolationException ex,
+            HttpServletRequest request) {
+
         log.error("Database constraint violation: {}", ex.getMessage());
-        return buildResponse(HttpStatus.CONFLICT, "Duplicate or invalid database value.");
+
+        return buildResponse(
+                HttpStatus.CONFLICT,
+                "Duplicate or invalid database value.",
+                request.getRequestURI());
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex) {
+    public ResponseEntity<ErrorResponseDTO> handleAccessDenied(
+            AccessDeniedException ex,
+            HttpServletRequest request) {
+
         log.warn("Access denied: {}", ex.getMessage());
-        return buildResponse(HttpStatus.FORBIDDEN, "You do not have permission to access this resource.");
+
+        return buildResponse(
+                HttpStatus.FORBIDDEN,
+                "You do not have permission to access this resource.",
+                request.getRequestURI());
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
-        log.error("Unexpected error occurred", ex);
-        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong.");
-    }
-	
-	private ResponseEntity<Map<String, Object>> buildResponse(HttpStatus status, String message){
-		Map<String, Object> error = new LinkedHashMap<>();
-		error.put("timestamp", LocalDateTime.now());
-		error.put("status", status.value());
-		error.put("error", status.getReasonPhrase());
-		error.put("message", message);
-		
-		return new ResponseEntity<>(error, status);
-	}
-}
+    public ResponseEntity<ErrorResponseDTO> handleGeneric(
+            Exception ex,
+            HttpServletRequest request) {
 
-//package com.monocept.project.exception;
-//
-//import java.nio.file.AccessDeniedException;
-//import java.time.LocalDateTime;
-//import java.util.LinkedHashMap;
-//import java.util.Map;
-//
-//import org.springframework.dao.DataIntegrityViolationException;
-//import org.springframework.http.HttpStatus;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.http.converter.HttpMessageNotReadableException;
-//import org.springframework.validation.FieldError;
-//import org.springframework.web.bind.MethodArgumentNotValidException;
-//import org.springframework.web.bind.annotation.ExceptionHandler;
-//import org.springframework.web.bind.annotation.RestControllerAdvice;
-//import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-//
-//import lombok.extern.slf4j.Slf4j;
-//
-//@Slf4j
-//@RestControllerAdvice
-//public class GlobalExceptionHandler {
-//
-//    @ExceptionHandler(ResourceNotFoundException.class)
-//    public ResponseEntity<Map<String, Object>> handleResourceNotFound(ResourceNotFoundException ex) {
-//        log.warn("Resource not found: {}", ex.getMessage());
-//        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
-//    }
-//
-//    @ExceptionHandler(DuplicateResourceException.class)
-//    public ResponseEntity<Map<String, Object>> handleDuplicateResponse(DuplicateResourceException ex) {
-//        log.warn("Duplicate resource: {}", ex.getMessage());
-//        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
-//    }
-//
-//    @ExceptionHandler(AuthenticationException.class)
-//    public ResponseEntity<Map<String, Object>> handleAuthentication(AuthenticationException ex) {
-//        log.warn("Authentication failed: {}", ex.getMessage());
-//        return buildResponse(HttpStatus.UNAUTHORIZED, ex.getMessage());
-//    }
-//
-//    // FIX:
-//    // Added dedicated handler for invalid JWT token
-//    @ExceptionHandler(InvalidJwtTokenException.class)
-//    public ResponseEntity<Map<String, Object>> handleInvalidJwt(InvalidJwtTokenException ex) {
-//        log.warn("Invalid JWT token: {}", ex.getMessage());
-//        return buildResponse(HttpStatus.UNAUTHORIZED, ex.getMessage());
-//    }
-//
-//    // FIX:
-//    // Added dedicated handler for expired JWT token
-//    @ExceptionHandler(ExpiredJwtTokenException.class)
-//    public ResponseEntity<Map<String, Object>> handleExpiredJwt(ExpiredJwtTokenException ex) {
-//        log.warn("Expired JWT token: {}", ex.getMessage());
-//        return buildResponse(HttpStatus.UNAUTHORIZED, ex.getMessage());
-//    }
-//
-//    @ExceptionHandler(AuthorizationException.class)
-//    public ResponseEntity<Map<String, Object>> handleAuthorization(AuthorizationException ex) {
-//        log.warn("Authorization failed: {}", ex.getMessage());
-//        return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage());
-//    }
-//
-//    @ExceptionHandler(InvalidStatusException.class)
-//    public ResponseEntity<Map<String, Object>> handleInvalidStatus(InvalidStatusException ex) {
-//        log.warn("Invalid status: {}", ex.getMessage());
-//        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
-//    }
-//
-//    @ExceptionHandler(BusinessRuleException.class)
-//    public ResponseEntity<Map<String, Object>> handleBusinessRule(BusinessRuleException ex) {
-//        log.warn("Business rule violation: {}", ex.getMessage());
-//        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
-//    }
-//
-//    @ExceptionHandler(InvalidRequestException.class)
-//    public ResponseEntity<Map<String, Object>> handleInvalidRequest(InvalidRequestException ex) {
-//        log.warn("Invalid request: {}", ex.getMessage());
-//        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
-//    }
-//
-//    @ExceptionHandler(IllegalArgumentException.class)
-//    public ResponseEntity<Map<String, Object>> handleIllegalArgument(IllegalArgumentException ex) {
-//        log.warn("Illegal argument: {}", ex.getMessage());
-//        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
-//    }
-//
-//    @ExceptionHandler(MethodArgumentNotValidException.class)
-//    public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
-//
-//        log.warn("Validation failed");
-//
-//        Map<String, String> validationErrors = new LinkedHashMap<>();
-//
-//        for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
-//            validationErrors.put(
-//                    fieldError.getField(),
-//                    fieldError.getDefaultMessage()
-//            );
-//        }
-//
-//        Map<String, Object> error = new LinkedHashMap<>();
-//        error.put("timestamp", LocalDateTime.now());
-//        error.put("status", HttpStatus.BAD_REQUEST.value());
-//        error.put("error", "Validation Failed");
-//        error.put("messages", validationErrors);
-//
-//        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
-//    }
-//
-//    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-//    public ResponseEntity<Map<String, Object>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
-//        log.warn("Invalid path variable or request parameter: {}", ex.getMessage());
-//        return buildResponse(
-//                HttpStatus.BAD_REQUEST,
-//                "Invalid input. Please provide valid data."
-//        );
-//    }
-//
-//    @ExceptionHandler(HttpMessageNotReadableException.class)
-//    public ResponseEntity<Map<String, Object>> handleInvalidJson(HttpMessageNotReadableException ex) {
-//        log.warn("Invalid JSON request body");
-//        return buildResponse(
-//                HttpStatus.BAD_REQUEST,
-//                "Invalid JSON request body."
-//        );
-//    }
-//
-//    @ExceptionHandler(DataIntegrityViolationException.class)
-//    public ResponseEntity<Map<String, Object>> handleDataIntegrity(DataIntegrityViolationException ex) {
-//        log.error("Database constraint violation: {}", ex.getMessage());
-//        return buildResponse(
-//                HttpStatus.CONFLICT,
-//                "Duplicate or invalid database value."
-//        );
-//    }
-//
-//    @ExceptionHandler(AccessDeniedException.class)
-//    public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex) {
-//        log.warn("Access denied: {}", ex.getMessage());
-//        return buildResponse(
-//                HttpStatus.FORBIDDEN,
-//                "You do not have permission to access this resource."
-//        );
-//    }
-//
-//    @ExceptionHandler(Exception.class)
-//    public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
-//        log.error("Unexpected error occurred", ex);
-//        return buildResponse(
-//                HttpStatus.INTERNAL_SERVER_ERROR,
-//                "Something went wrong."
-//        );
-//    }
-//
-//    private ResponseEntity<Map<String, Object>> buildResponse(
-//            HttpStatus status,
-//            String message) {
-//
-//        Map<String, Object> error = new LinkedHashMap<>();
-//
-//        error.put("timestamp", LocalDateTime.now());
-//        error.put("status", status.value());
-//        error.put("error", status.getReasonPhrase());
-//        error.put("message", message);
-//
-//        return new ResponseEntity<>(error, status);
-//    }
-//}
+        log.error("Unexpected error occurred", ex);
+
+        return buildResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Something went wrong.",
+                request.getRequestURI());
+    }
+
+    private ResponseEntity<ErrorResponseDTO> buildResponse(
+            HttpStatus status,
+            String message,
+            String path) {
+
+        ErrorResponseDTO error = new ErrorResponseDTO(
+                LocalDateTime.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                message,
+                path);
+
+        return new ResponseEntity<>(error, status);
+    }
+}
