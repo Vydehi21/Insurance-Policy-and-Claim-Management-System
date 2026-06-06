@@ -45,7 +45,7 @@ public class InsuranceProduct {
 	private String description;
 	
 	@Column(nullable = false)
-    private Boolean active = true;
+    private Boolean activeStatus = true;
 
     @OneToMany(mappedBy = "insuranceProduct",
                cascade = {CascadeType.PERSIST, CascadeType.MERGE})

@@ -11,7 +11,13 @@ import org.springframework.stereotype.Repository;
 public interface ClaimStatusHistoryRepository extends JpaRepository<ClaimStatusHistory, Long> {
 
     Page<ClaimStatusHistory> findByClaim_ClaimId(Long claimId, Pageable pageable);
-    Page<ClaimStatusHistory> findByUpdatedBy_UserId(Long userId, Pageable pageable);
+    Page<ClaimStatusHistory> findByUser_UserId(
+            Long userId,
+            Pageable pageable);
     Page<ClaimStatusHistory> findByNewStatus(ClaimStatus status, Pageable pageable);
-    Page<ClaimStatusHistory> findByClaim_ClaimIdAndUpdatedBy_UserIdAndNewStatus(Long claimId, Long userId, ClaimStatus status, Pageable pageable);
+    Page<ClaimStatusHistory> findByClaim_ClaimIdAndUser_UserIdAndNewStatus(
+            Long claimId,
+            Long userId,
+            ClaimStatus status,
+            Pageable pageable);
 }

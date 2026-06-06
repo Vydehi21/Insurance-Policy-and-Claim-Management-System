@@ -9,7 +9,15 @@ import java.util.Optional;
 
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
-    Optional<Customer> findByLinkedUser_UserId(Long userId);
-    Page<Customer> findByLinkedUser_ActiveStatus(Boolean activeStatus, Pageable pageable);
-    Page<Customer> findByLinkedUser_FullNameContainingIgnoreCase(String fullName, Pageable pageable);
+
+	Optional<Customer> findByUser_UserId(Long userId);
+
+	Page<Customer> findByUser_ActiveStatus(
+	        Boolean activeStatus,
+	        Pageable pageable);
+
+	Page<Customer> findByUser_FullNameContainingIgnoreCase(
+	        String fullName,
+	        Pageable pageable);
+
 }

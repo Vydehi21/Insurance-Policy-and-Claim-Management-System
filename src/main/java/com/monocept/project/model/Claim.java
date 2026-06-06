@@ -32,12 +32,18 @@ public class Claim {
 	@JoinColumn(name = "policy_id", nullable = false)
 	private Policy policy;
 	
-	@OneToMany(mappedBy = "claim",
-			   cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+	@OneToMany(
+		    mappedBy = "claim",
+		    cascade = CascadeType.ALL,
+		    orphanRemoval = true
+		)
 	private List<ClaimDocument> claimDocuments;
 	
-	@OneToMany(mappedBy = "claim",
-			   cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+	@OneToMany(
+		    mappedBy = "claim",
+		    cascade = CascadeType.ALL,
+		    orphanRemoval = true
+		)
 	private List<ClaimStatusHistory> claimStatusHistories;
 	
 	@Column(nullable = false)
