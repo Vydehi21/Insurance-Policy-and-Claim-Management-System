@@ -12,4 +12,7 @@ public interface PremiumPaymentService {
     PaginatedResponseDTO<PremiumPaymentResponseDTO> getPaymentsByStatus(PaymentStatus status, int page, int size, String sortBy, String direction);
     PaginatedResponseDTO<PremiumPaymentResponseDTO> getPaymentsByPolicyAndStatus(Long policyId, PaymentStatus status, int page, int size, String sortBy, String direction);
     PaginatedResponseDTO<PremiumPaymentResponseDTO> searchPaymentsByReference(String reference, int page, int size, String sortBy, String direction);
+    
+    //PremiumPaymentResponseDTO
+   // getPaymentByReference(String reference);
 }

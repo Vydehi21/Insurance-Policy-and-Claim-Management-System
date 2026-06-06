@@ -17,4 +17,12 @@ public interface ClaimService {
     PaginatedResponseDTO<ClaimResponseDTO> getClaimsByStatus(ClaimStatus status, int page, int size, String sortBy, String direction);
     PaginatedResponseDTO<ClaimResponseDTO> getClaimsByCustomerAndStatus(Long customerId, ClaimStatus status, int page, int size, String sortBy, String direction);
     PaginatedResponseDTO<ClaimResponseDTO> searchClaimsByNumber(String claimNumber, int page, int size, String sortBy, String direction);
+    
+//    PaginatedResponseDTO<ClaimResponseDTO>
+//    getClaimsByPolicyId(
+//        Long policyId,
+//        int page,
+//        int size,
+//        String sortBy,
+//        String direction);
 }

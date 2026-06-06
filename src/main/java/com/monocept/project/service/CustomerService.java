@@ -12,4 +12,7 @@ public interface CustomerService {
     PaginatedResponseDTO<CustomerResponseDTO> getCustomersByStatus(Boolean activeStatus, int page, int size, String sortBy, String direction);
     PaginatedResponseDTO<CustomerResponseDTO> searchCustomersByName(String name, int page, int size, String sortBy, String direction);
     CustomerResponseDTO updateCustomerProfile(Long customerId, CustomerRequestDTO customerRequestDTO);
+    
+//    PaginatedResponseDTO<InsuranceProductResponseDTO>
+//    getActiveProducts(...)
 }
