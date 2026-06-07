@@ -1,14 +1,17 @@
 package com.monocept.project.dto;
 
+import java.math.BigDecimal;
+
 import com.monocept.project.enums.PremiumType;
+
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -25,11 +28,11 @@ public class PolicyPlanRequestDTO {
 
     @NotNull(message = "Coverage amount is required")
     @Min(value = 1, message = "Coverage amount must be greater than zero")
-    private Double coverageAmount;
+    private BigDecimal coverageAmount;
 
     @NotNull(message = "Premium amount is required")
     @Min(value = 1, message = "Premium amount must be greater than zero")
-    private Double premiumAmount;
+    private BigDecimal premiumAmount;
 
     @NotNull(message = "Premium type is required")
     private PremiumType premiumType;

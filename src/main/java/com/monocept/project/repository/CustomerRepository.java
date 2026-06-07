@@ -10,13 +10,15 @@ import java.util.Optional;
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
-	Optional<Customer> findByUser_UserId(Long userId);
+	Optional<Customer> findByUserId(Long userId);
+	
+	boolean existsByUserId(Long userId);
 
-	Page<Customer> findByUser_ActiveStatus(
+	Page<Customer> findByUserActiveStatus(
 	        Boolean activeStatus,
 	        Pageable pageable);
 
-	Page<Customer> findByUser_FullNameContainingIgnoreCase(
+	Page<Customer> findByUserFullNameContainingIgnoreCase(
 	        String fullName,
 	        Pageable pageable);
 

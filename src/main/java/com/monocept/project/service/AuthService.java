@@ -9,7 +9,4 @@ public interface AuthService {
     UserResponseDTO registerCustomer(RegistrationRequestDTO registrationDTO);
     LoginResponseDTO login(LoginRequestDTO loginDTO);
     
-//    void changePassword(Long userId, ChangePasswordDTO dto);
-//
-//    void forgotPassword(String email);
 }

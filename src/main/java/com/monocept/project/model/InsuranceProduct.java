@@ -32,7 +32,7 @@ public class InsuranceProduct {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long productId;
+	private Long id;
 	
 	@Column(nullable = false, unique = true)
 	private String productName;

@@ -22,7 +22,7 @@ public class PolicyPlan {
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long planId;
+    private Long id;
 	
 	@ManyToOne
     @JoinColumn(name = "product_id", nullable = false)

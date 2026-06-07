@@ -9,9 +9,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PolicyPlanRepository extends JpaRepository<PolicyPlan, Long> {
     
-    Page<PolicyPlan> findByInsuranceProduct_ProductId(Long productId, Pageable pageable);
+    Page<PolicyPlan> findByInsuranceProductId(Long productId, Pageable pageable);
     Page<PolicyPlan> findByActiveStatus(Boolean activeStatus, Pageable pageable);
-    Page<PolicyPlan> findByInsuranceProduct_ProductIdAndActiveStatus(Long productId, Boolean activeStatus, Pageable pageable);
+    Page<PolicyPlan> findByInsuranceProductIdAndActiveStatus(Long productId, Boolean activeStatus, Pageable pageable);
    
     Page<PolicyPlan> findByPlanNameContainingIgnoreCase(String planName, Pageable pageable);
 }
