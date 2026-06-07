@@ -1,14 +1,17 @@
 package com.monocept.project.dto;
 
+import java.math.BigDecimal;
+
 import com.monocept.project.enums.PaymentMode;
 import com.monocept.project.enums.PaymentStatus;
-import jakarta.validation.constraints.Min;
+
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -20,8 +23,8 @@ public class PremiumPaymentRequestDTO {
     private Long policyId;
 
     @NotNull(message = "Amount is required")
-    @Min(value = 1, message = "Amount must be greater than zero")
-    private Double amount;
+    @DecimalMin(value = "1.0")
+    private BigDecimal amount;
 
     @NotNull(message = "Payment mode is required")
     private PaymentMode paymentMode;
