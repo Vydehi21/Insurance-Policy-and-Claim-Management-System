@@ -16,4 +16,8 @@ public interface PolicyRepository extends JpaRepository<Policy, Long> {
     Page<Policy> findByCustomer_CustomerId(Long customerId, Pageable pageable);
     Page<Policy> findByCustomer_CustomerIdAndPolicyStatus(Long customerId, PolicyStatus policyStatus, Pageable pageable);
     Page<Policy> findByPolicyNumberContainingIgnoreCase(String policyNumber, Pageable pageable);
+    Optional<Policy> findTopByOrderByPolicyIdDesc();
+    Optional<Policy> findTopByCustomerCustomerIdAndPolicyPlanPlanIdOrderByCreatedDateDesc(
+            Long customerId,
+            Long planId);
 }

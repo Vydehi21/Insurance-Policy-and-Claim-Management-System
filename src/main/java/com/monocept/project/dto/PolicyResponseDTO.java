@@ -1,13 +1,16 @@
 package com.monocept.project.dto;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
 import com.monocept.project.enums.PolicyStatus;
 import com.monocept.project.enums.PremiumType;
 import com.monocept.project.enums.ProductType;
-import java.time.LocalDate;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
+
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -20,11 +23,11 @@ public class PolicyResponseDTO {
     private String customerName;
     private String planName;
     private ProductType productType;
-    private Double coverageAmount;
-    private Double premiumAmount;
+    private BigDecimal coverageAmount;
+    private BigDecimal premiumAmount;
     private PremiumType premiumType;
     private LocalDate startDate;
     private LocalDate endDate;
     private PolicyStatus policyStatus;
-    private Double totalPremiumPaid;
+    private BigDecimal totalPremiumPaid;
 }

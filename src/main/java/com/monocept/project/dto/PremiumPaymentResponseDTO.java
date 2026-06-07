@@ -1,12 +1,15 @@
 package com.monocept.project.dto;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 import com.monocept.project.enums.PaymentMode;
 import com.monocept.project.enums.PaymentStatus;
-import java.time.LocalDateTime;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
+
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -16,7 +19,7 @@ public class PremiumPaymentResponseDTO {
 
     private Long paymentId;
     private String policyNumber;
-    private Double amount;
+    private BigDecimal amount;
     private LocalDateTime paymentDate;
     private PaymentMode paymentMode;
     private String transactionReference;
