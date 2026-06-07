@@ -43,7 +43,7 @@ public class PolicyServiceImpl implements PolicyService {
             CustomerPolicyPurchaseRequestDTO purchaseDTO) {
 
         Customer customer = customerRepository
-                .findByUser_UserId(authenticatedUserId)
+                .findByUserId(authenticatedUserId)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Customer not found"));
 
@@ -54,8 +54,8 @@ public class PolicyServiceImpl implements PolicyService {
 
         policyRepository
                 .findTopByCustomerCustomerIdAndPolicyPlanPlanIdOrderByCreatedDateDesc(
-                        customer.getCustomerId(),
-                        plan.getPlanId())
+                        customer.getId(),
+                        plan.getId())
                 .ifPresent(policy -> {
 
                     if (policy.getPolicyStatus() == PolicyStatus.PENDING_PAYMENT

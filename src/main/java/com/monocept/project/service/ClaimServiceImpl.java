@@ -158,7 +158,7 @@ public class ClaimServiceImpl implements ClaimService {
             Long userId) {
 
         return customerRepository
-                .findByUser_UserId(userId)
+                .findByUserId(userId)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Customer profile not found"));
@@ -177,8 +177,8 @@ public class ClaimServiceImpl implements ClaimService {
                 getPolicy(claimRequestDTO.getPolicyId());
 
         if (!policy.getCustomer()
-                .getCustomerId()
-                .equals(customer.getCustomerId())) {
+                .getId()
+                .equals(customer.getId())) {
 
             throw new AuthorizationException(
                     "You can only raise claims for your own policies");
