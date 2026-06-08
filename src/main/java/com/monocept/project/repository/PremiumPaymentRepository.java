@@ -12,7 +12,7 @@ import java.util.Optional;
 public interface PremiumPaymentRepository extends JpaRepository<PremiumPayment, Long> {
     Optional<PremiumPayment> findByTransactionReference(String transactionReference);
     boolean existsByTransactionReference(String transactionReference);
-    Page<PremiumPayment> findByPolicyId(Long id, Pageable pageable);
+    Page<PremiumPayment> findByPolicy_Id(Long id, Pageable pageable);
     Page<PremiumPayment> findByPaymentStatus(PaymentStatus paymentStatus, Pageable pageable);
     Page<PremiumPayment> findByPolicyIdAndPaymentStatus(Long id, PaymentStatus paymentStatus, Pageable pageable);
     Page<PremiumPayment> findByTransactionReferenceContainingIgnoreCase(String transactionReference, Pageable pageable);

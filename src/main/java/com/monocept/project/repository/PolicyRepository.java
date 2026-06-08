@@ -24,7 +24,7 @@
         
 
         Page<Policy> findByPolicyNumberContainingIgnoreCase(String policyNumber, Pageable pageable);
-        Optional<Policy> findTopByOrderByPolicyIdDesc();
+        Optional<Policy> findTopByOrderByIdDesc();
         
         // SAFE FIX: Uses explicit JPQL to safely bind customer and plan relationship properties
         @Query("SELECT p FROM Policy p WHERE p.customer.id = :customerId AND p.policyPlan.id = :planId ORDER BY p.createdDate DESC LIMIT 1")

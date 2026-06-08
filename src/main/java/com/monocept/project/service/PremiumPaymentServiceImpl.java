@@ -110,7 +110,7 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
 
         Page<PremiumPaymentResponseDTO> result =
                 premiumPaymentRepository
-                        .findByPolicyId(policyId, pageable)
+                        .findByPolicy_Id(policyId, pageable)
                         .map(this::mapToResponse);
 
         return PaginationUtil.createPaginatedResponse(

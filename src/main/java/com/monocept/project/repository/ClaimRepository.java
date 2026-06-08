@@ -20,7 +20,7 @@ public interface ClaimRepository extends JpaRepository<Claim, Long> {
     // FIXED: Changed CustomerId to Id
     Page<Claim> findByPolicy_Customer_IdAndClaimStatus(Long customerId, ClaimStatus claimStatus, Pageable pageable);
     
-    Page<Claim> findByPolicy_PolicyId(Long policyId, Pageable pageable);
+    Page<Claim> findByPolicy_Id(Long policyId, Pageable pageable);
     
     // FIXED: Corrected the full method name syntax here
     Page<Claim> findByClaimNumberContainingIgnoreCase(String claimNumber, Pageable pageable);
