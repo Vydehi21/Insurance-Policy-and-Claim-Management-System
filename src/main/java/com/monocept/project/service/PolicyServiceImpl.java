@@ -306,7 +306,7 @@ public class PolicyServiceImpl implements PolicyService {
 
         PolicyResponseDTO dto = new PolicyResponseDTO();
 
-        dto.setPolicyId(policy.getPolicyId());
+        dto.setPolicyId(policy.getId());
         dto.setPolicyNumber(policy.getPolicyNumber());
 
         dto.setCustomerName(

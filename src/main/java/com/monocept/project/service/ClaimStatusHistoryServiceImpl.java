@@ -173,7 +173,7 @@ public class ClaimStatusHistoryServiceImpl implements ClaimStatusHistoryService 
                         ClaimStatusHistoryResponseDTO.class);
 
         dto.setClaimId(
-                history.getClaim().getClaimId());
+                history.getClaim().getId());
 
         dto.setUpdatedByFullName(
                 history.getUser().getFullName());

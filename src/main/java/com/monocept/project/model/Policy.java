@@ -23,7 +23,7 @@ public class Policy {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long policyId;
+	private Long id;
 	
 	@Column(nullable = false, unique = true)
 	private String policyNumber;

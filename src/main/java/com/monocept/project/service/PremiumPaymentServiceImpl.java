@@ -213,7 +213,7 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
         PremiumPaymentResponseDTO dto =
                 new PremiumPaymentResponseDTO();
 
-        dto.setPaymentId(payment.getPaymentId());
+        dto.setPaymentId(payment.getId());
         dto.setPolicyNumber(
                 payment.getPolicy().getPolicyNumber());
         dto.setAmount(payment.getAmount());
