@@ -13,11 +13,11 @@ public interface PolicyRepository extends JpaRepository<Policy, Long> {
     Optional<Policy> findByPolicyNumber(String policyNumber);
     boolean existsByPolicyNumber(String policyNumber);
     Page<Policy> findByPolicyStatus(PolicyStatus policyStatus, Pageable pageable);
-    Page<Policy> findByCustomerId(Long customerId, Pageable pageable);
-    Page<Policy> findByCustomerIdAndPolicyStatus(Long customerId, PolicyStatus policyStatus, Pageable pageable);
+    Page<Policy> findByCustomerId(Long id, Pageable pageable);
+    Page<Policy> findByCustomerIdAndPolicyStatus(Long id, PolicyStatus policyStatus, Pageable pageable);
     Page<Policy> findByPolicyNumberContainingIgnoreCase(String policyNumber, Pageable pageable);
     Optional<Policy> findTopByOrderByPolicyIdDesc();
     Optional<Policy> findTopByCustomerCustomerIdAndPolicyPlanPlanIdOrderByCreatedDateDesc(
-            Long customerId,
+            Long id,
             Long planId);
 }
