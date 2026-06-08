@@ -181,11 +181,9 @@ public class PolicyServiceImpl implements PolicyService {
 
         Page<PolicyResponseDTO> result =
                 policyRepository
-<<<<<<< HEAD
+
                         .findByCustomer_Id(customerId, pageable)
-=======
-                        .findByCustomerId(customerId, pageable)
->>>>>>> ea4edcbbf0ef94935e37b3ec82cecae4d98da256
+
                         .map(this::mapToResponse);
 
         return PaginationUtil.createPaginatedResponse(
@@ -237,11 +235,9 @@ public class PolicyServiceImpl implements PolicyService {
 
         Page<PolicyResponseDTO> result =
                 policyRepository
-<<<<<<< HEAD
+
                         .findByCustomer_IdAndPolicyStatus(
-=======
-                        .findByCustomerIdAndPolicyStatus(
->>>>>>> ea4edcbbf0ef94935e37b3ec82cecae4d98da256
+
                                 customerId,
                                 status,
                                 pageable)
