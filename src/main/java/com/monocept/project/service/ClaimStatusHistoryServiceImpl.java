@@ -39,7 +39,7 @@ public class ClaimStatusHistoryServiceImpl implements ClaimStatusHistoryService 
         Pageable pageable = createPageable(page, size, sortBy, direction);
 
         Page<ClaimStatusHistory> historyPage =
-                claimStatusHistoryRepository.findByClaimId(claimId, pageable);
+                claimStatusHistoryRepository.findByClaim_ClaimId(claimId, pageable);
 
         if (historyPage.isEmpty()) {
             throw new ResourceNotFoundException(
@@ -63,7 +63,9 @@ public class ClaimStatusHistoryServiceImpl implements ClaimStatusHistoryService 
         Pageable pageable = createPageable(page, size, sortBy, direction);
 
         Page<ClaimStatusHistory> historyPage =
-                claimStatusHistoryRepository.findByUserId(userId, pageable);
+
+                claimStatusHistoryRepository.findByUser_Id(userId, pageable);
+
 
         if (historyPage.isEmpty()) {
             throw new ResourceNotFoundException(
@@ -114,7 +116,9 @@ public class ClaimStatusHistoryServiceImpl implements ClaimStatusHistoryService 
 
         Page<ClaimStatusHistory> historyPage =
                 claimStatusHistoryRepository
-                        .findByClaimIdAndUserIdAndNewStatus(
+
+                        .findByClaim_ClaimIdAndUser_IdAndNewStatus(
+
                                 claimId,
                                 userId,
                                 status,

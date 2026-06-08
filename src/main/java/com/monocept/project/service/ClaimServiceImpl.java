@@ -158,7 +158,7 @@ public class ClaimServiceImpl implements ClaimService {
             Long userId) {
 
         return customerRepository
-                .findByUserId(userId)
+                .findByUser_Id(userId)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
                                 "Customer profile not found"));
@@ -411,7 +411,11 @@ public class ClaimServiceImpl implements ClaimService {
                         sortBy));
 
         Page<Claim> claimPage =
-                claimRepository.findByPolicyCustomerId(
+
+                claimRepository.findByPolicy_Customer_Id(
+
+                
+
                         customerId,
                         pageable);
 
@@ -473,7 +477,9 @@ public class ClaimServiceImpl implements ClaimService {
 
         Page<Claim> claimPage =
                 claimRepository
-                        .findByPolicyCustomerIdAndClaimStatus(
+
+                        .findByPolicy_Customer_IdAndClaimStatus(
+
                                 customerId,
                                 status,
                                 pageable);

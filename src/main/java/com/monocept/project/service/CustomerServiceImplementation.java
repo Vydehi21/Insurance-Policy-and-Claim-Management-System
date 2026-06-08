@@ -36,7 +36,7 @@ public class CustomerServiceImplementation implements CustomerService {
 
 		User user = findUserById(userId);
 
-		if (customerRepository.existsByUserId(userId)) {
+		if (customerRepository.existsByUser_Id(userId)) {
 			log.warn("Customer profile creation failed. Profile already exists for user id: {}", userId);
 			throw new DuplicateResourceException("Customer profile already exists");
 		}
