@@ -2,6 +2,7 @@ package com.monocept.project.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,31 +22,34 @@ import com.monocept.project.enums.ClaimStatus;
 import com.monocept.project.security.CustomUserDetails;
 import com.monocept.project.service.ClaimService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/claims")
 @RequiredArgsConstructor
+@Tag(name = "Claims", description = "Operations for creating, reviewing, processing, and querying insurance claims")
 public class ClaimController {
 
     private final ClaimService claimService;
 
 	@PostMapping
+	@PreAuthorize("hasRole('CUSTOMER')")
+	@Operation(summary = "Raise Claim", description = "Initiates and creates a new insurance claim for the authenticated user")
 	public ResponseEntity<ClaimResponseDTO> raiseClaim(
-
 			@AuthenticationPrincipal CustomUserDetails userDetails,
 			@Valid @RequestBody ClaimRequestDTO dto
 	) {
-
 		ClaimResponseDTO response = claimService.raiseClaim(userDetails.getUserId(), dto);
-
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
 	@PutMapping("/{claimId}/review")
+	@PreAuthorize("hasRole('AGENT')")
+	@Operation(summary = "Review Claim", description = "Allows an internal agent to review a pending insurance claim")
 	public ResponseEntity<ClaimResponseDTO> reviewClaim(
-
 			@PathVariable Long claimId,
 			@AuthenticationPrincipal CustomUserDetails userDetails,
 			@Valid @RequestBody ClaimReviewRequestDTO dto) {
@@ -59,12 +63,12 @@ public class ClaimController {
 	}
 
 	@PutMapping("/{claimId}/decision")
+	@PreAuthorize("hasRole('ADMIN')")
+	@Operation(summary = "Process Final Decision", description = "Approve or reject an active claim profile based on full review metadata")
 	public ResponseEntity<ClaimResponseDTO> processFinalDecision(
-
 			@PathVariable Long claimId,
 			@AuthenticationPrincipal CustomUserDetails userDetails,
 			@Valid @RequestBody ClaimFinalDecisionRequestDTO dto
-
 	) {
 
 		ClaimResponseDTO response = claimService.processFinalDecision(
@@ -76,6 +80,8 @@ public class ClaimController {
 	}
 
     @GetMapping("/{claimId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT', 'CUSTOMER')")
+    @Operation(summary = "Get Claim By ID", description = "Fetches complete descriptive properties of a specific claim record")
     public ResponseEntity<ClaimResponseDTO> getClaimById(
             @PathVariable Long claimId) {
 
@@ -84,6 +90,8 @@ public class ClaimController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Get All Claims", description = "Returns a paginated index payload tracking every system wide claim event log")
     public ResponseEntity<PaginatedResponseDTO<ClaimResponseDTO>>
     getAllClaims(
             @RequestParam(defaultValue = "0") int page,
@@ -100,6 +108,8 @@ public class ClaimController {
     }
 
     @GetMapping("/customer/{customerId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    @Operation(summary = "Get Claims By Customer ID", description = "Lists out complete insurance transaction instances unique to an established customer profile reference")
     public ResponseEntity<PaginatedResponseDTO<ClaimResponseDTO>>
     getClaimsByCustomer(
             @PathVariable Long customerId,
@@ -118,6 +128,8 @@ public class ClaimController {
     }
 
     @GetMapping("/status/{status}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    @Operation(summary = "Get Claims By Status", description = "Filters target records by standard state workflow values like pending, approved, or denied")
     public ResponseEntity<PaginatedResponseDTO<ClaimResponseDTO>>
     getClaimsByStatus(
             @PathVariable ClaimStatus status,
@@ -136,6 +148,8 @@ public class ClaimController {
     }
 
     @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    @Operation(summary = "Search Claims By Reference Number", description = "Provides targeted text string scanning to locate explicit item structures quickly")
     public ResponseEntity<PaginatedResponseDTO<ClaimResponseDTO>>
     searchClaims(
             @RequestParam String claimNumber,

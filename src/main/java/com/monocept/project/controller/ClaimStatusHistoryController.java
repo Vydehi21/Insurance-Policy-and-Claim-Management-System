@@ -5,19 +5,25 @@ import com.monocept.project.dto.PaginatedResponseDTO;
 import com.monocept.project.enums.ClaimStatus;
 import com.monocept.project.service.ClaimStatusHistoryService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/claim-history")
 @RequiredArgsConstructor
+@Tag(name = "Claim status history", description = "Operations for tracking and auditing historical changes in claim lifecycle states")
 public class ClaimStatusHistoryController {
 
     private final ClaimStatusHistoryService claimStatusHistoryService;
 
     @GetMapping("/claim/{claimId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT', 'CUSTOMER')")
+    @Operation(summary = "Get History By Claim ID", description = "Retrieves a paginated chronological log of all status transitions for a specific claim record")
     public ResponseEntity<PaginatedResponseDTO<ClaimStatusHistoryResponseDTO>>
     getHistoryByClaim(
             @PathVariable Long claimId,
@@ -36,6 +42,8 @@ public class ClaimStatusHistoryController {
     }
 
     @GetMapping("/user/{userId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    @Operation(summary = "Get History By User ID", description = "Retrieves workflow execution audits indicating changes initiated by an internal user account mapping")
     public ResponseEntity<PaginatedResponseDTO<ClaimStatusHistoryResponseDTO>>
     getHistoryByUser(
             @PathVariable Long userId,
@@ -54,6 +62,8 @@ public class ClaimStatusHistoryController {
     }
 
     @GetMapping("/status/{status}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    @Operation(summary = "Get History By Claim Status", description = "Filters target lifecycle logs containing matched transactional states")
     public ResponseEntity<PaginatedResponseDTO<ClaimStatusHistoryResponseDTO>>
     getHistoryByStatus(
             @PathVariable ClaimStatus status,
@@ -72,6 +82,8 @@ public class ClaimStatusHistoryController {
     }
 
     @GetMapping("/filter")
+    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    @Operation(summary = "Filter History By Multiple Matrix Coordinates", description = "Runs explicit correlation lookups matching a target profile identifier, case context, and structural tracking state")
     public ResponseEntity<PaginatedResponseDTO<ClaimStatusHistoryResponseDTO>>
     getHistoryByClaimUserAndStatus(
             @RequestParam Long claimId,
@@ -93,4 +105,3 @@ public class ClaimStatusHistoryController {
                         direction));
     }
 }
-
