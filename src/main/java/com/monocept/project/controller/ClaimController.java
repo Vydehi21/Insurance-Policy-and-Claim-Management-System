@@ -1,15 +1,28 @@
 package com.monocept.project.controller;
 
-import com.monocept.project.dto.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.monocept.project.dto.ClaimFinalDecisionRequestDTO;
+import com.monocept.project.dto.ClaimRequestDTO;
+import com.monocept.project.dto.ClaimResponseDTO;
+import com.monocept.project.dto.ClaimReviewRequestDTO;
+import com.monocept.project.dto.PaginatedResponseDTO;
 import com.monocept.project.enums.ClaimStatus;
+import com.monocept.project.security.CustomUserDetails;
 import com.monocept.project.service.ClaimService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/claims")
@@ -18,40 +31,49 @@ public class ClaimController {
 
     private final ClaimService claimService;
 
-    @PostMapping
-    public ResponseEntity<ClaimResponseDTO> raiseClaim(
-            @RequestParam Long userId,
-            @Valid @RequestBody ClaimRequestDTO requestDTO) {
+	@PostMapping
+	public ResponseEntity<ClaimResponseDTO> raiseClaim(
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(claimService.raiseClaim(userId, requestDTO));
-    }
+			@AuthenticationPrincipal CustomUserDetails userDetails,
+			@Valid @RequestBody ClaimRequestDTO dto
+	) {
 
-    @PutMapping("/{claimId}/review")
-    public ResponseEntity<ClaimResponseDTO> reviewClaim(
-            @PathVariable Long claimId,
-            @RequestParam Long agentId,
-            @Valid @RequestBody ClaimReviewRequestDTO requestDTO) {
+		ClaimResponseDTO response = claimService.raiseClaim(userDetails.getUserId(), dto);
 
-        return ResponseEntity.ok(
-                claimService.reviewClaim(
-                        claimId,
-                        agentId,
-                        requestDTO));
-    }
+		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+	}
 
-    @PutMapping("/{claimId}/decision")
-    public ResponseEntity<ClaimResponseDTO> processFinalDecision(
-            @PathVariable Long claimId,
-            @RequestParam Long adminId,
-            @Valid @RequestBody ClaimFinalDecisionRequestDTO requestDTO) {
+	@PutMapping("/{claimId}/review")
+	public ResponseEntity<ClaimResponseDTO> reviewClaim(
 
-        return ResponseEntity.ok(
-                claimService.processFinalDecision(
-                        claimId,
-                        adminId,
-                        requestDTO));
-    }
+			@PathVariable Long claimId,
+			@AuthenticationPrincipal CustomUserDetails userDetails,
+			@Valid @RequestBody ClaimReviewRequestDTO dto) {
+
+		ClaimResponseDTO response = claimService.reviewClaim(
+				claimId,
+				userDetails.getUserId(),
+				dto);
+
+		return ResponseEntity.ok(response);
+	}
+
+	@PutMapping("/{claimId}/decision")
+	public ResponseEntity<ClaimResponseDTO> processFinalDecision(
+
+			@PathVariable Long claimId,
+			@AuthenticationPrincipal CustomUserDetails userDetails,
+			@Valid @RequestBody ClaimFinalDecisionRequestDTO dto
+
+	) {
+
+		ClaimResponseDTO response = claimService.processFinalDecision(
+				claimId,
+				userDetails.getUserId(),
+				dto);
+
+		return ResponseEntity.ok(response);
+	}
 
     @GetMapping("/{claimId}")
     public ResponseEntity<ClaimResponseDTO> getClaimById(

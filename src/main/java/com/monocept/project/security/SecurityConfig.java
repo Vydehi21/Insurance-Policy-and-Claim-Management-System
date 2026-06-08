@@ -2,6 +2,7 @@ package com.monocept.project.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -35,50 +36,180 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
+                        // PUBLIC ROUTES
                         .requestMatchers(
-                                "/api/auth/**")
-                        .permitAll()
+                                "/api/auth/**",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**"
+                        ).permitAll()
 
-                        .requestMatchers(
-                                "/error")
-                        .permitAll()
+                        // USER MANAGEMENT
+                        // ADMIN ONLY                    
+                        .requestMatchers("/api/users/**")
+                        .hasRole("ADMIN")
 
+                        // INSURANCE PRODUCTS
+                        
+                        // Everyone logged in can view products
                         .requestMatchers(
-                                "/api/products/**")
+                                HttpMethod.GET,
+                                "/api/products/**"
+                        )
+                        .hasAnyRole(
+                                "ADMIN",
+                                "AGENT",
+                                "CUSTOMER"
+                        )
+
+                        // Only admin can create/update/deactivate
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/products/**"
+                        )
                         .hasRole("ADMIN")
 
                         .requestMatchers(
-                                "/api/plans/**")
+                                HttpMethod.PUT,
+                                "/api/products/**"
+                        )
                         .hasRole("ADMIN")
 
                         .requestMatchers(
-                                "/api/users/**")
+                                HttpMethod.PATCH,
+                                "/api/products/**"
+                        )
+                        .hasRole("ADMIN")
+
+                        // POLICY PLANS
+
+                        // View active plans
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/plans/**"
+                        )
+                        .hasAnyRole(
+                                "ADMIN",
+                                "AGENT",
+                                "CUSTOMER"
+                        )
+
+                        // Mutations admin only
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/plans/**"
+                        )
                         .hasRole("ADMIN")
 
                         .requestMatchers(
-                                "/api/customers/**")
+                                HttpMethod.PUT,
+                                "/api/plans/**"
+                        )
                         .hasRole("ADMIN")
 
                         .requestMatchers(
-                                "/api/policies/purchase")
+                                HttpMethod.PATCH,
+                                "/api/plans/**"
+                        )
+                        .hasRole("ADMIN")
+
+                        // CUSTOMERS
+
+                        // Customer own profile APIs
+                        .requestMatchers(
+                                "/api/customers/profile/**"
+                        )
                         .hasRole("CUSTOMER")
 
+                        // Admin and agent customer lookup
                         .requestMatchers(
-                                "/api/premium-payments/**")
+                                "/api/customers/**"
+                        )
+                        .hasAnyRole(
+                                "ADMIN",
+                                "AGENT"
+                        )
+
+                        // POLICIES
+
+                        // Customer buys policy
+                        .requestMatchers(
+                                "/api/policies/purchase/**"
+                        )
                         .hasRole("CUSTOMER")
 
+                        // Agent/Admin issue policy
                         .requestMatchers(
-                                "/api/claims/*/review")
+                                "/api/policies/issue/**"
+                        )
+                        .hasAnyRole(
+                                "ADMIN",
+                                "AGENT"
+                        )
+
+                        // Other policy operations
+                        .requestMatchers(
+                                "/api/policies/**"
+                        )
+                        .hasAnyRole(
+                                "ADMIN",
+                                "AGENT",
+                                "CUSTOMER"
+                        )
+
+                        // PAYMENTS
+
+                        .requestMatchers(
+                                "/api/premium-payments/**"
+                        )
+                        .hasAnyRole(
+                                "ADMIN",
+                                "AGENT",
+                                "CUSTOMER"
+                        )
+
+                        // CLAIMS
+
+                        // Customer raises/views own claims
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/claims/**"
+                        )
+                        .hasRole("CUSTOMER")
+
+                        // Agent review
+                        .requestMatchers(
+                                "/api/claims/*/review"
+                        )
                         .hasRole("AGENT")
 
+                        // Admin final approval/rejection
                         .requestMatchers(
-                                "/api/claims/*/decision")
+                                "/api/claims/*/decision"
+                        )
                         .hasRole("ADMIN")
 
+                        // remaining claim APIs
                         .requestMatchers(
-                                "/api/claim-history/**")
-                        .hasAnyRole("ADMIN", "AGENT")
+                                "/api/claims/**"
+                        )
+                        .hasAnyRole(
+                                "ADMIN",
+                                "AGENT",
+                                "CUSTOMER"
+                        )
 
+                        // CLAIM HISTORY
+
+                        .requestMatchers(
+                                "/api/claim-history/**"
+                        )
+                        .hasAnyRole(
+                                "ADMIN",
+                                "AGENT",
+                                "CUSTOMER"
+                        )
+
+                        // anything else requires login
                         .anyRequest()
                         .authenticated())
 

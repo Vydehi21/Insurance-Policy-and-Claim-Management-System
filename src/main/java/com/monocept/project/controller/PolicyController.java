@@ -1,21 +1,30 @@
 package com.monocept.project.controller;
 
-import com.monocept.project.dto.AgentPolicyIssueRequestDTO;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+//import org.springframework.security.access.prepost.PreAuthorize;
+//import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
+import com.monocept.project.dto.AgentPolicyIssueRequestDTO;
 import com.monocept.project.dto.CustomerPolicyPurchaseRequestDTO;
 import com.monocept.project.dto.PaginatedResponseDTO;
 import com.monocept.project.dto.PolicyResponseDTO;
 import com.monocept.project.enums.PolicyStatus;
+import com.monocept.project.security.CustomUserDetails;
 //import com.monocept.project.security.CustomUserDetails;
 import com.monocept.project.service.PolicyService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
-import org.springframework.http.ResponseEntity;
-//import org.springframework.security.access.prepost.PreAuthorize;
-//import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/policies")
@@ -44,22 +53,29 @@ public class PolicyController {
 //                userId,
 //                purchaseDTO);
 //    }
-    @PostMapping("/purchase")
-    public ResponseEntity<PolicyResponseDTO> purchasePolicy(
-            @RequestParam Long userId,
-            @Valid @RequestBody CustomerPolicyPurchaseRequestDTO requestDTO) {
+	@PostMapping("/purchase")
+	public ResponseEntity<PolicyResponseDTO> purchasePolicy(
 
-        return ResponseEntity.ok(
-                policyService.purchasePolicy(userId, requestDTO));
-    }
+			@AuthenticationPrincipal CustomUserDetails userDetails,
+
+			@Valid @RequestBody CustomerPolicyPurchaseRequestDTO dto) {
+
+		Long userId = userDetails.getUserId();
+
+		PolicyResponseDTO response = policyService.purchasePolicy(userId, dto);
+
+		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+	}
     
-    @PostMapping("/issue")
-  //  @PreAuthorize("hasRole('AGENT')")
-    public PolicyResponseDTO issuePolicy(
-            @Valid @RequestBody AgentPolicyIssueRequestDTO issueDTO) {
+	@PostMapping("/issue")
+	public ResponseEntity<PolicyResponseDTO> issuePolicy(
 
-        return policyService.issuePolicy(issueDTO);
-    }
+			@Valid @RequestBody AgentPolicyIssueRequestDTO dto) {
+
+		PolicyResponseDTO response = policyService.issuePolicy(dto);
+
+		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+	}
 
     @GetMapping("/{policyId}")
  //   @PreAuthorize("hasAnyRole('ADMIN','AGENT','CUSTOMER')")
@@ -162,11 +178,13 @@ public class PolicyController {
                 direction);
     }
 
-    @PutMapping("/{policyId}/cancel")
- //   @PreAuthorize("hasRole('ADMIN')")
-    public void cancelPolicy(
-            @PathVariable Long policyId) {
+	@PatchMapping("/{policyId}/cancel")
+	public ResponseEntity<String> cancelPolicy(
 
-        policyService.cancelPolicy(policyId);
-    }
+			@PathVariable Long policyId) {
+
+		policyService.cancelPolicy(policyId);
+
+		return ResponseEntity.ok("Policy cancelled successfully");
+	}
 }
