@@ -39,7 +39,7 @@ public class ClaimStatusHistoryServiceImpl implements ClaimStatusHistoryService 
         Pageable pageable = createPageable(page, size, sortBy, direction);
 
         Page<ClaimStatusHistory> historyPage =
-                claimStatusHistoryRepository.findByClaim_ClaimId(claimId, pageable);
+                claimStatusHistoryRepository.findByClaimId(claimId, pageable);
 
         if (historyPage.isEmpty()) {
             throw new ResourceNotFoundException(
@@ -63,7 +63,11 @@ public class ClaimStatusHistoryServiceImpl implements ClaimStatusHistoryService 
         Pageable pageable = createPageable(page, size, sortBy, direction);
 
         Page<ClaimStatusHistory> historyPage =
+<<<<<<< HEAD
                 claimStatusHistoryRepository.findByUser_Id(userId, pageable);
+=======
+                claimStatusHistoryRepository.findByUserId(userId, pageable);
+>>>>>>> ea4edcbbf0ef94935e37b3ec82cecae4d98da256
 
         if (historyPage.isEmpty()) {
             throw new ResourceNotFoundException(
@@ -114,7 +118,11 @@ public class ClaimStatusHistoryServiceImpl implements ClaimStatusHistoryService 
 
         Page<ClaimStatusHistory> historyPage =
                 claimStatusHistoryRepository
+<<<<<<< HEAD
                         .findByClaim_ClaimIdAndUser_IdAndNewStatus(
+=======
+                        .findByClaimIdAndUserIdAndNewStatus(
+>>>>>>> ea4edcbbf0ef94935e37b3ec82cecae4d98da256
                                 claimId,
                                 userId,
                                 status,
@@ -173,7 +181,7 @@ public class ClaimStatusHistoryServiceImpl implements ClaimStatusHistoryService 
                         ClaimStatusHistoryResponseDTO.class);
 
         dto.setClaimId(
-                history.getClaim().getClaimId());
+                history.getClaim().getId());
 
         dto.setUpdatedByFullName(
                 history.getUser().getFullName());

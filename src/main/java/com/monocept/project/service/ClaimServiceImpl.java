@@ -411,7 +411,11 @@ public class ClaimServiceImpl implements ClaimService {
                         sortBy));
 
         Page<Claim> claimPage =
+<<<<<<< HEAD
                 claimRepository.findByPolicy_Customer_Id(
+=======
+                claimRepository.findByPolicyCustomerId(
+>>>>>>> ea4edcbbf0ef94935e37b3ec82cecae4d98da256
                         customerId,
                         pageable);
 
@@ -473,7 +477,11 @@ public class ClaimServiceImpl implements ClaimService {
 
         Page<Claim> claimPage =
                 claimRepository
+<<<<<<< HEAD
                         .findByPolicy_Customer_IdAndClaimStatus(
+=======
+                        .findByPolicyCustomerIdAndClaimStatus(
+>>>>>>> ea4edcbbf0ef94935e37b3ec82cecae4d98da256
                                 customerId,
                                 status,
                                 pageable);

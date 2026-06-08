@@ -18,7 +18,7 @@ public class ClaimDocument {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long documentId;
+	private Long id;
 	
 	@ManyToOne
 	@JoinColumn(name = "claim_id", nullable = false)

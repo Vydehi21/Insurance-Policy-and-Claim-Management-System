@@ -110,7 +110,7 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
 
         Page<PremiumPaymentResponseDTO> result =
                 premiumPaymentRepository
-                        .findByPolicy_PolicyId(policyId, pageable)
+                        .findByPolicyId(policyId, pageable)
                         .map(this::mapToResponse);
 
         return PaginationUtil.createPaginatedResponse(
@@ -157,7 +157,7 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
 
         Page<PremiumPaymentResponseDTO> result =
                 premiumPaymentRepository
-                        .findByPolicy_PolicyIdAndPaymentStatus(
+                        .findByPolicyIdAndPaymentStatus(
                                 policyId,
                                 status,
                                 pageable)
@@ -213,7 +213,7 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
         PremiumPaymentResponseDTO dto =
                 new PremiumPaymentResponseDTO();
 
-        dto.setPaymentId(payment.getPaymentId());
+        dto.setPaymentId(payment.getId());
         dto.setPolicyNumber(
                 payment.getPolicy().getPolicyNumber());
         dto.setAmount(payment.getAmount());

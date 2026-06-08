@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ClaimDocumentRepository extends JpaRepository<ClaimDocument, Long> {
-    Page<ClaimDocument> findByClaim_ClaimId(Long claimId, Pageable pageable);
+    Page<ClaimDocument> findByClaimId(Long claimId, Pageable pageable);
 }

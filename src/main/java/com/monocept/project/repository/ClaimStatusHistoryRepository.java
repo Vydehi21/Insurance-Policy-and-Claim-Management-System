@@ -1,4 +1,3 @@
-
 package com.monocept.project.repository;
 
 import com.monocept.project.model.ClaimStatusHistory;
@@ -13,7 +12,7 @@ public interface ClaimStatusHistoryRepository extends JpaRepository<ClaimStatusH
 
     Page<ClaimStatusHistory> findByClaim_ClaimId(Long claimId, Pageable pageable);
     
-    // FIXED: Changed User_UserId to User_Id
+    // FIXED: Changed User_UserId to User_Id to target User primary key name
     Page<ClaimStatusHistory> findByUser_Id(
             Long userId,
             Pageable pageable);
