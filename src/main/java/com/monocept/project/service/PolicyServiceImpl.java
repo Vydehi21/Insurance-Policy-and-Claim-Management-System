@@ -43,7 +43,7 @@ public class PolicyServiceImpl implements PolicyService {
             CustomerPolicyPurchaseRequestDTO purchaseDTO) {
 
         Customer customer = customerRepository
-                .findByUserId(authenticatedUserId)
+                .findByUser_Id(authenticatedUserId)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Customer not found"));
 
@@ -53,7 +53,7 @@ public class PolicyServiceImpl implements PolicyService {
                         new ResourceNotFoundException("Plan not found"));
 
         policyRepository
-                .findTopByCustomerCustomerIdAndPolicyPlanPlanIdOrderByCreatedDateDesc(
+                .findLatestPolicyByCustomerAndPlan(
                         customer.getId(),
                         plan.getId())
                 .ifPresent(policy -> {
@@ -181,7 +181,7 @@ public class PolicyServiceImpl implements PolicyService {
 
         Page<PolicyResponseDTO> result =
                 policyRepository
-                        .findByCustomer_CustomerId(customerId, pageable)
+                        .findByCustomer_Id(customerId, pageable)
                         .map(this::mapToResponse);
 
         return PaginationUtil.createPaginatedResponse(
@@ -233,7 +233,7 @@ public class PolicyServiceImpl implements PolicyService {
 
         Page<PolicyResponseDTO> result =
                 policyRepository
-                        .findByCustomer_CustomerIdAndPolicyStatus(
+                        .findByCustomer_IdAndPolicyStatus(
                                 customerId,
                                 status,
                                 pageable)

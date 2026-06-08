@@ -1,3 +1,4 @@
+
 package com.monocept.project.repository;
 
 import com.monocept.project.model.Customer;
@@ -10,16 +11,17 @@ import java.util.Optional;
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
-	Optional<Customer> findByUserId(Long userId);
+    // FIXED: Changed findByUserId to findByUser_Id
+    Optional<Customer> findByUser_Id(Long userId);
 	
-	boolean existsByUserId(Long userId);
+    // FIXED: Changed existsByUserId to existsByUser_Id
+    boolean existsByUser_Id(Long userId);
 
-	Page<Customer> findByUserActiveStatus(
-	        Boolean activeStatus,
-	        Pageable pageable);
+    Page<Customer> findByUserActiveStatus(
+            Boolean activeStatus,
+            Pageable pageable);
 
-	Page<Customer> findByUserFullNameContainingIgnoreCase(
-	        String fullName,
-	        Pageable pageable);
-
+    Page<Customer> findByUserFullNameContainingIgnoreCase(
+            String fullName,
+            Pageable pageable);
 }

@@ -1,3 +1,4 @@
+
 package com.monocept.project.repository;
 
 import com.monocept.project.model.ClaimStatusHistory;
@@ -11,11 +12,16 @@ import org.springframework.stereotype.Repository;
 public interface ClaimStatusHistoryRepository extends JpaRepository<ClaimStatusHistory, Long> {
 
     Page<ClaimStatusHistory> findByClaim_ClaimId(Long claimId, Pageable pageable);
-    Page<ClaimStatusHistory> findByUser_UserId(
+    
+    // FIXED: Changed User_UserId to User_Id
+    Page<ClaimStatusHistory> findByUser_Id(
             Long userId,
             Pageable pageable);
+            
     Page<ClaimStatusHistory> findByNewStatus(ClaimStatus status, Pageable pageable);
-    Page<ClaimStatusHistory> findByClaim_ClaimIdAndUser_UserIdAndNewStatus(
+    
+    // FIXED: Changed User_UserId to User_Id
+    Page<ClaimStatusHistory> findByClaim_ClaimIdAndUser_IdAndNewStatus(
             Long claimId,
             Long userId,
             ClaimStatus status,
