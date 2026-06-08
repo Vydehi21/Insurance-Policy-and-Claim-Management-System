@@ -411,7 +411,7 @@ public class ClaimServiceImpl implements ClaimService {
                         sortBy));
 
         Page<Claim> claimPage =
-                claimRepository.findByPolicy_Customer_CustomerId(
+                claimRepository.findByPolicyCustomerId(
                         customerId,
                         pageable);
 
@@ -473,7 +473,7 @@ public class ClaimServiceImpl implements ClaimService {
 
         Page<Claim> claimPage =
                 claimRepository
-                        .findByPolicy_Customer_CustomerIdAndClaimStatus(
+                        .findByPolicyCustomerIdAndClaimStatus(
                                 customerId,
                                 status,
                                 pageable);
