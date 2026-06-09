@@ -21,6 +21,7 @@ public class User {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "user_id")
 	private Long id;
 	
 	@Column(nullable = false)
@@ -32,7 +33,7 @@ public class User {
 	@Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
+    @Column(nullable = false,unique = true)
     private String mobileNumber;
     
     @Enumerated(EnumType.STRING)
@@ -47,6 +48,11 @@ public class User {
     
     @Column(nullable = false)
     private LocalDateTime updatedDate;
+    
+    @Column(length = 10)
+    private String resetPasswordOtp;
+
+    private LocalDateTime resetPasswordOtpExpiry;
     
     @PrePersist
     public void beforeSave() {

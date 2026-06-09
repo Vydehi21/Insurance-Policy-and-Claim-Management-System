@@ -31,19 +31,46 @@ public class PolicyPlanServiceImplementation implements PolicyPlanService {
 	@Override
 	@Transactional
 	public PolicyPlanResponseDTO createPlan(PolicyPlanRequestDTO planRequestDTO) {
-		log.info("Creating policy plan: {}", planRequestDTO.getPlanName());
 
-		InsuranceProduct product = findProductById(planRequestDTO.getProductId());
+	    log.info("Creating policy plan: {}", planRequestDTO.getPlanName());
 
-		PolicyPlan plan = modelMapper.map(planRequestDTO, PolicyPlan.class);
+	    InsuranceProduct product = findProductById(planRequestDTO.getProductId());
 
-		plan.setInsuranceProduct(product);
 
-		PolicyPlan savedPlan = policyPlanRepository.save(plan);
+	    PolicyPlan plan = new PolicyPlan();
 
-		log.info("Policy plan created successfully with id: {}", savedPlan.getId());
 
-		return modelMapper.map(savedPlan, PolicyPlanResponseDTO.class);
+	    plan.setPlanName(planRequestDTO.getPlanName());
+
+	    plan.setCoverageAmount(planRequestDTO.getCoverageAmount());
+
+	    plan.setPremiumAmount(planRequestDTO.getPremiumAmount());
+
+	    plan.setPremiumType(planRequestDTO.getPremiumType());
+
+	    plan.setDuration(planRequestDTO.getDuration());
+
+	    plan.setTermsAndConditions(planRequestDTO.getTermsAndConditions());
+
+	    plan.setActiveStatus(planRequestDTO.getActiveStatus());
+
+
+	    plan.setInsuranceProduct(product);
+
+
+	    PolicyPlan savedPlan = policyPlanRepository.save(plan);
+
+
+	    log.info(
+	        "Policy plan created successfully id: {}",
+	        savedPlan.getId()
+	    );
+
+
+	    return modelMapper.map(
+	            savedPlan,
+	            PolicyPlanResponseDTO.class
+	    );
 	}
 
 	@Override

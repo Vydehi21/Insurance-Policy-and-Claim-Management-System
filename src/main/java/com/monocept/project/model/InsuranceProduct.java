@@ -32,6 +32,7 @@ public class InsuranceProduct {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "product_id")
 	private Long id;
 	
 	@Column(nullable = false, unique = true)

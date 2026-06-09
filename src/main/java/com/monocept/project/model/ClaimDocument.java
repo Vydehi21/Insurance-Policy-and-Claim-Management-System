@@ -18,6 +18,7 @@ public class ClaimDocument {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "document_id")
 	private Long id;
 	
 	@ManyToOne
