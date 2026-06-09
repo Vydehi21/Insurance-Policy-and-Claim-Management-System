@@ -32,6 +32,7 @@ public class DataInitializer {
                 admin.setPassword(
                     passwordEncoder.encode("admin123")
                 );
+                admin.setMobileNumber("1234567890");
 
                 admin.setRole(Role.ADMIN);
 

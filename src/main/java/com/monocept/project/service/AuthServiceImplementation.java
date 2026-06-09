@@ -1,13 +1,17 @@
 package com.monocept.project.service;
 
+import java.time.LocalDateTime;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.monocept.project.dto.ForgotPasswordRequestDTO;
 import com.monocept.project.dto.LoginRequestDTO;
 import com.monocept.project.dto.LoginResponseDTO;
 import com.monocept.project.dto.RegistrationRequestDTO;
+import com.monocept.project.dto.ResetPasswordRequestDTO;
 import com.monocept.project.dto.UserResponseDTO;
 import com.monocept.project.enums.Role;
 import com.monocept.project.exception.AuthenticationException;
@@ -87,5 +91,73 @@ public class AuthServiceImplementation implements AuthService {
 
         log.info("Login successful for user id: {}", user.getId());
         return response;
+    }
+    
+    private String generateOtp() {
+
+        return String.valueOf(
+                100000 +
+                new java.util.Random()
+                        .nextInt(900000));
+    }
+    
+    @Override
+    @Transactional
+    public String forgotPassword(
+            ForgotPasswordRequestDTO request) {
+
+        User user = userRepository
+                .findByEmail(request.getEmail())
+                .orElseThrow(() ->
+                        new AuthenticationException("User not found"));
+
+        String otp = generateOtp();
+
+        user.setResetPasswordOtp(otp);
+        user.setResetPasswordOtpExpiry(
+                LocalDateTime.now().plusMinutes(10));
+
+        userRepository.save(user);
+
+        return otp;
+    }
+    
+    @Override
+    @Transactional
+    public void resetPassword(
+            ResetPasswordRequestDTO request) {
+
+        User user =
+                userRepository
+                        .findByEmail(
+                                request.getEmail())
+                        .orElseThrow(
+                                () -> new AuthenticationException(
+                                        "User not found"));
+
+        if (!request.getOtp()
+                .equals(
+                        user.getResetPasswordOtp())) {
+
+            throw new AuthenticationException(
+                    "Invalid OTP");
+        }
+
+        if (user.getResetPasswordOtpExpiry()
+                .isBefore(
+                        LocalDateTime.now())) {
+
+            throw new AuthenticationException(
+                    "OTP expired");
+        }
+
+        user.setPassword(
+                request.getNewPassword());
+
+        user.setResetPasswordOtp(null);
+
+        user.setResetPasswordOtpExpiry(null);
+
+        userRepository.save(user);
     }
 }

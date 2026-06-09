@@ -48,6 +48,11 @@ public class User {
     @Column(nullable = false)
     private LocalDateTime updatedDate;
     
+    @Column(length = 10)
+    private String resetPasswordOtp;
+
+    private LocalDateTime resetPasswordOtpExpiry;
+    
     @PrePersist
     public void beforeSave() {
     	createdDate = LocalDateTime.now();

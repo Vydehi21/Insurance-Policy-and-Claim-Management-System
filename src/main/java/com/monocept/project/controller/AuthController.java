@@ -1,5 +1,7 @@
 package com.monocept.project.controller;
 
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -7,9 +9,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.monocept.project.dto.ForgotPasswordRequestDTO;
 import com.monocept.project.dto.LoginRequestDTO;
 import com.monocept.project.dto.LoginResponseDTO;
 import com.monocept.project.dto.RegistrationRequestDTO;
+import com.monocept.project.dto.ResetPasswordRequestDTO;
 import com.monocept.project.dto.UserResponseDTO;
 import com.monocept.project.service.AuthService;
 
@@ -45,5 +49,29 @@ public class AuthController {
         return ResponseEntity.ok(
                 authService.login(request)
         );
+    }
+    
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(
+            @RequestBody ForgotPasswordRequestDTO request) {
+
+        String otp = authService.forgotPassword(request);
+
+        return ResponseEntity.ok(
+                Map.of(
+                        "message", "OTP generated successfully",
+                        "otp", otp
+                ));
+    }
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(
+            @Valid
+            @RequestBody
+            ResetPasswordRequestDTO request) {
+
+        authService.resetPassword(request);
+
+        return ResponseEntity.ok(
+                "Password reset successfully");
     }
 }
