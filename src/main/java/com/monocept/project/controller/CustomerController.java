@@ -2,6 +2,7 @@ package com.monocept.project.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,22 +19,25 @@ import com.monocept.project.dto.PaginatedResponseDTO;
 import com.monocept.project.security.CustomUserDetails;
 import com.monocept.project.service.CustomerService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/customers")
 @RequiredArgsConstructor
+@Tag(name = "customers", description = "Operations for managing insurance customer profile information")
 public class CustomerController {
 
     private final CustomerService customerService;
 
     @PostMapping("/user/{userId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    @Operation(summary = "Create Profile", description = "Binds supplementary descriptive customer fields to a registered user account mapping")
     public ResponseEntity<CustomerResponseDTO> createProfile(
-
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody CustomerRequestDTO dto
-
     ) {
         CustomerResponseDTO response =
                 customerService.createCustomerProfile(
@@ -47,12 +51,12 @@ public class CustomerController {
     }
 
     @GetMapping("/{customerId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT', 'CUSTOMER')")
+    @Operation(summary = "Get Customer By ID", description = "Fetches core customer entity attributes matching the designated primary key identifier")
     public ResponseEntity<CustomerResponseDTO> getCustomerById(
-
             @PathVariable Long customerId) {
 
         return ResponseEntity.ok(
-
                 customerService.getCustomerById(
                         customerId
                 )
@@ -60,13 +64,12 @@ public class CustomerController {
     }
 
     @GetMapping("/user/{userId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT', 'CUSTOMER')")
+    @Operation(summary = "Get Customer By User ID", description = "Retrieves relational customer structural configurations using the security user profile identity record link")
     public ResponseEntity<CustomerResponseDTO> getCustomerByUserId(
-
             @PathVariable Long userId) {
 
-
         return ResponseEntity.ok(
-
                 customerService.getCustomerByUserId(
                         userId
                 )
@@ -74,16 +77,16 @@ public class CustomerController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Get All Customers", description = "Returns an indexed catalog tracking customer files registered system-wide")
     public ResponseEntity<PaginatedResponseDTO<CustomerResponseDTO>>
     getAllCustomers(
-
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdDate") String sortBy,
             @RequestParam(defaultValue = "desc") String direction) {
 
         return ResponseEntity.ok(
-
                 customerService.getAllCustomers(
                         page,
                         size,
@@ -94,25 +97,17 @@ public class CustomerController {
     }
 
     @GetMapping("/status/{activeStatus}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Get Customers By Status", description = "Filters target catalog profiles using categorical operational state parameters")
     public ResponseEntity<PaginatedResponseDTO<CustomerResponseDTO>>
     getCustomersByStatus(
-
             @PathVariable Boolean activeStatus,
-
-            @RequestParam(defaultValue = "0")
-            int page,
-
-            @RequestParam(defaultValue = "10")
-            int size,
-
-            @RequestParam(defaultValue = "createdDate")
-            String sortBy,
-
-            @RequestParam(defaultValue = "desc")
-            String direction) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdDate") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction) {
 
         return ResponseEntity.ok(
-
                 customerService.getCustomersByStatus(
                         activeStatus,
                         page,
@@ -124,9 +119,10 @@ public class CustomerController {
     }
 
     @GetMapping("/search")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Search Customers By Name", description = "Executes text-string criteria patterns to match name components in target logs")
     public ResponseEntity<PaginatedResponseDTO<CustomerResponseDTO>>
     searchCustomers(
-
             @RequestParam String name,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -134,7 +130,6 @@ public class CustomerController {
             @RequestParam(defaultValue = "desc") String direction) {
 
         return ResponseEntity.ok(
-        		
                 customerService.searchCustomersByName(
                         name,
                         page,
@@ -146,19 +141,17 @@ public class CustomerController {
     }
 
     @PutMapping("/{customerId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT', 'CUSTOMER')")
+    @Operation(summary = "Update Customer Profile", description = "Modifies existing customer registration data records based on the payload data structures")
     public ResponseEntity<CustomerResponseDTO> updateCustomerProfile(
-
             @PathVariable Long customerId,
-            @Valid
-            @RequestBody CustomerRequestDTO customerRequestDTO) {
+            @Valid @RequestBody CustomerRequestDTO customerRequestDTO) {
 
         return ResponseEntity.ok(
-
                 customerService.updateCustomerProfile(
                         customerId,
                         customerRequestDTO
                 )
         );
     }
-    
 }
