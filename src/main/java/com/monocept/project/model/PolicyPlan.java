@@ -22,6 +22,7 @@ public class PolicyPlan {
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "plan_id")
     private Long id;
 	
 	@ManyToOne

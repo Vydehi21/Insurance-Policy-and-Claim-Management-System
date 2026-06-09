@@ -22,6 +22,7 @@ public class PremiumPayment {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "payment_id")
 	private Long id;
 	
 	@ManyToOne

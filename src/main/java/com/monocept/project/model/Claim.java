@@ -23,6 +23,7 @@ public class Claim {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "claim_id")
 	private Long id;
 	
 	@Column(nullable = false, unique = true)
