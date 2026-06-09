@@ -3,6 +3,7 @@ package com.monocept.project.service;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,26 +28,30 @@ public class UserServiceImplementation implements UserService {
 
 	private final UserRepository userRepository;
 	private final ModelMapper modelMapper;
+	private final PasswordEncoder passwordEncoder;
 
 	@Override
 	@Transactional
 	public UserResponseDTO createAgent(UserRequestDTO userRequestDTO) {
-		log.info("Creating agent with email: {}", userRequestDTO.getEmail());
+	    log.info("Creating agent with email: {}", userRequestDTO.getEmail());
 
-		if (userRepository.existsByEmail(userRequestDTO.getEmail())) {
-			log.warn("Agent creation failed. Duplicate email: {}", userRequestDTO.getEmail());
-			throw new DuplicateResourceException("Email already exists: " + userRequestDTO.getEmail());
-		}
+	    if (userRepository.existsByEmail(userRequestDTO.getEmail())) {
+	        log.warn("Agent creation failed. Duplicate email: {}", userRequestDTO.getEmail());
+	        throw new DuplicateResourceException("Email already exists: " + userRequestDTO.getEmail());
+	    }
 
-		User user = modelMapper.map(userRequestDTO, User.class);
-		user.setRole(Role.AGENT);
-		user.setActiveStatus(true);
+	    User user = modelMapper.map(userRequestDTO, User.class);
 
-		User savedUser = userRepository.save(user);
+	    user.setPassword(passwordEncoder.encode(userRequestDTO.getPassword()));
 
-		log.info("Agent created successfully with id: {}", savedUser.getId());
+	    user.setRole(Role.AGENT);
+	    user.setActiveStatus(true);
 
-		return modelMapper.map(savedUser, UserResponseDTO.class);
+	    User savedUser = userRepository.save(user);
+
+	    log.info("Agent created successfully with id: {}", savedUser.getId());
+
+	    return modelMapper.map(savedUser, UserResponseDTO.class);
 	}
 
 	@Override

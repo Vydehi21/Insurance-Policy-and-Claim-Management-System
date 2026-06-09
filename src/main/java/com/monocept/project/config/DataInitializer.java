@@ -1,5 +1,7 @@
 package com.monocept.project.config;
 
+import java.time.LocalDateTime;
+
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,7 +29,10 @@ public class DataInitializer {
                 User admin = new User();
 
                 admin.setFullName("System Admin");
+
                 admin.setEmail(adminEmail);
+
+                admin.setMobileNumber("9999999999");
 
                 admin.setPassword(
                     passwordEncoder.encode("admin123")
@@ -36,12 +41,14 @@ public class DataInitializer {
 
                 admin.setRole(Role.ADMIN);
 
+                admin.setActiveStatus(true);
+
+                admin.setCreatedDate(LocalDateTime.now());
+                admin.setUpdatedDate(LocalDateTime.now());
+
                 userRepository.save(admin);
 
                 System.out.println("Default admin created");
-            }
-            else {
-                System.out.println("Admin already exists");
             }
         };
     }
