@@ -2,6 +2,7 @@ package com.monocept.project.exception;
 
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -246,6 +247,18 @@ public class GlobalExceptionHandler {
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Something went wrong.",
                 request.getRequestURI());
+    }
+    
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String,Object>> handleRuntimeException(RuntimeException ex){
+
+        Map<String,Object> error = new HashMap<>();
+
+        error.put("timestamp", LocalDateTime.now());
+        error.put("message", ex.getMessage());
+        error.put("status", HttpStatus.BAD_REQUEST.value());
+
+        return new ResponseEntity<>(error,HttpStatus.BAD_REQUEST);
     }
 
     private ResponseEntity<ErrorResponseDTO> buildResponse(

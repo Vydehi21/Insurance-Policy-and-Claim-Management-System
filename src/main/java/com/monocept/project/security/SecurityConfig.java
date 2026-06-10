@@ -209,6 +209,10 @@ public class SecurityConfig {
                                 "AGENT",
                                 "CUSTOMER"
                         )
+                        .requestMatchers(
+                        		"/api/otp/**"
+                        )
+                        .permitAll()
 
                         // anything else requires login
                         .anyRequest()

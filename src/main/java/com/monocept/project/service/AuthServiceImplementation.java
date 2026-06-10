@@ -16,7 +16,11 @@ import com.monocept.project.dto.UserResponseDTO;
 import com.monocept.project.enums.Role;
 import com.monocept.project.exception.AuthenticationException;
 import com.monocept.project.exception.DuplicateResourceException;
+import com.monocept.project.model.EmailOtp;
+import com.monocept.project.model.PhoneOtp;
 import com.monocept.project.model.User;
+import com.monocept.project.repository.EmailOtpRepository;
+import com.monocept.project.repository.PhoneOtpRepository;
 import com.monocept.project.repository.UserRepository;
 import com.monocept.project.security.JwtService;
 
@@ -32,26 +36,49 @@ public class AuthServiceImplementation implements AuthService {
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final EmailOtpRepository emailOtpRepository;
+    private final PhoneOtpRepository phoneOtpRepository;
 
     @Override
     @Transactional
     public UserResponseDTO registerCustomer(RegistrationRequestDTO registrationRequestDTO) {
+
         log.info("Registering customer: {}", registrationRequestDTO.getEmail());
 
         if (userRepository.existsByEmail(registrationRequestDTO.getEmail())) {
-            throw new DuplicateResourceException("Email already exists: " + registrationRequestDTO.getEmail());
+            throw new DuplicateResourceException(
+                    "Email already exists: " + registrationRequestDTO.getEmail());
+        }
+
+        EmailOtp emailOtp = emailOtpRepository
+                .findByEmail(registrationRequestDTO.getEmail())
+                .orElseThrow(() ->
+                        new RuntimeException("Please verify email first"));
+
+        if(!emailOtp.isVerified()) {
+            throw new RuntimeException("Please verify email first");
+        }
+
+        PhoneOtp phoneOtp = phoneOtpRepository
+                .findByPhone(registrationRequestDTO.getMobileNumber())
+                .orElseThrow(() ->
+                        new RuntimeException("Please verify phone number first"));
+
+        if(!phoneOtp.isVerified()) {
+            throw new RuntimeException("Please verify phone number first");
         }
 
         User user = modelMapper.map(registrationRequestDTO, User.class);
-        
-        // Setup initial default fields
+
         user.setRole(Role.CUSTOMER);
         user.setActiveStatus(true);
-        
-        // Encrypt the raw password before saving it to MySQL
-        user.setPassword(passwordEncoder.encode(registrationRequestDTO.getPassword()));
+
+        user.setPassword(
+                passwordEncoder.encode(registrationRequestDTO.getPassword())
+        );
 
         User savedUser = userRepository.save(user);
+
         log.info("User registered with id: {}", savedUser.getId());
 
         return modelMapper.map(savedUser, UserResponseDTO.class);

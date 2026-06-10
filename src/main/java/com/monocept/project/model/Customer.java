@@ -22,6 +22,12 @@ public class Customer {
 	@Column(name = "customer_id")
 	private Long id;
 	
+	@Column(name = "email_verified")
+	private boolean emailVerified = false;
+
+	@Column(name = "phone_verified")
+	private boolean phoneVerified = false;
+	
 	@OneToOne
 	@JoinColumn(name = "user_id", nullable = false, unique = true)
 	private User user;
