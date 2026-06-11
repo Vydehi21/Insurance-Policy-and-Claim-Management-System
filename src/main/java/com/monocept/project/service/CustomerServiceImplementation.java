@@ -67,10 +67,13 @@ public class CustomerServiceImplementation implements CustomerService {
 	public CustomerResponseDTO getCustomerByUserId(Long userId) {
 		log.info("Fetching customer profile for user id: {}", userId);
 
-		Customer customer = customerRepository.findById(userId).orElseThrow(() -> {
-			log.warn("Customer not found for user id: {}", userId);
-			return new ResourceNotFoundException("Customer not found for user id: " + userId);
-		});
+		Customer customer =
+		        customerRepository.findByUser_Id(userId)
+		        .orElseThrow(() ->
+		             new ResourceNotFoundException(
+		                "Customer not found for user id: " + userId
+		             )
+		        );
 
 		return modelMapper.map(customer, CustomerResponseDTO.class);
 	}

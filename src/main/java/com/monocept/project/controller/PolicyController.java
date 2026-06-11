@@ -47,8 +47,10 @@ public class PolicyController {
 	}
     
 	@PostMapping("/issue")
+
 	@PreAuthorize("hasRole('AGENT','ADMIN')")
 	@Operation(summary = "Issue Policy", description = "Allows an admin and agent to directly issue a policy package to a targeted consumer account")
+
 	public ResponseEntity<PolicyResponseDTO> issuePolicy(
 			@Valid @RequestBody AgentPolicyIssueRequestDTO dto) {
 
@@ -56,13 +58,13 @@ public class PolicyController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
-    @GetMapping("/{policyId}")
+    @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','AGENT','CUSTOMER')")
     @Operation(summary = "Get Policy By ID", description = "Fetches complete entity schema fields for an active policy via primary record ID")
     public PolicyResponseDTO getPolicyById(
-            @PathVariable Long policyId) {
+            @PathVariable Long id) {
 
-        return policyService.getPolicyById(policyId);
+        return policyService.getPolicyById(id);
     }
 
     @GetMapping("/number/{policyNumber}")
@@ -80,7 +82,7 @@ public class PolicyController {
     public PaginatedResponseDTO<PolicyResponseDTO> getAllPolicies(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "policyId") String sortBy,
+            @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String direction) {
 
         return policyService.getAllPolicies(
