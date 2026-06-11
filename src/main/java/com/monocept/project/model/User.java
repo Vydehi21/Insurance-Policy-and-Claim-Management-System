@@ -49,10 +49,9 @@ public class User {
     @Column(nullable = false)
     private LocalDateTime updatedDate;
     
-    @Column(length = 10)
-    private String resetPasswordOtp;
+    private String resetToken;
 
-    private LocalDateTime resetPasswordOtpExpiry;
+    private LocalDateTime resetTokenExpiry;
     
     @PrePersist
     public void beforeSave() {

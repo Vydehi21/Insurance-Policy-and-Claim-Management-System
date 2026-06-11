@@ -1,5 +1,7 @@
 package com.monocept.project.dto;
 
+import java.time.LocalDate;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -30,4 +32,6 @@ public class RegistrationRequestDTO {
     @NotBlank(message = "Mobile number is required")
     @Size(max = 15, message = "Mobile number must not exceed 15 characters")
     private String mobileNumber;
+    
+    
 }

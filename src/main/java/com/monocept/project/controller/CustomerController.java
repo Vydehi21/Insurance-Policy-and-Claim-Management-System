@@ -34,14 +34,14 @@ public class CustomerController {
 
     @PostMapping("/user/{userId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
-    @Operation(summary = "Create Profile", description = "Binds supplementary descriptive customer fields to a registered user account mapping")
     public ResponseEntity<CustomerResponseDTO> createProfile(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long userId,
             @Valid @RequestBody CustomerRequestDTO dto
     ) {
+
         CustomerResponseDTO response =
                 customerService.createCustomerProfile(
-                        userDetails.getUserId(),
+                        userId,
                         dto
                 );
 

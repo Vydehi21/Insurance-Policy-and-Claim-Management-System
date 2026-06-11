@@ -8,12 +8,9 @@ import lombok.Setter;
 @Setter
 public class ResetPasswordRequestDTO {
 
-    @NotBlank
-    private String email;
+	@NotBlank
+	private String token;
 
-    @NotBlank
-    private String otp;
-
-    @NotBlank
+	@NotBlank
     private String newPassword;
 }

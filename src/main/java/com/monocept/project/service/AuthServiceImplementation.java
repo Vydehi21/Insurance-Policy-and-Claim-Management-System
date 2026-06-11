@@ -1,11 +1,14 @@
 package com.monocept.project.service;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.monocept.project.dto.ForgotPasswordRequestDTO;
 import com.monocept.project.dto.LoginRequestDTO;
@@ -17,6 +20,7 @@ import com.monocept.project.enums.Role;
 import com.monocept.project.exception.AuthenticationException;
 import com.monocept.project.exception.DuplicateResourceException;
 import com.monocept.project.model.User;
+import com.monocept.project.repository.CustomerRepository;
 import com.monocept.project.repository.UserRepository;
 import com.monocept.project.security.JwtService;
 
@@ -32,6 +36,11 @@ public class AuthServiceImplementation implements AuthService {
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final CustomerRepository customerRepository;
+    private final ResendEmailService resendEmailService;
+    
+    @Value("${app.frontend.reset-url}")
+    private String resetUrl;
 
     @Override
     @Transactional
@@ -93,33 +102,49 @@ public class AuthServiceImplementation implements AuthService {
         return response;
     }
     
-    private String generateOtp() {
-
-        return String.valueOf(
-                100000 +
-                new java.util.Random()
-                        .nextInt(900000));
-    }
-    
     @Override
     @Transactional
-    public String forgotPassword(
+    public void forgotPassword(
             ForgotPasswordRequestDTO request) {
 
-        User user = userRepository
-                .findByEmail(request.getEmail())
-                .orElseThrow(() ->
-                        new AuthenticationException("User not found"));
+        User user =
+                userRepository
+                        .findByEmail(request.getEmail())
+                        .orElseThrow(() ->
+                                new AuthenticationException(
+                                        "User not found"));
 
-        String otp = generateOtp();
+        String token =
+                UUID.randomUUID().toString();
 
-        user.setResetPasswordOtp(otp);
-        user.setResetPasswordOtpExpiry(
-                LocalDateTime.now().plusMinutes(10));
+        user.setResetToken(token);
+
+        user.setResetTokenExpiry(
+                LocalDateTime.now().plusMinutes(15));
 
         userRepository.save(user);
 
-        return otp;
+        String fullResetUrl =
+                "http://localhost:8080/reset-password?token="
+                        + token;
+
+        log.info("Reset URL: {}", fullResetUrl);
+
+        try {
+
+            resendEmailService.sendPasswordResetEmail(
+                    user.getEmail(),
+                    fullResetUrl);
+
+        } catch (IOException | InterruptedException e) {
+
+            log.error(
+                    "Failed to send password reset email",
+                    e);
+
+            throw new RuntimeException(
+                    "Unable to send reset email");
+        }
     }
     
     @Override
@@ -129,35 +154,31 @@ public class AuthServiceImplementation implements AuthService {
 
         User user =
                 userRepository
-                        .findByEmail(
-                                request.getEmail())
+                        .findByResetToken(
+                                request.getToken())
                         .orElseThrow(
                                 () -> new AuthenticationException(
-                                        "User not found"));
+                                        "Invalid token"));
 
-        if (!request.getOtp()
-                .equals(
-                        user.getResetPasswordOtp())) {
-
-            throw new AuthenticationException(
-                    "Invalid OTP");
-        }
-
-        if (user.getResetPasswordOtpExpiry()
+        if (user.getResetTokenExpiry()
                 .isBefore(
                         LocalDateTime.now())) {
 
             throw new AuthenticationException(
-                    "OTP expired");
+                    "Reset token expired");
         }
 
-        user.setPassword(
-                request.getNewPassword());
+        // Encrypt the raw password before saving it to MySQL
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
 
-        user.setResetPasswordOtp(null);
+        user.setResetToken(null);
 
-        user.setResetPasswordOtpExpiry(null);
+        user.setResetTokenExpiry(null);
 
         userRepository.save(user);
     }
+    
+   
+    
+    
 }

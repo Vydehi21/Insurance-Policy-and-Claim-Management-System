@@ -10,7 +10,7 @@ import com.monocept.project.dto.UserResponseDTO;
 public interface AuthService {
     UserResponseDTO registerCustomer(RegistrationRequestDTO registrationDTO);
     LoginResponseDTO login(LoginRequestDTO loginDTO);
-    String  forgotPassword(
+    void   forgotPassword(
             ForgotPasswordRequestDTO request);
 
     void resetPassword(

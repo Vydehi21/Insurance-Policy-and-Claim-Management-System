@@ -42,6 +42,7 @@ public class PolicyServiceImpl implements PolicyService {
             Long authenticatedUserId,
             CustomerPolicyPurchaseRequestDTO purchaseDTO) {
 
+    	 System.out.println("Authenticated User ID = " + authenticatedUserId);
         Customer customer = customerRepository
                 .findByUser_Id(authenticatedUserId)
                 .orElseThrow(() ->
@@ -67,6 +68,7 @@ public class PolicyServiceImpl implements PolicyService {
                 });
 
         Policy policy = new Policy();
+        System.out.println("Authenticated User ID = " + authenticatedUserId);
 
         policy.setPolicyNumber(
                 "POL-" + UUID.randomUUID().toString().substring(0, 8));

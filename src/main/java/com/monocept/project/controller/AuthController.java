@@ -2,6 +2,7 @@ package com.monocept.project.controller;
 
 import java.util.Map;
 
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -52,26 +53,26 @@ public class AuthController {
     }
     
     @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(
-            @RequestBody ForgotPasswordRequestDTO request) {
+    public ResponseEntity<String>
+    forgotPassword(
+            @RequestBody
+            ForgotPasswordRequestDTO request) {
 
-        String otp = authService.forgotPassword(request);
+        authService.forgotPassword(request);
 
         return ResponseEntity.ok(
-                Map.of(
-                        "message", "OTP generated successfully",
-                        "otp", otp
-                ));
+                "Password reset email sent");
     }
+    
     @PostMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(
-            @Valid
+    public ResponseEntity<String>
+    resetPassword(
             @RequestBody
             ResetPasswordRequestDTO request) {
 
         authService.resetPassword(request);
 
         return ResponseEntity.ok(
-                "Password reset successfully");
+                "Password reset successful");
     }
 }

@@ -47,8 +47,8 @@ public class PolicyController {
 	}
     
 	@PostMapping("/issue")
-	@PreAuthorize("hasRole('AGENT')")
-	@Operation(summary = "Issue Policy", description = "Allows an agent to directly issue a policy package to a targeted consumer account")
+	@PreAuthorize("hasRole('AGENT','ADMIN')")
+	@Operation(summary = "Issue Policy", description = "Allows an admin and agent to directly issue a policy package to a targeted consumer account")
 	public ResponseEntity<PolicyResponseDTO> issuePolicy(
 			@Valid @RequestBody AgentPolicyIssueRequestDTO dto) {
 
