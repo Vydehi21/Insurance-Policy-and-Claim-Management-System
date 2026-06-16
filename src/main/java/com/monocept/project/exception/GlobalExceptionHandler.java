@@ -214,7 +214,7 @@ public class GlobalExceptionHandler {
             DataIntegrityViolationException ex,
             HttpServletRequest request) {
 
-        log.error("Database constraint violation: {}", ex.getMessage());
+        log.error("Database constraint violation occured ");
 
         return buildResponse(
                 HttpStatus.CONFLICT,
@@ -222,18 +222,7 @@ public class GlobalExceptionHandler {
                 request.getRequestURI());
     }
 
-//    @ExceptionHandler(AccessDeniedException.class)
-//    public ResponseEntity<ErrorResponseDTO> handleAccessDenied(
-//            AccessDeniedException ex,
-//            HttpServletRequest request) {
-//
-//        log.warn("Access denied: {}", ex.getMessage());
-//
-//        return buildResponse(
-//                HttpStatus.FORBIDDEN,
-//                "You do not have permission to access this resource.",
-//                request.getRequestURI());
-//    }
+ 
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDTO> handleGeneric(
@@ -248,22 +237,16 @@ public class GlobalExceptionHandler {
                 request.getRequestURI());
     }
     
-//    @ExceptionHandler(RuntimeException.class)
-//    public ResponseEntity<Map<String,Object>> handleRuntimeException(RuntimeException ex){
-//
-//        Map<String,Object> error = new HashMap<>();
-//
-//        error.put("timestamp", LocalDateTime.now());
-//        error.put("message", ex.getMessage());
-//        error.put("status", HttpStatus.BAD_REQUEST.value());
-//
-//        return new ResponseEntity<>(error,HttpStatus.BAD_REQUEST);
-//    }
+
 
     @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
     public ResponseEntity<ErrorResponseDTO> handleSpringAccessDenied(
             org.springframework.security.access.AccessDeniedException ex,
             HttpServletRequest request) {
+    	
+    	 log.warn(
+    	            "Security failure. Access denied for request: {}",
+    	            request.getRequestURI());
 
         return buildResponse(
                 HttpStatus.FORBIDDEN,
@@ -283,5 +266,20 @@ public class GlobalExceptionHandler {
                 path);
 
         return new ResponseEntity<>(error, status);
+    }
+    
+    @ExceptionHandler(InvalidOperationException.class)
+    public ResponseEntity<ErrorResponseDTO> handleInvalidOperation(
+            InvalidOperationException ex,
+            HttpServletRequest request){
+
+        log.warn(
+        "Invalid operation: {}",
+        ex.getMessage());
+
+        return buildResponse(
+                HttpStatus.CONFLICT,
+                ex.getMessage(),
+                request.getRequestURI());
     }
 }

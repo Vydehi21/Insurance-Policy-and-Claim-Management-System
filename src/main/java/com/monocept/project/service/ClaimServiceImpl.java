@@ -434,7 +434,7 @@ public class ClaimServiceImpl implements ClaimService {
 
 
             log.info(
-                    "inal claim rejection. Claim {} rejected by admin {}",
+                    "Final claim rejection. Claim {} rejected by admin {}",
                     updatedClaim.getClaimNumber(),
                     adminUserId);
 

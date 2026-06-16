@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.monocept.project.dto.OtpRequestDto;
 import com.monocept.project.service.OtpService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/otp")
 public class OtpController {
@@ -21,7 +23,7 @@ public class OtpController {
 	}
 
 	@PostMapping("/phone/send")
-	public String sendPhone(@RequestBody OtpRequestDto request) {
+	public String sendPhone(@Valid @RequestBody OtpRequestDto request) {
 
 	    return otpService.sendPhoneOtp(
 	            request.getPhone()
@@ -38,7 +40,7 @@ public class OtpController {
 	}
 
 	@PostMapping("/email/send")
-	public String sendEmail(@RequestBody OtpRequestDto request) {
+	public String sendEmail(@Valid @RequestBody OtpRequestDto request) {
 
 	    otpService.sendEmailOtp(request.getEmail());
 
@@ -46,7 +48,7 @@ public class OtpController {
 	}
 
 	@PostMapping("/email/verify")
-	public boolean verifyEmail(@RequestBody OtpRequestDto request) {
+	public boolean verifyEmail(@Valid @RequestBody OtpRequestDto request) {
 
 	    return otpService.verifyEmailOtp(
 	            request.getEmail(),
