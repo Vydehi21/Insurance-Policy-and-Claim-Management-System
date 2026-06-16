@@ -1,12 +1,15 @@
 package com.monocept.project.repository;
 
-import com.monocept.project.model.Claim;
-import com.monocept.project.enums.ClaimStatus;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import java.util.Optional;
+
+import com.monocept.project.enums.ClaimStatus;
+import com.monocept.project.model.Claim;
 
 @Repository
 public interface ClaimRepository extends JpaRepository<Claim, Long> {
@@ -24,4 +27,9 @@ public interface ClaimRepository extends JpaRepository<Claim, Long> {
     
     // FIXED: Corrected the full method name syntax here
     Page<Claim> findByClaimNumberContainingIgnoreCase(String claimNumber, Pageable pageable);
+    
+    boolean existsByPolicyIdAndClaimStatusIn(
+            Long policyId,
+            List<ClaimStatus> statuses);
+    
 }

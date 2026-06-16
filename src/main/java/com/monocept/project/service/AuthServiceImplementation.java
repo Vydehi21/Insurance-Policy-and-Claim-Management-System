@@ -93,6 +93,10 @@ public class AuthServiceImplementation implements AuthService {
         );
 
         User savedUser = userRepository.save(user);
+        
+     // CLEAN UP OTP RECORDS
+        emailOtpRepository.delete(emailOtp);
+        phoneOtpRepository.delete(phoneOtp);
 
         log.info("User registered with id: {}", savedUser.getId());
 
@@ -158,8 +162,7 @@ public class AuthServiceImplementation implements AuthService {
         userRepository.save(user);
 
         String fullResetUrl =
-                "http://localhost:8080/reset-password?token="
-                        + token;
+                resetUrl + "?token=" + token;
 
         log.info("Reset URL: {}", fullResetUrl);
 
@@ -187,11 +190,19 @@ public class AuthServiceImplementation implements AuthService {
 
         User user =
                 userRepository
-                        .findByResetToken(
+                        .findByEmail(
                                 request.getToken())
                         .orElseThrow(
                                 () -> new AuthenticationException(
-                                        "Invalid token"));
+                                        "User not found"));
+        
+        if(!passwordEncoder.matches(
+                request.getToken(),
+                user.getResetToken())) {
+
+            throw new AuthenticationException(
+                    "Invalid token");
+        }
 
         if (user.getResetTokenExpiry()
                 .isBefore(

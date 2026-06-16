@@ -13,6 +13,7 @@ import com.monocept.project.enums.PaymentStatus;
 import com.monocept.project.enums.PolicyStatus;
 import com.monocept.project.exception.BusinessRuleException;
 import com.monocept.project.exception.DuplicateResourceException;
+import com.monocept.project.exception.InvalidRequestException;
 import com.monocept.project.exception.ResourceNotFoundException;
 import com.monocept.project.model.Policy;
 import com.monocept.project.model.PremiumPayment;
@@ -22,7 +23,9 @@ import com.monocept.project.service.PremiumPaymentService;
 import com.monocept.project.util.PaginationUtil;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PremiumPaymentServiceImpl implements PremiumPaymentService {
@@ -41,12 +44,23 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
 
         if (premiumPaymentRepository.existsByTransactionReference(
                 paymentRequestDTO.getTransactionReference())) {
+        	
+        	log.warn(
+                    "Duplicate payment transaction reference: {}",
+                    paymentRequestDTO.getTransactionReference()
+            );
 
             throw new DuplicateResourceException(
                     "Transaction reference already exists");
         }
 
         if (policy.getPolicyStatus() == PolicyStatus.CANCELLED) {
+        	
+        	 log.warn(
+        	            "Business rule violation. Payment attempted on cancelled policy: {}",
+        	            policy.getPolicyNumber()
+        	    );
+        	 
             throw new BusinessRuleException(
                     "Cannot record payment for cancelled policy");
         }
@@ -63,6 +77,12 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
 
         PremiumPayment savedPayment =
                 premiumPaymentRepository.save(payment);
+        
+        log.info(
+                "Payment record created. Payment id: {} Transaction reference: {}",
+                savedPayment.getId(),
+                savedPayment.getTransactionReference()
+        );
 
         if (paymentRequestDTO.getPaymentStatus()
                 == PaymentStatus.SUCCESS) {
@@ -76,6 +96,11 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
                     == PolicyStatus.PENDING_PAYMENT) {
 
                 policy.setPolicyStatus(PolicyStatus.ACTIVE);
+                
+                log.info(
+                        "Policy issued after payment. Policy number: {}",
+                        policy.getPolicyNumber()
+                );
             }
 
             policyRepository.save(policy);
@@ -200,11 +225,41 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
             String sortBy,
             String direction) {
 
-        Sort sort = direction.equalsIgnoreCase("desc")
+
+        if(page < 0) {
+
+            log.warn(
+                    "LOG-017 Invalid pagination request. Negative page: {}",
+                    page
+            );
+
+            throw new InvalidRequestException(
+                    "Page number cannot be negative");
+        }
+
+
+        if(size <=0 || size >100) {
+
+            log.warn(
+                    "LOG-017 Invalid pagination request. Invalid size: {}",
+                    size
+            );
+
+            throw new InvalidRequestException(
+                    "Page size must be between 1 and 100");
+        }
+
+
+        Sort sort =
+                direction.equalsIgnoreCase("desc")
                 ? Sort.by(sortBy).descending()
                 : Sort.by(sortBy).ascending();
 
-        return PageRequest.of(page, size, sort);
+
+        return PageRequest.of(
+                page,
+                size,
+                sort);
     }
 
     private PremiumPaymentResponseDTO mapToResponse(

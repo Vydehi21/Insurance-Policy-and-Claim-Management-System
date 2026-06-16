@@ -2,242 +2,178 @@ package com.monocept.project.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
+
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+
 import org.springframework.security.config.http.SessionCreationPolicy;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
 import org.springframework.security.web.SecurityFilterChain;
+
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+
 import lombok.RequiredArgsConstructor;
+
 
 @Configuration
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http)
             throws Exception {
 
+
         http
-                .csrf(csrf -> csrf.disable())
 
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(
-                                SessionCreationPolicy.STATELESS))
 
-                .authorizeHttpRequests(auth -> auth
+        .csrf(csrf -> csrf.disable())
 
-                        // PUBLIC ROUTES
-                        .requestMatchers("/api/files/upload",
-                        		"/api/claims",
-                                "/api/auth/**",
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**"
-                        ).permitAll()
 
-                        // USER MANAGEMENT
-                        // ADMIN ONLY                    
-                        .requestMatchers("/api/users/**")
-                        .hasRole("ADMIN")
+        .sessionManagement(session ->
 
-                        // INSURANCE PRODUCTS
-                        
-                        // Everyone logged in can view products
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/api/products/**"
-                        )
-                        .hasAnyRole(
-                                "ADMIN",
-                                "AGENT",
-                                "CUSTOMER"
-                        )
+            session.sessionCreationPolicy(
+                SessionCreationPolicy.STATELESS
+            )
 
-                        // Only admin can create/update/deactivate
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/api/products/**"
-                        )
-                        .hasRole("ADMIN")
+        )
 
-                        .requestMatchers(
-                                HttpMethod.PUT,
-                                "/api/products/**"
-                        )
-                        .hasRole("ADMIN")
 
-                        .requestMatchers(
-                                HttpMethod.PATCH,
-                                "/api/products/**"
-                        )
-                        .hasRole("ADMIN")
+        .authorizeHttpRequests(auth -> auth
 
-                        // POLICY PLANS
 
-                        // View active plans
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/api/plans/**"
-                        )
-                        .hasAnyRole(
-                                "ADMIN",
-                                "AGENT",
-                                "CUSTOMER"
-                        )
+            .requestMatchers(
+                    "/api/auth/**",
+                    "/api/otp/**",
+                    "/swagger-ui/**",
+                    "/swagger-ui.html",
+                    "/v3/api-docs/**",
+                    "/error"
+            )
 
-                        // Mutations admin only
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/api/plans/**"
-                        )
-                        .hasRole("ADMIN")
+            .permitAll()
 
-                        .requestMatchers(
-                                HttpMethod.PUT,
-                                "/api/plans/**"
-                        )
-                        .hasRole("ADMIN")
 
-                        .requestMatchers(
-                                HttpMethod.PATCH,
-                                "/api/plans/**"
-                        )
-                        .hasRole("ADMIN")
 
-                        // CUSTOMERS
+            .requestMatchers(
+                    "/api/products/**",
+                    "/api/plans/**",
+                    "/api/users/**",
+                    "/api/customers/**"
+            )
 
-                        // Customer own profile APIs
-                        .requestMatchers(
-                                "/api/customers/profile/**"
-                        )
-                        .hasRole("CUSTOMER")
+            .hasRole("ADMIN")
 
-                        // Admin and agent customer lookup
-                        .requestMatchers(
-                                "/api/customers/**"
-                        )
-                        .hasAnyRole(
-                                "ADMIN",
-                                "AGENT"
-                        )
 
-                        // POLICIES
 
-                        // Customer buys policy
-                        .requestMatchers(
-                                "/api/policies/purchase/**"
-                        )
-                        .hasRole("CUSTOMER")
+            .requestMatchers(
+                    "/api/policies/purchase",
+                    "/api/premium-payments/**",
+                    "/api/claims/**"
+            )
 
-                        // Agent/Admin issue policy
-                        .requestMatchers(
-                                "/api/policies/issue/**"
-                        )
-                        .hasAnyRole(
-                                "ADMIN",
-                                "AGENT"
-                        )
+            .hasRole("CUSTOMER")
 
-                        // Other policy operations
-                        .requestMatchers(
-                                "/api/policies/**"
-                        )
-                        .hasAnyRole(
-                                "ADMIN",
-                                "AGENT",
-                                "CUSTOMER"
-                        )
 
-                        // PAYMENTS
 
-                        .requestMatchers(
-                                "/api/premium-payments/**"
-                        )
-                        .hasAnyRole(
-                                "ADMIN",
-                                "AGENT",
-                                "CUSTOMER"
-                        )
+            .requestMatchers(
+                    "/api/claims/*/review"
+            )
 
-                        // CLAIMS
+            .hasRole("AGENT")
 
-                        // Customer raises/views own claims
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/api/claims/**"
-                        )
-                        .hasRole("CUSTOMER")
 
-                        // Agent review
-                        .requestMatchers(
-                                "/api/claims/*/review"
-                        )
-                        .hasRole("AGENT")
 
-                        // Admin final approval/rejection
-                        .requestMatchers(
-                                "/api/claims/*/decision"
-                        )
-                        .hasRole("ADMIN")
+            .requestMatchers(
+                    "/api/claims/*/decision"
+            )
 
-                        // remaining claim APIs
-                        .requestMatchers(
-                                "/api/claims/**"
-                        )
-                        .hasAnyRole(
-                                "ADMIN",
-                                "AGENT",
-                                "CUSTOMER"
-                        )
+            .hasRole("ADMIN")
 
-                        // CLAIM HISTORY
 
-                        .requestMatchers(
-                                "/api/claim-history/**"
-                        )
-                        .hasAnyRole(
-                                "ADMIN",
-                                "AGENT",
-                                "CUSTOMER"
-                        )
-                        .requestMatchers(
-                        		"/api/otp/**"
-                        )
-                        .permitAll()
 
-                        // anything else requires login
-                        .anyRequest()
-                        .authenticated())
+            .requestMatchers(
+                    "/api/claim-history/**"
+            )
 
-                .httpBasic(Customizer.withDefaults())
+            .hasAnyRole(
+                    "ADMIN",
+                    "AGENT"
+            )
 
-                .addFilterBefore(
-                        jwtAuthenticationFilter,
-                        UsernamePasswordAuthenticationFilter.class);
+
+
+            .anyRequest()
+            .authenticated()
+
+        )
+
+
+
+        // REMOVE BASIC LOGIN POPUP
+        .httpBasic(httpBasic ->
+                httpBasic.disable()
+        )
+
+
+
+        // REMOVE DEFAULT LOGIN PAGE
+        .formLogin(form ->
+                form.disable()
+        )
+
+
+        .addFilterBefore(
+
+                jwtAuthenticationFilter,
+
+                UsernamePasswordAuthenticationFilter.class
+
+        );
+
+
 
         return http.build();
+
     }
+
+
+
+
 
     @Bean
-    PasswordEncoder passwordEncoder() {
+    PasswordEncoder passwordEncoder(){
 
         return new BCryptPasswordEncoder();
+
     }
+
+
+
+
 
     @Bean
     AuthenticationManager authenticationManager(
             AuthenticationConfiguration configuration)
             throws Exception {
 
+
         return configuration.getAuthenticationManager();
+
     }
+
 }

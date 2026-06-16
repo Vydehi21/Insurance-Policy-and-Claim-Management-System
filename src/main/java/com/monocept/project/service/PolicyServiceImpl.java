@@ -1,6 +1,7 @@
 package com.monocept.project.service;
 
 import java.time.LocalDate;
+
 import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
@@ -16,6 +17,7 @@ import com.monocept.project.dto.PaginatedResponseDTO;
 import com.monocept.project.dto.PolicyResponseDTO;
 import com.monocept.project.enums.PolicyStatus;
 import com.monocept.project.exception.BusinessRuleException;
+import com.monocept.project.exception.InvalidRequestException;
 import com.monocept.project.exception.ResourceNotFoundException;
 import com.monocept.project.model.Customer;
 import com.monocept.project.model.Policy;
@@ -27,7 +29,9 @@ import com.monocept.project.service.PolicyService;
 import com.monocept.project.util.PaginationUtil;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PolicyServiceImpl implements PolicyService {
@@ -62,7 +66,13 @@ public class PolicyServiceImpl implements PolicyService {
                     if (policy.getPolicyStatus() == PolicyStatus.PENDING_PAYMENT
                             || policy.getPolicyStatus() == PolicyStatus.ACTIVE) {
 
-                        throw new BusinessRuleException(
+                    	log.warn(
+                    	        "Business rule violation. Customer {} already has policy for plan {}",
+                    	        customer.getId(),
+                    	        plan.getId()
+                    	);
+                    	
+                    	throw new BusinessRuleException(
                                 "Policy already exists for this plan");
                     }
                 });
@@ -85,6 +95,11 @@ public class PolicyServiceImpl implements PolicyService {
         policy.setPolicyStatus(PolicyStatus.PENDING_PAYMENT);
 
         Policy savedPolicy = policyRepository.save(policy);
+        
+        log.info(
+        		 "LOG-006 Policy purchased. Policy number: {}",
+        		 policy.getPolicyNumber()
+        		);
 
         return mapToResponse(savedPolicy);
     }
@@ -120,6 +135,11 @@ public class PolicyServiceImpl implements PolicyService {
         policy.setPolicyStatus(PolicyStatus.ACTIVE);
 
         Policy savedPolicy = policyRepository.save(policy);
+        
+        log.info(
+                "Policy issued. Policy number: {}",
+                savedPolicy.getPolicyNumber()
+        );
 
         return mapToResponse(savedPolicy);
     }
@@ -286,6 +306,21 @@ public class PolicyServiceImpl implements PolicyService {
                         new ResourceNotFoundException("Policy not found"));
 
         if (policy.getPolicyStatus() == PolicyStatus.CANCELLED) {
+        	
+        	  log.warn(
+        	            "Business rule violation. Policy already cancelled: {}",
+        	            policy.getPolicyNumber()
+        	    );
+            throw new BusinessRuleException(
+                    "Policy already cancelled");
+        }
+        if (policy.getPolicyStatus() == PolicyStatus.CANCELLED) {
+
+            log.warn(
+                    "Business rule violation. Policy already cancelled: {}",
+                    policy.getPolicyNumber()
+            );
+
             throw new BusinessRuleException(
                     "Policy already cancelled");
         }
@@ -293,6 +328,10 @@ public class PolicyServiceImpl implements PolicyService {
         policy.setPolicyStatus(PolicyStatus.CANCELLED);
 
         policyRepository.save(policy);
+        log.info(
+                "Policy cancelled successfully. Policy number: {}",
+                policy.getPolicyNumber()
+        );
     }
 
     private Pageable createPageable(
@@ -301,9 +340,34 @@ public class PolicyServiceImpl implements PolicyService {
             String sortBy,
             String direction) {
 
+
+        if(page < 0) {
+
+            log.warn(
+                    "LOG-017 Invalid pagination request. Page cannot be negative"
+            );
+
+            throw new InvalidRequestException(
+                    "Page number cannot be negative");
+        }
+
+
+        if(size <= 0 || size > 100) {
+
+            log.warn(
+                    "LOG-017 Invalid pagination request. Invalid size {}",
+                    size
+            );
+
+            throw new InvalidRequestException(
+                    "Page size must be between 1 and 100");
+        }
+
+
         Sort sort = direction.equalsIgnoreCase("desc")
                 ? Sort.by(sortBy).descending()
                 : Sort.by(sortBy).ascending();
+
 
         return PageRequest.of(page, size, sort);
     }

@@ -1,6 +1,8 @@
 package com.monocept.project.dto;
 
 import com.monocept.project.enums.Role;
+
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -22,6 +24,7 @@ public class UserRequestDTO {
 
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
+    @Column(unique = true)
     @Size(max = 100, message = "Email must not exceed 100 characters")
     private String email;
 

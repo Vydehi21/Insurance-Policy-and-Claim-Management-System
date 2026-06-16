@@ -17,8 +17,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Page<User> findByRoleAndActiveStatus(Role role, Boolean activeStatus, Pageable pageable);
     Page<User> findByFullNameContainingIgnoreCase(String fullName, Pageable pageable);
 
-    Optional<User> findByResetToken(String resetToken);
-
     Optional<User> findByMobileNumber(String mobileNumber);
 
 }

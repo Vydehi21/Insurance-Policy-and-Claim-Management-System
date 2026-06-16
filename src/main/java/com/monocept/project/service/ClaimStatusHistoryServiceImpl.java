@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.monocept.project.dto.ClaimStatusHistoryResponseDTO;
 import com.monocept.project.dto.PaginatedResponseDTO;
 import com.monocept.project.enums.ClaimStatus;
+import com.monocept.project.exception.InvalidRequestException;
 import com.monocept.project.exception.ResourceNotFoundException;
 import com.monocept.project.model.ClaimStatusHistory;
 import com.monocept.project.repository.ClaimStatusHistoryRepository;
@@ -20,7 +21,9 @@ import com.monocept.project.service.ClaimStatusHistoryService;
 import com.monocept.project.util.PaginationUtil;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ClaimStatusHistoryServiceImpl implements ClaimStatusHistoryService {
@@ -40,6 +43,11 @@ public class ClaimStatusHistoryServiceImpl implements ClaimStatusHistoryService 
 
         Page<ClaimStatusHistory> historyPage =
                 claimStatusHistoryRepository.findByClaim_Id(claimId, pageable);
+        
+        log.info(
+                "Claim history fetched for claim id: {}",
+                claimId
+        );
 
         if (historyPage.isEmpty()) {
             throw new ResourceNotFoundException(
@@ -141,11 +149,41 @@ public class ClaimStatusHistoryServiceImpl implements ClaimStatusHistoryService 
             String sortBy,
             String direction) {
 
-        Sort sort = direction.equalsIgnoreCase("desc")
+
+        if(page < 0) {
+
+            log.warn(
+                    "Invalid pagination request. Page: {}",
+                    page
+            );
+
+            throw new InvalidRequestException(
+                    "Page number cannot be negative");
+        }
+
+
+        if(size <= 0 || size > 100) {
+
+            log.warn(
+                    "Invalid pagination request. Size: {}",
+                    size
+            );
+
+            throw new InvalidRequestException(
+                    "Page size must be between 1 and 100");
+        }
+
+
+        Sort sort =
+                direction.equalsIgnoreCase("desc")
                 ? Sort.by(sortBy).descending()
                 : Sort.by(sortBy).ascending();
 
-        return PageRequest.of(page, size, sort);
+
+        return PageRequest.of(
+                page,
+                size,
+                sort);
     }
 
     private PaginatedResponseDTO<ClaimStatusHistoryResponseDTO> convertToPaginatedResponse(

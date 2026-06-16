@@ -20,11 +20,19 @@ import io.jsonwebtoken.security.Keys;
 @Service
 public class JwtService {
 
-    @Value("${jwt.secret}")
-    private String secretKey;
+//    @Value("${jwt.secret}")
+//    private String secretKey;
+//
+//    @Value("${jwt.expiration}")
+//    private Long jwtExpiration;
+	   
 
-    @Value("${jwt.expiration}")
-    private Long jwtExpiration;
+	    // Use constructor injection to guarantee values are loaded early
+	    @Value("${jwt.secret}")
+	    private String secretKey;
+
+	    @Value("${jwt.expiration}")
+	    private Long jwtExpiration;
 
     
 

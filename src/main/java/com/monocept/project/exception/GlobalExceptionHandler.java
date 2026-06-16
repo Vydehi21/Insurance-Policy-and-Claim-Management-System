@@ -1,6 +1,5 @@
 package com.monocept.project.exception;
 
-import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -223,18 +222,18 @@ public class GlobalExceptionHandler {
                 request.getRequestURI());
     }
 
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorResponseDTO> handleAccessDenied(
-            AccessDeniedException ex,
-            HttpServletRequest request) {
-
-        log.warn("Access denied: {}", ex.getMessage());
-
-        return buildResponse(
-                HttpStatus.FORBIDDEN,
-                "You do not have permission to access this resource.",
-                request.getRequestURI());
-    }
+//    @ExceptionHandler(AccessDeniedException.class)
+//    public ResponseEntity<ErrorResponseDTO> handleAccessDenied(
+//            AccessDeniedException ex,
+//            HttpServletRequest request) {
+//
+//        log.warn("Access denied: {}", ex.getMessage());
+//
+//        return buildResponse(
+//                HttpStatus.FORBIDDEN,
+//                "You do not have permission to access this resource.",
+//                request.getRequestURI());
+//    }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDTO> handleGeneric(
@@ -249,18 +248,28 @@ public class GlobalExceptionHandler {
                 request.getRequestURI());
     }
     
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String,Object>> handleRuntimeException(RuntimeException ex){
+//    @ExceptionHandler(RuntimeException.class)
+//    public ResponseEntity<Map<String,Object>> handleRuntimeException(RuntimeException ex){
+//
+//        Map<String,Object> error = new HashMap<>();
+//
+//        error.put("timestamp", LocalDateTime.now());
+//        error.put("message", ex.getMessage());
+//        error.put("status", HttpStatus.BAD_REQUEST.value());
+//
+//        return new ResponseEntity<>(error,HttpStatus.BAD_REQUEST);
+//    }
 
-        Map<String,Object> error = new HashMap<>();
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<ErrorResponseDTO> handleSpringAccessDenied(
+            org.springframework.security.access.AccessDeniedException ex,
+            HttpServletRequest request) {
 
-        error.put("timestamp", LocalDateTime.now());
-        error.put("message", ex.getMessage());
-        error.put("status", HttpStatus.BAD_REQUEST.value());
-
-        return new ResponseEntity<>(error,HttpStatus.BAD_REQUEST);
+        return buildResponse(
+                HttpStatus.FORBIDDEN,
+                "Access denied",
+                request.getRequestURI());
     }
-
     private ResponseEntity<ErrorResponseDTO> buildResponse(
             HttpStatus status,
             String message,
