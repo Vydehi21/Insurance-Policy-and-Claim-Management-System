@@ -27,9 +27,11 @@ public class CloudinaryService {
 
         } catch (Exception e) {
 
+        	e.printStackTrace();
+
             throw new RuntimeException(
-                    "File upload failed",
-                    e);
+                    "File upload failed: " + e.getMessage()
+            );
         }
     }
 }

@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/products")
 @RequiredArgsConstructor
+@CrossOrigin("http://localhost:5173/")
 @Tag(name = "Insurance Products", description = "Operations for managing structural definitions of insurance catalogs and products")
 public class InsuranceProductController {
 

@@ -5,22 +5,22 @@ import java.util.List;
 import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 
 import com.monocept.project.dto.ClaimDocumentDTO;
+import com.monocept.project.dto.ClaimFinalDecisionRequestDTO;
+import com.monocept.project.dto.ClaimRequestDTO;
 import com.monocept.project.dto.ClaimResponseDTO;
 import com.monocept.project.dto.ClaimReviewRequestDTO;
 import com.monocept.project.dto.PaginatedResponseDTO;
 import com.monocept.project.enums.ClaimStatus;
-import com.monocept.project.enums.PolicyStatus;
 import com.monocept.project.enums.Role;
 import com.monocept.project.exception.AuthorizationException;
-import com.monocept.project.exception.BusinessRuleException;
 import com.monocept.project.exception.InvalidStatusException;
 import com.monocept.project.exception.ResourceNotFoundException;
 import com.monocept.project.model.Claim;
@@ -35,17 +35,15 @@ import com.monocept.project.repository.ClaimStatusHistoryRepository;
 import com.monocept.project.repository.CustomerRepository;
 import com.monocept.project.repository.PolicyRepository;
 import com.monocept.project.repository.UserRepository;
-import com.monocept.project.service.ClaimService;
 import com.monocept.project.util.PaginationUtil;
-import com.monocept.project.dto.ClaimRequestDTO;
-import com.monocept.project.model.ClaimDocument;
-import com.monocept.project.dto.ClaimFinalDecisionRequestDTO;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class ClaimServiceImpl implements ClaimService {
 
     private final ClaimRepository claimRepository;
@@ -164,83 +162,184 @@ public class ClaimServiceImpl implements ClaimService {
                                 "Customer profile not found"));
     }
     
+//    @Override
+//    @Transactional
+//    public ClaimResponseDTO raiseClaim(
+//            Long authenticatedUserId,
+//            ClaimRequestDTO claimRequestDTO) {
+//
+//        Customer customer =
+//                getCustomerByUserId(authenticatedUserId);
+//
+//        Policy policy =
+//                getPolicy(claimRequestDTO.getPolicyId());
+//
+//        if (!policy.getCustomer()
+//                .getId()
+//                .equals(customer.getId())) {
+//
+//            throw new AuthorizationException(
+//                    "You can only raise claims for your own policies");
+//        }
+//
+//        if (policy.getPolicyStatus() != PolicyStatus.ACTIVE) {
+//
+//            throw new BusinessRuleException(
+//                    "Claims can only be raised for active policies");
+//        }
+//
+//        if (claimRequestDTO.getClaimAmount()
+//                .compareTo(
+//                        policy.getPolicyPlan()
+//                              .getCoverageAmount()) > 0) {
+//
+//            throw new BusinessRuleException(
+//                    "Claim amount exceeds policy coverage amount");
+//        }
+//
+//        Claim claim = new Claim();
+//
+//        claim.setClaimNumber(generateClaimNumber());
+//
+//        claim.setPolicy(policy);
+//
+//        claim.setClaimAmount(
+//                claimRequestDTO.getClaimAmount());
+//
+//        claim.setClaimReason(
+//                claimRequestDTO.getClaimReason());
+//
+//        claim.setIncidentDate(
+//                claimRequestDTO.getIncidentDate());
+//
+//        claim.setClaimStatus(
+//                ClaimStatus.SUBMITTED);
+//
+//        Claim savedClaim =
+//                claimRepository.save(claim);
+//
+//        List<ClaimDocument> documents =
+//                buildDocuments(
+//                        savedClaim,
+//                        claimRequestDTO
+//                                .getSupportingDocuments());
+//
+//        claimDocumentRepository.saveAll(documents);
+//
+//        savedClaim.setClaimDocuments(documents);
+//
+//        User customerUser =
+//                getUser(authenticatedUserId);
+//
+//        createHistory(
+//                savedClaim,
+//                ClaimStatus.SUBMITTED,
+//                ClaimStatus.SUBMITTED,
+//                "Claim submitted",
+//                customerUser);
+//
+//        return convertToResponseDTO(savedClaim);
+//    }
+    
     @Override
     @Transactional
     public ClaimResponseDTO raiseClaim(
-            Long authenticatedUserId,
-            ClaimRequestDTO claimRequestDTO) {
+            Long userId,
+            ClaimRequestDTO dto) {
 
-        Customer customer =
-                getCustomerByUserId(authenticatedUserId);
+        log.info("Raising claim for user id: {}", userId);
 
-        Policy policy =
-                getPolicy(claimRequestDTO.getPolicyId());
 
-        if (!policy.getCustomer()
+        Policy policy = policyRepository
+                .findById(dto.getPolicyId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Policy not found"
+                        ));
+
+
+        if(!policy.getCustomer()
+                .getUser()
                 .getId()
-                .equals(customer.getId())) {
+                .equals(userId)) {
 
             throw new AuthorizationException(
-                    "You can only raise claims for your own policies");
+                    "You cannot claim another customer's policy"
+            );
         }
 
-        if (policy.getPolicyStatus() != PolicyStatus.ACTIVE) {
-
-            throw new BusinessRuleException(
-                    "Claims can only be raised for active policies");
-        }
-
-        if (claimRequestDTO.getClaimAmount()
-                .compareTo(
-                        policy.getPolicyPlan()
-                              .getCoverageAmount()) > 0) {
-
-            throw new BusinessRuleException(
-                    "Claim amount exceeds policy coverage amount");
-        }
 
         Claim claim = new Claim();
 
-        claim.setClaimNumber(generateClaimNumber());
+
+        claim.setClaimNumber(
+                "CLM-" +
+                UUID.randomUUID()
+                        .toString()
+                        .substring(0,8)
+                        .toUpperCase()
+        );
+
 
         claim.setPolicy(policy);
 
         claim.setClaimAmount(
-                claimRequestDTO.getClaimAmount());
+                dto.getClaimAmount()
+        );
 
         claim.setClaimReason(
-                claimRequestDTO.getClaimReason());
+                dto.getClaimReason()
+        );
 
         claim.setIncidentDate(
-                claimRequestDTO.getIncidentDate());
+                dto.getIncidentDate()
+        );
+
 
         claim.setClaimStatus(
-                ClaimStatus.SUBMITTED);
+                ClaimStatus.SUBMITTED
+        );
+
+
+        List<ClaimDocument> documents =
+                dto.getSupportingDocuments()
+                        .stream()
+                        .map(documentDTO -> {
+
+                            ClaimDocument document =
+                                    new ClaimDocument();
+
+                            document.setClaim(claim);
+
+                            document.setDocumentName(
+                                    documentDTO.getDocumentName()
+                            );
+
+                            document.setDocumentType(
+                                    documentDTO.getDocumentType()
+                            );
+
+                            document.setDocumentReference(
+                                    documentDTO.getDocumentReference()
+                            );
+
+                            return document;
+
+                        }).toList();
+
+
+        claim.setClaimDocuments(
+                documents
+        );
+
 
         Claim savedClaim =
                 claimRepository.save(claim);
 
-        List<ClaimDocument> documents =
-                buildDocuments(
-                        savedClaim,
-                        claimRequestDTO
-                                .getSupportingDocuments());
-
-        claimDocumentRepository.saveAll(documents);
-
-        savedClaim.setClaimDocuments(documents);
-
-        User customerUser =
-                getUser(authenticatedUserId);
-
-        createHistory(
+        return modelMapper.map(
                 savedClaim,
-                ClaimStatus.SUBMITTED,
-                ClaimStatus.SUBMITTED,
-                "Claim submitted",
-                customerUser);
-
-        return convertToResponseDTO(savedClaim);
+                ClaimResponseDTO.class
+        );
     }
     
     @Override
