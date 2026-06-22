@@ -14,18 +14,22 @@ import com.monocept.project.dto.ForgotPasswordRequestDTO;
 import com.monocept.project.dto.LoginRequestDTO;
 import com.monocept.project.dto.LoginResponseDTO;
 import com.monocept.project.dto.RegistrationRequestDTO;
+import com.monocept.project.dto.ResendRegistrationOtpDTO;
 import com.monocept.project.dto.ResetPasswordRequestDTO;
 import com.monocept.project.dto.UserResponseDTO;
+import com.monocept.project.dto.VerifyRegistrationOtpDTO;
 import com.monocept.project.enums.Role;
 import com.monocept.project.exception.AuthenticationException;
 import com.monocept.project.exception.DuplicateResourceException;
 import com.monocept.project.model.EmailOtp;
+import com.monocept.project.model.PendingUser;
 import com.monocept.project.model.PhoneOtp;
 import com.monocept.project.model.User;
 
 import com.monocept.project.repository.CustomerRepository;
 
 import com.monocept.project.repository.EmailOtpRepository;
+import com.monocept.project.repository.PendingUserRepository;
 import com.monocept.project.repository.PhoneOtpRepository;
 
 import com.monocept.project.repository.UserRepository;
@@ -52,11 +56,13 @@ public class AuthServiceImplementation implements AuthService {
 
     private final EmailOtpRepository emailOtpRepository;
     private final PhoneOtpRepository phoneOtpRepository;
+    private final OtpService otpService;
+    private final PendingUserRepository pendingUserRepository;
 
 
     @Override
     @Transactional
-    public UserResponseDTO registerCustomer(RegistrationRequestDTO registrationRequestDTO) {
+    public String registerCustomer(RegistrationRequestDTO registrationRequestDTO) {
 
         log.info("Registering customer: {}", registrationRequestDTO.getEmail());
 
@@ -64,43 +70,153 @@ public class AuthServiceImplementation implements AuthService {
             throw new DuplicateResourceException(
                     "Email already exists: " + registrationRequestDTO.getEmail());
         }
-
-        EmailOtp emailOtp = emailOtpRepository
-                .findByEmail(registrationRequestDTO.getEmail())
-                .orElseThrow(() ->
-                        new RuntimeException("Please verify email first"));
-
-        if(!emailOtp.isVerified()) {
-            throw new RuntimeException("Please verify email first");
+        
+        if (userRepository.existsByMobileNumber(registrationRequestDTO.getMobileNumber())) {
+            throw new DuplicateResourceException(
+                    "Phone number already exists: " + registrationRequestDTO.getMobileNumber());
+        }
+//
+//        EmailOtp emailOtp = emailOtpRepository
+//                .findByEmail(registrationRequestDTO.getEmail())
+//                .orElseThrow(() ->
+//                        new RuntimeException("Please verify email first"));
+//
+//        if(!emailOtp.isVerified()) {
+//            throw new RuntimeException("Please verify email first");
+//        }
+//
+//        PhoneOtp phoneOtp = phoneOtpRepository
+//                .findByPhone(registrationRequestDTO.getMobileNumber())
+//                .orElseThrow(() ->
+//                        new RuntimeException("Please verify phone number first"));
+//
+//        if(!phoneOtp.isVerified()) {
+//            throw new RuntimeException("Please verify phone number first");
+//        }
+//
+//        User user = modelMapper.map(registrationRequestDTO, User.class);
+//
+//        user.setRole(Role.CUSTOMER);
+//        user.setActiveStatus(true);
+//
+//        user.setPassword(
+//                passwordEncoder.encode(registrationRequestDTO.getPassword())
+//        );
+//
+//        User savedUser = userRepository.save(user);
+//
+//        log.info("User registered with id: {}", savedUser.getId());
+//
+//        return modelMapper.map(savedUser, UserResponseDTO.class);
+        
+        if(pendingUserRepository.existsByEmail(registrationRequestDTO.getEmail())) {
+            throw new DuplicateResourceException(
+                    "Registration already pending. Please verify OTP or resend OTP"
+            );
         }
 
-        PhoneOtp phoneOtp = phoneOtpRepository
-                .findByPhone(registrationRequestDTO.getMobileNumber())
-                .orElseThrow(() ->
-                        new RuntimeException("Please verify phone number first"));
+        if(pendingUserRepository.existsByMobileNumber(registrationRequestDTO.getMobileNumber())) {
+            throw new DuplicateResourceException(
+                    "Registration already pending. Please verify OTP or resend OTP"
+            );
+        }
+        
+        PendingUser pendingUser =
+                modelMapper.map(registrationRequestDTO, PendingUser.class);
 
-        if(!phoneOtp.isVerified()) {
-            throw new RuntimeException("Please verify phone number first");
+        pendingUser.setPassword(
+                passwordEncoder.encode(registrationRequestDTO.getPassword())
+        );
+
+        pendingUserRepository.save(pendingUser);
+        
+        otpService.sendEmailOtp(registrationRequestDTO.getEmail());
+        otpService.sendPhoneOtp(registrationRequestDTO.getMobileNumber());
+        
+        return "OTP sent successfully";
+    }
+    
+    @Override
+    @Transactional
+    public UserResponseDTO verifyRegister(
+            VerifyRegistrationOtpDTO dto) {
+
+        EmailOtp emailOtp =
+                emailOtpRepository
+                .findByEmail(dto.getEmail())
+                .orElseThrow(() ->
+                        new RuntimeException("Email OTP not found"));
+
+        if(!emailOtp.getOtp().equals(dto.getEmailOtp())) {
+            throw new RuntimeException("Invalid Email OTP");
+        }
+        
+        emailOtp.setVerified(true);
+        emailOtpRepository.save(emailOtp);
+
+        boolean phoneVerified =
+                otpService.verifyPhoneOtp(
+                        dto.getMobileNumber(),
+                        dto.getPhoneOtp()
+                );
+
+        if(!phoneVerified) {
+
+            throw new RuntimeException("Invalid Phone OTP");
         }
 
-        User user = modelMapper.map(registrationRequestDTO, User.class);
+        PendingUser pendingUser =
+                pendingUserRepository
+                .findByEmail(dto.getEmail())
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Registration expired"));
+
+        User user =
+                modelMapper.map(
+                        pendingUser,
+                        User.class
+                );
 
         user.setRole(Role.CUSTOMER);
         user.setActiveStatus(true);
-
-        user.setPassword(
-                passwordEncoder.encode(registrationRequestDTO.getPassword())
-        );
 
         User savedUser = userRepository.save(user);
         
      // CLEAN UP OTP RECORDS
         emailOtpRepository.delete(emailOtp);
-        phoneOtpRepository.delete(phoneOtp);
+        phoneOtpRepository
+        .findByPhone(dto.getMobileNumber())
+        .ifPresent(phoneOtpRepository::delete);
 
-        log.info("User registered with id: {}", savedUser.getId());
+        pendingUserRepository.delete(pendingUser);
 
-        return modelMapper.map(savedUser, UserResponseDTO.class);
+        return modelMapper.map(
+                savedUser,
+                UserResponseDTO.class
+        );
+    }
+    
+    @Override
+    public String resendRegistrationOtp(
+            ResendRegistrationOtpDTO dto){
+
+        PendingUser pendingUser =
+                pendingUserRepository
+                .findByEmail(dto.getEmail())
+                .orElseThrow(() ->
+                        new RuntimeException(
+                        "Please register first"));
+
+        otpService.sendEmailOtp(
+                pendingUser.getEmail()
+        );
+        
+        otpService.sendPhoneOtp(
+                pendingUser.getMobileNumber()
+        );
+
+        return "OTP resent successfully";
     }
 
     @Override
@@ -190,8 +306,8 @@ public class AuthServiceImplementation implements AuthService {
 
         User user =
                 userRepository
-                        .findByEmail(
-                                request.getToken())
+                .findByResetToken(
+                        request.getToken())
                         .orElseThrow(
                                 () -> new AuthenticationException(
                                         "User not found"));

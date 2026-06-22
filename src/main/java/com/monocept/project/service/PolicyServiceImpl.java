@@ -412,4 +412,37 @@ public class PolicyServiceImpl implements PolicyService {
 
         return dto;
     }
+    
+    @Override
+    public PaginatedResponseDTO<PolicyResponseDTO> getMyPolicies(
+            Long userId,
+            int page,
+            int size,
+            String sortBy,
+            String direction) {
+
+
+        Customer customer =
+                customerRepository.findByUser_Id(userId)
+                .orElseThrow(() ->
+                    new ResourceNotFoundException(
+                        "Customer not found"
+                    )
+                );
+        
+        System.out.println(
+                "CUSTOMER TABLE ID = "
+                + customer.getId()
+            );
+
+
+        return getPoliciesByCustomerId(
+                customer.getId(),
+                page,
+                size,
+                sortBy,
+                direction
+        );
+
+    }
 }

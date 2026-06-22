@@ -17,6 +17,8 @@ import lombok.Setter;
 public class RegistrationRequestDTO {
 
     @NotBlank(message = "Full name is required")
+    @Pattern(regexp = "^[A-Za-z ]+$",
+            message = "Name should contain only alphabets")
     @Size(max = 100, message = "Full name must not exceed 100 characters")
     private String fullName;
 
@@ -26,22 +28,19 @@ public class RegistrationRequestDTO {
     @Size(max = 100, message = "Email must not exceed 100 characters")
     private String email;
 
-    @NotBlank(message = "Password is required")
-    @Size(min = 6, max = 255, message = "Password must be between 6 and 255 characters")
-    @Pattern(
-    	    regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).{8,}$",
-    	    message = "Password must contain uppercase, lowercase and number"
-    	)
+    
+    
+
+    @Size(min = 6, max = 20, message = "Password must be between 6 and 20 characters")
     private String password;
 
     @NotBlank(message = "Mobile number is required")
-    @Size(max = 15, message = "Mobile number must not exceed 15 characters")
-    @Pattern(
-            regexp = "^\\+[1-9]\\d{7,14}$",
-            message = "Mobile number must be in international format like +919876543210"
-    )
-    @Column(unique = true)
+    @Pattern(regexp = "^\\+91[0-9]{10}$",
+            message = "Invalid mobile number")
     private String mobileNumber;
     
-    
+    public void setFullName(String fullName) {
+        this.fullName = fullName.trim();
+    }
+
 }

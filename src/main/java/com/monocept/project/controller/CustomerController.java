@@ -3,7 +3,11 @@ package com.monocept.project.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
+import org.springframework.web.bind.annotation.CrossOrigin;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/customers")
 @RequiredArgsConstructor
+@CrossOrigin("http://localhost:5173/")
 @Tag(name = "customers", description = "Operations for managing insurance customer profile information")
 public class CustomerController {
 

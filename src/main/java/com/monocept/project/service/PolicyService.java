@@ -16,6 +16,13 @@ public interface PolicyService {
     PaginatedResponseDTO<PolicyResponseDTO> getPoliciesByStatus(PolicyStatus status, int page, int size, String sortBy, String direction);
     PaginatedResponseDTO<PolicyResponseDTO> getPoliciesByCustomerAndStatus(Long customerId, PolicyStatus status, int page, int size, String sortBy, String direction);
     PaginatedResponseDTO<PolicyResponseDTO> searchPoliciesByNumber(String policyNumber, int page, int size, String sortBy, String direction);
+    PaginatedResponseDTO<PolicyResponseDTO> getMyPolicies(
+            Long userId,
+            int page,
+            int size,
+            String sortBy,
+            String direction
+    );
     void cancelPolicy(Long policyId);
     
     //getPolicyByCustomerAndPolicyNumber(...)

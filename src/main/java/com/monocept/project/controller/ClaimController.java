@@ -207,7 +207,7 @@ public class ClaimController {
 
         return ResponseEntity.ok(
 
-            claimService.getClaimsByCustomerId(
+            claimService.getMyClaims(
                     userDetails.getUserId(),
                     page,
                     size,

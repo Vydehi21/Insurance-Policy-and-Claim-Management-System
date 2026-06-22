@@ -1,5 +1,6 @@
 package com.monocept.project.repository;
 
+import com.monocept.project.model.EmailOtp;
 import com.monocept.project.model.User;
 import com.monocept.project.enums.Role;
 import org.springframework.data.domain.Page;
@@ -12,11 +13,15 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
     boolean existsByEmail(String email);
+    
+    boolean existsByMobileNumber(String mobileNumber);
+    
     Page<User> findByRole(Role role, Pageable pageable);
     Page<User> findByActiveStatus(Boolean activeStatus, Pageable pageable);
     Page<User> findByRoleAndActiveStatus(Role role, Boolean activeStatus, Pageable pageable);
     Page<User> findByFullNameContainingIgnoreCase(String fullName, Pageable pageable);
 
     Optional<User> findByMobileNumber(String mobileNumber);
+	Optional<User> findByResetToken(String token);
 
 }

@@ -45,19 +45,19 @@ public class PremiumPaymentController {
     }
     
 
-//    @GetMapping("/my")
-//    @PreAuthorize("hasRole('CUSTOMER')")
-//    public ResponseEntity<List<PremiumPaymentResponseDTO>> getMyPayments(
-//            @AuthenticationPrincipal CustomUserDetails userDetails
-//    ){
-//
-//        return ResponseEntity.ok(
-//                premiumPaymentService.getPaymentsByCustomer(
-//                        userDetails.getUserId()
-//                )
-//        );
-//
-//    }
+    @GetMapping("/my")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<List<PremiumPaymentResponseDTO>> getMyPayments(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ){
+
+        return ResponseEntity.ok(
+                premiumPaymentService.getPaymentsByCustomer(
+                        userDetails.getUserId()
+                )
+        );
+
+    }
 
     @GetMapping("/{paymentId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'AGENT', 'CUSTOMER')")
