@@ -89,18 +89,70 @@ public class ClaimServiceImpl implements ClaimService {
 
     private ClaimResponseDTO convertToResponseDTO(Claim claim) {
 
-        ClaimResponseDTO dto = modelMapper.map(
-                claim,
-                ClaimResponseDTO.class);
+        ClaimResponseDTO dto = new ClaimResponseDTO();
 
-        dto.setPolicyNumber(
-                claim.getPolicy().getPolicyNumber());
 
-        dto.setCustomerName(
-                claim.getPolicy()
-                     .getCustomer()
-                     .getUser()
-                     .getFullName());
+        dto.setClaimId(claim.getId());
+
+        dto.setClaimNumber(
+                claim.getClaimNumber()
+        );
+
+        dto.setClaimAmount(
+                claim.getClaimAmount()
+        );
+
+        dto.setClaimReason(
+                claim.getClaimReason()
+        );
+
+        dto.setIncidentDate(
+                claim.getIncidentDate()
+        );
+
+        dto.setClaimStatus(
+                claim.getClaimStatus()
+        );
+
+        dto.setAgentRemarks(
+                claim.getAgentRemarks()
+        );
+
+        dto.setAdminRemarks(
+                claim.getAdminRemarks()
+        );
+
+        dto.setCreatedDate(
+                claim.getCreatedDate()
+        );
+
+        dto.setUpdatedDate(
+                claim.getUpdatedDate()
+        );
+
+
+        if(claim.getPolicy() != null) {
+
+            dto.setPolicyNumber(
+                    claim.getPolicy()
+                        .getPolicyNumber()
+            );
+
+
+            if(claim.getPolicy().getCustomer() != null
+                && claim.getPolicy()
+                        .getCustomer()
+                        .getUser() != null) {
+
+                dto.setCustomerName(
+                    claim.getPolicy()
+                         .getCustomer()
+                         .getUser()
+                         .getFullName()
+                );
+            }
+        }
+
 
         return dto;
     }
@@ -528,6 +580,10 @@ public class ClaimServiceImpl implements ClaimService {
             int size,
             String sortBy,
             String direction) {
+    	
+    	 if(sortBy.equals("claimId")){
+    	        sortBy = "id";
+    	    }
 
 
         if(page < 0) {

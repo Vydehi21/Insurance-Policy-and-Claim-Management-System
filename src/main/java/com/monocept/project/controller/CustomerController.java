@@ -3,6 +3,7 @@ package com.monocept.project.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,9 +13,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.monocept.project.dto.ClaimResponseDTO;
 import com.monocept.project.dto.CustomerRequestDTO;
 import com.monocept.project.dto.CustomerResponseDTO;
 import com.monocept.project.dto.PaginatedResponseDTO;
+import com.monocept.project.security.CustomUserDetails;
 import com.monocept.project.service.CustomerService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -49,7 +52,7 @@ public class CustomerController {
     }
     
     @GetMapping("/{customerId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT', 'CUSTOMER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
     @Operation(summary = "Get Customer By ID", description = "Fetches core customer entity attributes matching the designated primary key identifier")
     public ResponseEntity<CustomerResponseDTO> getCustomerById(
             @PathVariable Long customerId) {
@@ -152,4 +155,21 @@ public class CustomerController {
                 )
         );
     }
+    
+    @GetMapping("/me")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<CustomerResponseDTO> getMyProfile(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ){
+
+        return ResponseEntity.ok(
+            customerService.getCustomerByUserId(
+                userDetails.getUserId()
+            )
+        );
+
+    }
+    
+    
+
 }

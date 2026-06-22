@@ -1,5 +1,7 @@
 package com.monocept.project.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,8 +17,10 @@ import com.monocept.project.exception.BusinessRuleException;
 import com.monocept.project.exception.DuplicateResourceException;
 import com.monocept.project.exception.InvalidRequestException;
 import com.monocept.project.exception.ResourceNotFoundException;
+import com.monocept.project.model.Customer;
 import com.monocept.project.model.Policy;
 import com.monocept.project.model.PremiumPayment;
+import com.monocept.project.repository.CustomerRepository;
 import com.monocept.project.repository.PolicyRepository;
 import com.monocept.project.repository.PremiumPaymentRepository;
 import com.monocept.project.service.PremiumPaymentService;
@@ -32,6 +36,7 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
 
     private final PremiumPaymentRepository premiumPaymentRepository;
     private final PolicyRepository policyRepository;
+    private final CustomerRepository customerRepository;
 
     @Override
     public PremiumPaymentResponseDTO recordPayment(
@@ -279,5 +284,24 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
         dto.setPaymentStatus(payment.getPaymentStatus());
 
         return dto;
+    }
+    
+    public List<PremiumPaymentResponseDTO> getPaymentsByCustomer(Long userId){
+
+        Customer customer =
+            customerRepository.findByUser_Id(userId)
+            .orElseThrow(
+                () -> new RuntimeException("Customer not found")
+            );
+
+
+        return premiumPaymentRepository
+                .findByPolicy_Customer_Id(
+                        customer.getId()
+                )
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+
     }
 }

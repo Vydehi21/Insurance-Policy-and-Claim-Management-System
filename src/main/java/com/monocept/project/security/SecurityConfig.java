@@ -19,7 +19,6 @@ import org.springframework.security.web.SecurityFilterChain;
 
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-
 import lombok.RequiredArgsConstructor;
 
 
@@ -40,22 +39,21 @@ public class SecurityConfig {
 
         http
 
-
         .csrf(csrf -> csrf.disable())
 
 
         .sessionManagement(session ->
-
             session.sessionCreationPolicy(
                 SessionCreationPolicy.STATELESS
             )
-
         )
 
 
         .authorizeHttpRequests(auth -> auth
 
 
+
+            // PUBLIC APIs
             .requestMatchers(
                     "/api/auth/**",
                     "/api/otp/**",
@@ -64,52 +62,138 @@ public class SecurityConfig {
                     "/v3/api-docs/**",
                     "/error"
             )
-
             .permitAll()
 
 
 
+            // =========================
+            // PRODUCTS & PLANS
+            // =========================
+
+            // customer can browse
+            // admin can manage
             .requestMatchers(
                     "/api/products/**",
-                    "/api/plans/**",
+                    "/api/plans/**"
+            )
+            .hasAnyRole(
+                    "ADMIN",
+                    "CUSTOMER"
+            )
+
+
+
+            // =========================
+            // ADMIN MANAGEMENT
+            // =========================
+
+            .requestMatchers(
                     "/api/users/**",
                     "/api/customers/**"
             )
-
             .hasRole("ADMIN")
 
 
 
-            .requestMatchers(
-                    "/api/policies/purchase",
-                    "/api/premium-payments/**",
-                    "/api/claims/**"
-            )
 
+            // =========================
+            // CUSTOMER POLICIES
+            // =========================
+
+            // customer own policies
+            .requestMatchers(
+                    "/api/policies/my"
+            )
+            .hasRole("CUSTOMER")
+
+
+            // admin policy management
+            .requestMatchers(
+                    "/api/policies/**"
+            )
+            .hasRole("ADMIN")
+
+
+
+            // customer purchase policy
+            .requestMatchers(
+                    "/api/policies/purchase"
+            )
             .hasRole("CUSTOMER")
 
 
 
+
+            // =========================
+            // CLAIMS
+            // =========================
+
+
+            // customer sees own claims
             .requestMatchers(
-                    "/api/claims/*/review"
+                    "/api/claims/my"
             )
-
-            .hasRole("AGENT")
-
+            .hasRole("CUSTOMER")
 
 
+
+            // admin sees all claims
             .requestMatchers(
-                    "/api/claims/*/decision"
+                    "/api/claims"
             )
-
             .hasRole("ADMIN")
 
 
 
+            // agent review claim
+            .requestMatchers(
+                    "/api/claims/*/review"
+            )
+            .hasRole("AGENT")
+
+
+
+            // admin final decision
+            .requestMatchers(
+                    "/api/claims/*/decision"
+            )
+            .hasRole("ADMIN")
+
+
+
+            // customer create claim
+            .requestMatchers(
+                    "/api/claims"
+            )
+            .hasRole("CUSTOMER")
+
+
+
+
+
+            // =========================
+            // PREMIUM PAYMENTS
+            // =========================
+
+
+            // customer pays and views own payments
+            .requestMatchers(
+                    "/api/premium-payments/my",
+                    "/api/premium-payments/**"
+            )
+            .hasRole("CUSTOMER")
+
+
+
+
+
+            // =========================
+            // CLAIM HISTORY
+            // =========================
+
             .requestMatchers(
                     "/api/claim-history/**"
             )
-
             .hasAnyRole(
                     "ADMIN",
                     "AGENT"
@@ -117,6 +201,7 @@ public class SecurityConfig {
 
 
 
+            // everything else
             .anyRequest()
             .authenticated()
 
@@ -124,25 +209,20 @@ public class SecurityConfig {
 
 
 
-        // REMOVE BASIC LOGIN POPUP
         .httpBasic(httpBasic ->
                 httpBasic.disable()
         )
 
 
-
-        // REMOVE DEFAULT LOGIN PAGE
         .formLogin(form ->
                 form.disable()
         )
 
 
+
         .addFilterBefore(
-
                 jwtAuthenticationFilter,
-
                 UsernamePasswordAuthenticationFilter.class
-
         );
 
 

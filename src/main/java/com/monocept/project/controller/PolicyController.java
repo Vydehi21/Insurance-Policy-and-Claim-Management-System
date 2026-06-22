@@ -48,7 +48,7 @@ public class PolicyController {
     
 	@PostMapping("/issue")
 
-	@PreAuthorize("hasRole('AGENT','ADMIN')")
+	@PreAuthorize("hasRole('ADMIN')")
 	@Operation(summary = "Issue Policy", description = "Allows an admin and agent to directly issue a policy package to a targeted consumer account")
 
 	public ResponseEntity<PolicyResponseDTO> issuePolicy(
@@ -57,6 +57,45 @@ public class PolicyController {
 		PolicyResponseDTO response = policyService.issuePolicy(dto);
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
+	
+	@GetMapping("/my")
+	@PreAuthorize("hasRole('CUSTOMER')")
+	public ResponseEntity<PaginatedResponseDTO<PolicyResponseDTO>> getMyPolicies(
+
+	        @AuthenticationPrincipal CustomUserDetails userDetails,
+
+	        @RequestParam(defaultValue = "0") int page,
+	        @RequestParam(defaultValue = "10") int size,
+	        @RequestParam(defaultValue = "id") String sortBy,
+	        @RequestParam(defaultValue = "desc") String direction
+
+	){
+
+	    return ResponseEntity.ok(
+
+	        policyService.getPoliciesByCustomerId(
+	            userDetails.getUserId(),
+	            page,
+	            size,
+	            sortBy,
+	            direction
+	        )
+
+	    );
+	}
+	
+//	@GetMapping("/my")
+//	@PreAuthorize("hasRole('CUSTOMER')")
+//	public ResponseEntity<?> getMyPolicies(
+//	        @AuthenticationPrincipal CustomUserDetails userDetails
+//	){
+//
+//	    return ResponseEntity.ok(
+//	        policyService.getMyPolicies(
+//	            userDetails.getUserId()
+//	        )
+//	    );
+//	}
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','AGENT','CUSTOMER')")

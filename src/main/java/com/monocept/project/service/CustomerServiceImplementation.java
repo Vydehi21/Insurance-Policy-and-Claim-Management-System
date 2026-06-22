@@ -160,4 +160,15 @@ public class CustomerServiceImplementation implements CustomerService {
 			return new ResourceNotFoundException("User not found with id: " + id);
 		});
 	}
+	
+	public CustomerResponseDTO getCustomerProfileByUserId(Long userId){
+
+	    Customer customer =
+	        customerRepository.findByUser_Id(userId)
+	        .orElseThrow(
+	            () -> new RuntimeException("Customer not found")
+	        );
+
+	    return modelMapper.map(customer, CustomerResponseDTO.class);
+	}
 }
