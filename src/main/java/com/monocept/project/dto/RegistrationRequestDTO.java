@@ -28,9 +28,6 @@ public class RegistrationRequestDTO {
     @Size(max = 100, message = "Email must not exceed 100 characters")
     private String email;
 
-    
-    
-
     @Size(min = 6, max = 20, message = "Password must be between 6 and 20 characters")
     private String password;
 
