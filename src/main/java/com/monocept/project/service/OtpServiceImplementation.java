@@ -42,15 +42,24 @@ public class OtpServiceImplementation implements OtpService {
             throw new RuntimeException("Mobile number already registered");
         }
 
-        Verification verification = Verification.creator(
-                verifySid,
-                phone,
-                "sms"
-        ).create();
+        try {
+            Verification verification = Verification.creator(
+                    verifySid,
+                    phone,
+                    "sms"
+            ).create();
 
-        log.info("Phone OTP sent successfully: {}", phone);
+            log.info("STATUS {}", verification.getStatus());
 
-        return verification.getStatus();
+            return verification.getStatus();
+
+        } catch(Exception e) {
+            log.error("TWILIO ERROR: ", e);
+            throw e;
+        }
+
+//        log.info("Phone OTP sent successfully: {}", phone);
+
     }
 
     @Override
