@@ -182,7 +182,8 @@ public class SecurityConfig {
             .requestMatchers(
                     "/api/claims"
             )
-            .hasRole("ADMIN")
+            .hasAnyRole("ADMIN",
+                    "CUSTOMER")
 
 
 

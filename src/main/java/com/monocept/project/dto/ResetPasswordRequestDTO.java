@@ -1,18 +1,19 @@
 package com.monocept.project.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.Size;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 public class ResetPasswordRequestDTO {
 
-	@NotBlank
-	private String email;
-	@NotBlank
-	private String token;
 
-	@NotBlank
+    @NotBlank(message = "Reset token is required")
+    private String token;
+
+
+    @NotBlank(message = "New password is required")
+    @Size(min = 8, message = "Password must be at least 8 characters long")
     private String newPassword;
+
 }

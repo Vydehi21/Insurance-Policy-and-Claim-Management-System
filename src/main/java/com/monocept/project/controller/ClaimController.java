@@ -183,7 +183,7 @@ public class ClaimController {
 
         return ResponseEntity.ok(
                 claimService.getClaimsByStatus(
-                        ClaimStatus.UNDER_REVIEW,
+                        ClaimStatus.SUBMITTED,
                         page,
                         size,
                         sortBy,
