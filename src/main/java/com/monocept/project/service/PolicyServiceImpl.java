@@ -1,7 +1,7 @@
 package com.monocept.project.service;
 
 import java.time.LocalDate;
-
+import java.util.List;
 import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
@@ -443,6 +443,48 @@ public class PolicyServiceImpl implements PolicyService {
                 sortBy,
                 direction
         );
+
+    }
+    
+    @Override
+    public PaginatedResponseDTO<PolicyResponseDTO> getAgentPolicies(
+            int page,
+            int size,
+            String sortBy,
+            String direction) {
+
+
+        Sort sort =
+            direction.equalsIgnoreCase("asc")
+            ?
+            Sort.by(sortBy).ascending()
+            :
+            Sort.by(sortBy).descending();
+
+
+
+        Pageable pageable =
+                PageRequest.of(
+                        page,
+                        size,
+                        sort
+                );
+
+
+
+        Page<PolicyResponseDTO> result =
+                policyRepository.findAll(pageable)
+                .map(this::mapToResponse);
+
+
+        return PaginationUtil.createPaginatedResponse(
+                result,
+                sortBy,
+                direction
+        );
+
+
+        
 
     }
 }

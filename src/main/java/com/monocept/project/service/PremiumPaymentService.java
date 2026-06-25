@@ -16,7 +16,13 @@ public interface PremiumPaymentService {
     PaginatedResponseDTO<PremiumPaymentResponseDTO> getPaymentsByPolicyAndStatus(Long policyId, PaymentStatus status, int page, int size, String sortBy, String direction);
     PaginatedResponseDTO<PremiumPaymentResponseDTO> searchPaymentsByReference(String reference, int page, int size, String sortBy, String direction);
     public List<PremiumPaymentResponseDTO> getPaymentsByCustomer(Long userId);
-    
+    PaginatedResponseDTO<PremiumPaymentResponseDTO>
+    getAllPayments(
+            int page,
+            int size,
+            String sortBy,
+            String direction
+    );
     //PremiumPaymentResponseDTO
    // getPaymentByReference(String reference);
 }
