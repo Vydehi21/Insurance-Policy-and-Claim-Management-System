@@ -1,6 +1,9 @@
 package com.monocept.project.service;
 
 import com.monocept.project.dto.CustomerPolicyPurchaseRequestDTO;
+
+import org.jspecify.annotations.Nullable;
+
 import com.monocept.project.dto.AgentPolicyIssueRequestDTO;
 import com.monocept.project.dto.PolicyResponseDTO;
 import com.monocept.project.dto.PaginatedResponseDTO;
@@ -24,6 +27,12 @@ public interface PolicyService {
             String direction
     );
     void cancelPolicy(Long policyId);
+    PaginatedResponseDTO<PolicyResponseDTO> getAgentPolicies(
+            int page,
+            int size,
+            String sortBy,
+            String direction
+    );
     
     //getPolicyByCustomerAndPolicyNumber(...)
 }

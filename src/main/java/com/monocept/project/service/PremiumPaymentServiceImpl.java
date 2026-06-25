@@ -304,4 +304,36 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
                 .toList();
 
     }
+    
+    @Override
+    public PaginatedResponseDTO<PremiumPaymentResponseDTO>
+    getAllPayments(
+            int page,
+            int size,
+            String sortBy,
+            String direction
+    ){
+
+        Pageable pageable =
+                createPageable(
+                        page,
+                        size,
+                        sortBy,
+                        direction
+                );
+
+
+        Page<PremiumPaymentResponseDTO> result =
+                premiumPaymentRepository
+                .findAll(pageable)
+                .map(this::mapToResponse);
+
+
+        return PaginationUtil.createPaginatedResponse(
+                result,
+                sortBy,
+                direction
+        );
+
+    }
 }

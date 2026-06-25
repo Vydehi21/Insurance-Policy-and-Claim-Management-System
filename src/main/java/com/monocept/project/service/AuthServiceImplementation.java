@@ -121,6 +121,9 @@ public class AuthServiceImplementation implements AuthService {
             );
         }
         
+        otpService.sendEmailOtp(registrationRequestDTO.getEmail());
+        otpService.sendPhoneOtp(registrationRequestDTO.getMobileNumber());
+        
         PendingUser pendingUser =
                 modelMapper.map(registrationRequestDTO, PendingUser.class);
 
@@ -128,10 +131,8 @@ public class AuthServiceImplementation implements AuthService {
                 passwordEncoder.encode(registrationRequestDTO.getPassword())
         );
 
-        pendingUserRepository.save(pendingUser);
         
-        otpService.sendEmailOtp(registrationRequestDTO.getEmail());
-        otpService.sendPhoneOtp(registrationRequestDTO.getMobileNumber());
+       pendingUserRepository.save(pendingUser);
         
         return "OTP sent successfully";
     }

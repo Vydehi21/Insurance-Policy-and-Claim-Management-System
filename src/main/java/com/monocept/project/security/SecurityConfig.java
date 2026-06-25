@@ -99,10 +99,28 @@ public class SecurityConfig {
             // =========================
 
             .requestMatchers(
-                    "/api/users/**",
-                    "/api/customers/**"
+                    "/api/users/**"
             )
             .hasRole("ADMIN")
+            
+         // CUSTOMER OWN PROFILE
+            .requestMatchers(
+                    "/api/customers/profile"
+            )
+            .hasRole("CUSTOMER")
+            .requestMatchers(
+                    "/api/customers/me"
+            )
+            .hasRole("CUSTOMER")
+
+
+            .requestMatchers(
+                    "/api/customers/**"
+            )
+            .hasAnyRole(
+                    "ADMIN",
+                    "AGENT"
+            )
 
 
 
@@ -117,6 +135,22 @@ public class SecurityConfig {
             )
             .hasRole("CUSTOMER")
 
+            .requestMatchers(
+                    "/api/policies/issue"
+            )
+            .hasAnyRole("ADMIN",
+                    "AGENT")
+            
+            .requestMatchers(
+                    "/api/policies/agent"
+            )
+            .hasRole("AGENT")
+            
+         // customer purchase policy
+            .requestMatchers(
+                    "/api/policies/purchase"
+            )
+            .hasRole("CUSTOMER")
 
             // admin policy management
             .requestMatchers(
@@ -126,11 +160,7 @@ public class SecurityConfig {
 
 
 
-            // customer purchase policy
-            .requestMatchers(
-                    "/api/policies/purchase"
-            )
-            .hasRole("CUSTOMER")
+            
 
 
 
@@ -187,6 +217,10 @@ public class SecurityConfig {
             // =========================
 
 
+            .requestMatchers(
+                    "/api/premium-payments/agent"
+            )
+            .hasRole("AGENT")
             // customer pays and views own payments
             .requestMatchers(
                     "/api/premium-payments/my",

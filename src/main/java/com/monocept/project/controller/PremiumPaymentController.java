@@ -128,4 +128,35 @@ public class PremiumPaymentController {
                         sortBy,
                         direction));
     }
+    
+    @GetMapping("/agent")
+    @PreAuthorize("hasRole('AGENT')")
+    @Operation(
+        summary = "Get Payments For Agent",
+        description = "Returns premium payments handled by agent"
+    )
+    public ResponseEntity<PaginatedResponseDTO<PremiumPaymentResponseDTO>>
+    getAgentPayments(
+
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "paymentDate") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction
+
+    ){
+
+        return ResponseEntity.ok(
+
+            premiumPaymentService.getAllPayments(
+                page,
+                size,
+                sortBy,
+                direction
+            )
+
+        );
+
+    }
+
+    
 }

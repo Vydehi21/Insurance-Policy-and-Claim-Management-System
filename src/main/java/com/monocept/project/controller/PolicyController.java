@@ -50,7 +50,7 @@ public class PolicyController {
     
 	@PostMapping("/issue")
 
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasAnyRole('ADMIN','AGENT')")
 	@Operation(summary = "Issue Policy", description = "Allows an admin and agent to directly issue a policy package to a targeted consumer account")
 
 	public ResponseEntity<PolicyResponseDTO> issuePolicy(
@@ -218,5 +218,34 @@ public class PolicyController {
 
 		policyService.cancelPolicy(policyId);
 		return ResponseEntity.ok("Policy cancelled successfully");
+	}
+	
+	@GetMapping("/agent")
+	@PreAuthorize("hasRole('AGENT')")
+	@Operation(
+	    summary = "Get Policies For Agent",
+	    description = "Returns policies available for agent view"
+	)
+	public ResponseEntity<PaginatedResponseDTO<PolicyResponseDTO>>
+	getAgentPolicies(
+
+	        @RequestParam(defaultValue = "0") int page,
+	        @RequestParam(defaultValue = "10") int size,
+	        @RequestParam(defaultValue = "id") String sortBy,
+	        @RequestParam(defaultValue = "desc") String direction
+
+	){
+
+	    return ResponseEntity.ok(
+
+	        policyService.getAgentPolicies(
+	                page,
+	                size,
+	                sortBy,
+	                direction
+	        )
+
+	    );
+
 	}
 }

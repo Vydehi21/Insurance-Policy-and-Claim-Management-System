@@ -38,22 +38,24 @@ public class CustomerController {
 
     private final CustomerService customerService;
 
-    @PostMapping("/user/{userId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    @PostMapping("/profile")
+    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<CustomerResponseDTO> createProfile(
-            @PathVariable Long userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody CustomerRequestDTO dto){
 
 
         CustomerResponseDTO response =
                 customerService.createCustomerProfile(
-                        userId,
+                        userDetails.getUserId(),
                         dto
                 );
+
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
+
     }
     
     @GetMapping("/{customerId}")
@@ -83,7 +85,7 @@ public class CustomerController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','AGENT')")
     @Operation(summary = "Get All Customers", description = "Returns an indexed catalog tracking customer files registered system-wide")
     public ResponseEntity<PaginatedResponseDTO<CustomerResponseDTO>>
     getAllCustomers(
