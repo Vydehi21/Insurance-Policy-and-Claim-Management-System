@@ -97,16 +97,26 @@ public class CustomerServiceImplementation implements CustomerService {
 	@Override
 	@Transactional
 	public CustomerResponseDTO updateCustomerProfile(Long customerId, CustomerRequestDTO customerRequestDTO) {
-		log.info("Updating customer profile for user id: {}", customerId);
+		log.info("Updating customer profile for customer id: {}", customerId);
 
 		Customer customer = customerRepository.findById(customerId).orElseThrow(() -> {
-			log.warn("Profile update failed. Customer not found for user id: {}", customerId);
+			log.warn("Profile update failed. Customer not found for customer id: {}", customerId);
 			return new ResourceNotFoundException("Customer not found");
 		});
 
-		customer.setAddress(customerRequestDTO.getAddress());
 		customer.setDateOfBirth(customerRequestDTO.getDateOfBirth());
+
+		customer.setAddress(customerRequestDTO.getAddress());
+
+		customer.setCity(customerRequestDTO.getCity());
+
+		customer.setState(customerRequestDTO.getState());
+
+		customer.setPinCode(customerRequestDTO.getPinCode());
+
 		customer.setNomineeName(customerRequestDTO.getNomineeName());
+
+		customer.setNomineeRelation(customerRequestDTO.getNomineeRelation());
 
 		Customer updatedCustomer = customerRepository.save(customer);
 
