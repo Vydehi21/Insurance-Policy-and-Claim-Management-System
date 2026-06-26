@@ -29,7 +29,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@CrossOrigin("http://localhost:5173")
+@CrossOrigin(origins = "http://localhost:5173")
 @Tag(name = "auth", description = "Authentication and registration management")
 public class AuthController {
 
@@ -73,26 +73,20 @@ public class AuthController {
     }
     
     @PostMapping("/forgot-password")
-    public ResponseEntity<String>
-    forgotPassword(
-            @RequestBody
-            ForgotPasswordRequestDTO request) {
+    public ResponseEntity<String> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequestDTO request) {
 
         authService.forgotPassword(request);
-
-        return ResponseEntity.ok(
-                "Password reset email sent");
+        // Universal message prevents user enumeration attacks
+        return ResponseEntity.ok("If the email matches an account, a 6-digit OTP has been sent.");
     }
     
     @PostMapping("/reset-password")
-    public ResponseEntity<String>
-    resetPassword(
-            @RequestBody
-            ResetPasswordRequestDTO request) {
+    public ResponseEntity<String> resetPassword(
+            @Valid @RequestBody ResetPasswordRequestDTO request) {
 
         authService.resetPassword(request);
-
-        return ResponseEntity.ok(
-                "Password reset successful");
+        return ResponseEntity.ok("Password reset successful");
     }
+
 }

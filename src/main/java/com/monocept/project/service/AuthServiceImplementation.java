@@ -2,6 +2,7 @@ package com.monocept.project.service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
@@ -258,88 +259,65 @@ public class AuthServiceImplementation implements AuthService {
     
     @Override
     @Transactional
-    public void forgotPassword(
-            ForgotPasswordRequestDTO request) {
+    public void forgotPassword(ForgotPasswordRequestDTO request) {
+        // 1. Locate the account profile
+//    	Optional<User> user =
+//    			userRepository.findByEmail(request.getEmail());
+//
+//    			if(user.isEmpty()){
+//    			    return;
+//    			}
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new AuthenticationException("User not found"));
 
-        User user =
-                userRepository
-                        .findByEmail(request.getEmail())
-                        .orElseThrow(() ->
-                                new AuthenticationException(
-                                        "User not found"));
+        // 2. Generate a secure, unique UUID string token
+        String token = java.util.UUID.randomUUID().toString();
 
-        String token =
-                UUID.randomUUID().toString();
-
+        // 3. Persist token with a 15-minute validity window
         user.setResetToken(token);
-
-        user.setResetTokenExpiry(
-                LocalDateTime.now().plusMinutes(15));
-
+        user.setResetTokenExpiry(LocalDateTime.now().plusMinutes(15));
         userRepository.save(user);
 
-        String fullResetUrl =
-                resetUrl + "?token=" + token;
-
-        log.info("Reset URL: {}", fullResetUrl);
+        // 4. Construct a direct link matching your React application routes
+        String fullResetUrl = "http://localhost:5173/forgot-password/" + token;
+        log.info("Generated Secure Reset URL Link: {}", fullResetUrl);
 
         try {
-
-            resendEmailService.sendPasswordResetEmail(
-                    user.getEmail(),
-                    fullResetUrl);
-
+            // 5. Dispatch the clickable link to the user's mailbox
+            resendEmailService.sendPasswordResetEmail(user.getEmail(), fullResetUrl);
         } catch (IOException | InterruptedException e) {
-
-            log.error(
-                    "Failed to send password reset email",
-                    e);
-
-            throw new RuntimeException(
-                    "Unable to send reset email");
+            log.error("Failed to send password reset email", e);
+            throw new RuntimeException("Unable to send reset email");
         }
     }
     
     @Override
     @Transactional
-    public void resetPassword(
-            ResetPasswordRequestDTO request) {
-
-        User user =
-                userRepository
-                .findByResetToken(
-                        request.getToken())
-                        .orElseThrow(
-                                () -> new AuthenticationException(
-                                        "User not found"));
+    public void resetPassword(ResetPasswordRequestDTO request) {
+        // 1. Basic validation check on payload
+    	if(request.getToken()==null || request.getToken().trim().isEmpty()){
+    	    throw new AuthenticationException(
+    	        "Missing reset token"
+    	    );
+    	}
+        // 2. Locate user record mapped directly to this unique URL token string
+        // Note: We map request.getOtp() to the token variable to preserve DTO mapping contracts smoothly
+        User user = userRepository.findByResetToken(request.getToken())
+                .orElseThrow(() -> new AuthenticationException("The reset link is invalid or has already been used."));
         
-        if(!passwordEncoder.matches(
-                request.getToken(),
-                user.getResetToken())) {
-
-            throw new AuthenticationException(
-                    "Invalid token");
+        // 3. Check expiration window rules
+        if (user.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
+            throw new AuthenticationException("This reset link has expired. Please request a new one.");
         }
 
-        if (user.getResetTokenExpiry()
-                .isBefore(
-                        LocalDateTime.now())) {
-
-            throw new AuthenticationException(
-                    "Reset token expired");
-        }
-
-        // Encrypt the raw password before saving it to MySQL
+        // 4. Encrypt raw password entry and clear transient tokens
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
-
         user.setResetToken(null);
-
         user.setResetTokenExpiry(null);
 
         userRepository.save(user);
     }
-    
-   
+
     
     
 }

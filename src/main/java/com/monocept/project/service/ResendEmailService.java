@@ -15,37 +15,29 @@ public class ResendEmailService {
     @Value("${resend.api.key}")
     private String apiKey;
 
-    public void sendPasswordResetEmail(
-            String email,
-            String resetUrl)
+    public void sendPasswordResetEmail(String email, String resetUrl) 
             throws IOException, InterruptedException {
 
         String jsonBody = """
             {
               "from": "onboarding@resend.dev",
               "to": ["%s"],
-              "subject": "Reset Your Password",
-              "html": "<p>Click below to reset your password:</p><a href='%s'>Reset Password</a>"
+              "subject": "Reset Your Insurance System Password",
+              "html": "<p>You requested a password reset. Please click the button below to choose a new password:</p><a href='%s' style='display:inline-block; background-color:#0d6efd; color:#ffffff; padding:10px 20px; text-decoration:none; border-radius:5px; font-weight:bold; margin:15px 0;'>Reset Password</a><p>If the button above does not work, copy and paste this link into your browser:</p><p>%s</p><p>This secure link will expire in 15 minutes.</p>"
             }
-            """.formatted(email, resetUrl);
+            """.formatted(email, resetUrl, resetUrl);
 
-        HttpRequest request =
-                HttpRequest.newBuilder()
-                        .uri(URI.create(
-                                "https://api.resend.com/emails"))
-                        .header(
-                                "Authorization",
-                                "Bearer " + apiKey)
-                        .header(
-                                "Content-Type",
-                                "application/json")
-                        .POST(HttpRequest.BodyPublishers
-                                .ofString(jsonBody))
-                        .build();
+        // ... Keep HTTP Request and HttpClient logic exactly the same ...
+
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://api.resend.com/emails"))
+                .header("Authorization", "Bearer " + apiKey)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
 
         HttpClient.newHttpClient()
-                .send(
-                        request,
-                        HttpResponse.BodyHandlers.ofString());
+                .send(request, HttpResponse.BodyHandlers.ofString());
     }
 }

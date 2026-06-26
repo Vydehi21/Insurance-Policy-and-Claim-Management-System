@@ -173,9 +173,6 @@ public class SecurityConfig {
 
 
             // admin sees all claims
-            .requestMatchers(HttpMethod.GET, "/api/claims")
-            .hasRole("ADMIN")
-
 
 
             // agent review claim
