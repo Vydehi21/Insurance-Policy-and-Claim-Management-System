@@ -216,10 +216,6 @@ public class SecurityConfig {
             )
             .hasRole("CUSTOMER")
 
-
-
-
-
             // =========================
             // CLAIM HISTORY
             // =========================
