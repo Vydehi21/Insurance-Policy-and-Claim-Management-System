@@ -34,6 +34,16 @@ public class AppConfig {
                         src -> src.getUser().getMobileNumber(),
                         CustomerResponseDTO::setMobileNumber
                     );
+                    
+                    m.map(
+                    	    src -> src.getUser().getId(),
+                    	    CustomerResponseDTO::setUserId
+                    	);
+
+                    	m.map(
+                    	    src -> src.getUser().getActiveStatus(),
+                    	    CustomerResponseDTO::setActiveStatus
+                    	);
                    
                 });
         

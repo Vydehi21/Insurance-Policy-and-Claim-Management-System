@@ -23,4 +23,6 @@ public class CustomerResponseDTO {
     private String pinCode;
     private String nomineeName;
     private String nomineeRelation;
+    private Long userId;          // Extra apart from SRS
+    private Boolean activeStatus; // Extra
 }
