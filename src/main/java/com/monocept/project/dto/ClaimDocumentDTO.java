@@ -24,4 +24,5 @@ public class ClaimDocumentDTO {
     @NotBlank(message = "Document reference is required")
     @Size(max = 255)
     private String documentReference;
+    private Long documentId;
 }

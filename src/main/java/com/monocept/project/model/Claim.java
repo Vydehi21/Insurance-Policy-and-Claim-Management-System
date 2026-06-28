@@ -64,6 +64,15 @@ public class Claim {
 
     private String adminRemarks;
     
+    @ManyToOne
+    @JoinColumn(name="reviewed_by")
+    private User reviewedBy;
+
+
+    @ManyToOne
+    @JoinColumn(name="decided_by")
+    private User decidedBy;
+    
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdDate;
 
