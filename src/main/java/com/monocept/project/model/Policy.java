@@ -58,6 +58,10 @@ public class Policy {
     @Column(nullable = false)
     private BigDecimal totalPremiumPaid = BigDecimal.ZERO;
     
+    // --- ADD THIS NEW FIELD FOR ANNUAL LOCK TRACKING ---
+    @Column(name = "next_premium_due_date")
+    private LocalDate nextPremiumDueDate;
+    
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdDate;
 

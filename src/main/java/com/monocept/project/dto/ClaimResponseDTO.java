@@ -30,6 +30,7 @@ public class ClaimResponseDTO {
     private String adminRemarks;
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
+    private Long reviewedById;
     private String reviewedByName;
     private String decidedByName;
 
@@ -43,4 +44,18 @@ public class ClaimResponseDTO {
     private Integer previousClaimCount;
 
     private List<ClaimStatusHistoryResponseDTO> history;
+    
+    private List<PastClaimTimelineDTO> pastClaimsTimeline;
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class PastClaimTimelineDTO {
+        private String claimNumber;
+        private BigDecimal amount;
+        private String reason;
+        private String status;
+        private LocalDate incidentDate;
+    }
 }

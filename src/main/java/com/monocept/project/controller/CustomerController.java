@@ -1,5 +1,6 @@
 package com.monocept.project.controller;
 
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -148,20 +149,20 @@ public class CustomerController {
         );
     }
 
-    @PutMapping("/{customerId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT', 'CUSTOMER')")
-    @Operation(summary = "Update Customer Profile", description = "Modifies existing customer registration data records based on the payload data structures")
-    public ResponseEntity<CustomerResponseDTO> updateCustomerProfile(
-            @PathVariable Long customerId,
-            @Valid @RequestBody CustomerRequestDTO customerRequestDTO) {
-
-        return ResponseEntity.ok(
-                customerService.updateCustomerProfile(
-                        customerId,
-                        customerRequestDTO
-                )
-        );
-    }
+//    @PutMapping("/{customerId}")
+//    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT', 'CUSTOMER')")
+//    @Operation(summary = "Update Customer Profile", description = "Modifies existing customer registration data records based on the payload data structures")
+//    public ResponseEntity<CustomerResponseDTO> updateCustomerProfile(
+//            @PathVariable Long customerId,
+//            @Valid @RequestBody CustomerRequestDTO customerRequestDTO) {
+//
+//        return ResponseEntity.ok(
+//                customerService.updateCustomerProfile(
+//                        customerId,
+//                        customerRequestDTO
+//                )
+//        );
+//    }
     
     @GetMapping("/me")
     @PreAuthorize("hasRole('CUSTOMER')")
@@ -176,6 +177,22 @@ public class CustomerController {
         );
 
     }
+    
+    @PutMapping("/profile")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<CustomerResponseDTO> updateMyProfile(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody CustomerRequestDTO dto){
+
+        return ResponseEntity.ok(
+            customerService.updateCustomerProfile(
+                userDetails.getUserId(),
+                dto
+            )
+        );
+    }
+    
+   
     
     
 

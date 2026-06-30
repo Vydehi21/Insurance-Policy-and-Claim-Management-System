@@ -2,14 +2,8 @@ package com.monocept.project.dto;
 
 import java.time.LocalDate;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Past;
-import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.validation.constraints.*;
+import lombok.*;
 
 @Getter
 @Setter
@@ -17,32 +11,63 @@ import lombok.Setter;
 @AllArgsConstructor
 public class CustomerRequestDTO {
 
-    @NotNull(message = "Date of birth is required")
-    @Past(
-    	    message = "Date of birth must be in the past")
+
+    @NotBlank(message="Full name is required")
+    @Size(max=100,message="Name cannot exceed 100 characters")
+    private String fullName;
+
+
+    @Email(message="Invalid email format")
+    @NotBlank(message="Email is required")
+    private String email;
+
+
+    @NotBlank(message="Mobile number is required")
+    @Pattern(
+        regexp="^[6-9][0-9]{9}$",
+        message="Mobile number must be 10 digits"
+    )
+    private String mobileNumber;
+
+
+
+    @NotNull(message="Date of birth is required")
+    @Past(message="Date of birth must be past date")
     private LocalDate dateOfBirth;
 
-    @NotBlank(message = "Address is required")
-    @Size(max = 255, message = "Address must not exceed 255 characters")
+
+
+    @NotBlank(message="Address is required")
+    @Size(max=255)
     private String address;
 
-    @NotBlank(message = "City is required")
-    @Size(max = 100, message = "City must not exceed 100 characters")
+
+
+    @NotBlank(message="City is required")
     private String city;
 
-    @NotBlank(message = "State is required")
-    @Size(max = 100, message = "State must not exceed 100 characters")
+
+
+    @NotBlank(message="State is required")
     private String state;
 
-    @NotBlank(message = "PIN code is required")
-    @Size(max = 10, message = "PIN code must not exceed 10 characters")
+
+
+    @NotBlank(message="PIN code required")
+    @Pattern(
+      regexp="^[0-9]{6}$",
+      message="PIN code must be 6 digits"
+    )
     private String pinCode;
 
-    @NotBlank(message = "Nominee name is required")
-    @Size(max = 100, message = "Nominee name must not exceed 100 characters")
+
+
+    @NotBlank(message="Nominee name required")
     private String nomineeName;
 
-    @NotBlank(message = "Nominee relation is required")
-    @Size(max = 50, message = "Nominee relation must not exceed 50 characters")
+
+
+    @NotBlank(message="Nominee relation required")
     private String nomineeRelation;
+
 }

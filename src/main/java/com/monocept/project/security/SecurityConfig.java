@@ -114,7 +114,8 @@ public class SecurityConfig {
             )
             .hasAnyRole(
                     "ADMIN",
-                    "AGENT"
+                    "AGENT",
+                    "CUSTOMER"
             )
 
 

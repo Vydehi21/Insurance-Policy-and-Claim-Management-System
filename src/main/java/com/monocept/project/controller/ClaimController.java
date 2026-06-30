@@ -94,13 +94,25 @@ public class ClaimController {
 
     @GetMapping("/{claimId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'AGENT', 'CUSTOMER')")
-    @Operation(summary = "Get Claim By ID", description = "Fetches complete descriptive properties of a specific claim record")
+    @Operation(summary = "Get Claim By ID", description = "Fetches complete properties of a claim and applies concurrency locks if accessed by an internal agent")
     public ResponseEntity<ClaimResponseDTO> getClaimById(
-            @PathVariable Long claimId) {
+            @PathVariable Long claimId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
 
+        // 🔐 If an agent requests this claim, route it through the lock acquisition engine
+        if (userDetails != null && userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_AGENT"))) {
+            
+            return ResponseEntity.ok(
+                    claimService.getClaimDetailsForReview(claimId, userDetails.getUserId())
+            );
+        }
+
+        // Default read-only payload fallback for admins and customers
         return ResponseEntity.ok(
                 claimService.getClaimById(claimId));
     }
+
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
