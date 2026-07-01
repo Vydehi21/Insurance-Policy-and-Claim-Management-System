@@ -83,6 +83,7 @@ public class SecurityConfig {
             )
             .hasAnyRole(
                     "ADMIN",
+                    "AGENT",
                     "CUSTOMER"
             )
 
@@ -113,7 +114,8 @@ public class SecurityConfig {
             )
             .hasAnyRole(
                     "ADMIN",
-                    "AGENT"
+                    "AGENT",
+                    "CUSTOMER"
             )
 
 
@@ -189,7 +191,10 @@ public class SecurityConfig {
             )
             .hasRole("ADMIN")
 
-
+            .requestMatchers(
+                    "/api/files/upload"
+            )
+            .hasRole("CUSTOMER")
 
             // customer create claim
 

@@ -3,6 +3,7 @@ package com.monocept.project.dto;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.monocept.project.enums.ClaimStatus;
 
@@ -29,4 +30,32 @@ public class ClaimResponseDTO {
     private String adminRemarks;
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
+    private Long reviewedById;
+    private String reviewedByName;
+    private String decidedByName;
+
+    private List<ClaimDocumentDTO> documents;
+    private BigDecimal policyCoverageAmount;
+
+    private BigDecimal totalApprovedClaimAmount;
+
+    private BigDecimal remainingCoverageAmount;
+
+    private Integer previousClaimCount;
+
+    private List<ClaimStatusHistoryResponseDTO> history;
+    
+    private List<PastClaimTimelineDTO> pastClaimsTimeline;
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class PastClaimTimelineDTO {
+        private String claimNumber;
+        private BigDecimal amount;
+        private String reason;
+        private String status;
+        private LocalDate incidentDate;
+    }
 }

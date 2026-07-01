@@ -1,11 +1,14 @@
 package com.monocept.project.repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.monocept.project.enums.ClaimStatus;
@@ -33,6 +36,21 @@ public interface ClaimRepository extends JpaRepository<Claim, Long> {
             List<ClaimStatus> statuses);
     List<Claim> findByPolicy_Customer_Id(
             Long customerId
+    );
+    @Query("""
+    		SELECT COALESCE(SUM(c.claimAmount),0)
+    		FROM Claim c
+    		WHERE c.policy.id = :policyId
+    		AND c.claimStatus = 'APPROVED'
+    		""")
+    		BigDecimal getApprovedClaimAmount(
+    		        @Param("policyId") Long policyId
+    		);
+    
+    List<Claim> findByPolicy_Id(Long policyId);
+    Page<Claim> findByClaimStatusIn(
+            List<ClaimStatus> statuses,
+            Pageable pageable
     );
     
 }

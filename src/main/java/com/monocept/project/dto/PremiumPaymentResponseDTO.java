@@ -1,6 +1,7 @@
 package com.monocept.project.dto;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import com.monocept.project.enums.PaymentMode;
@@ -24,4 +25,6 @@ public class PremiumPaymentResponseDTO {
     private PaymentMode paymentMode;
     private String transactionReference;
     private PaymentStatus paymentStatus;
+    private LocalDate nextPremiumDueDate;
+    private String customerName;
 }

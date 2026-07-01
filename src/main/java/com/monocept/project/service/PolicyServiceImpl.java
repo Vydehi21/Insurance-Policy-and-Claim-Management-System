@@ -1,5 +1,6 @@
 package com.monocept.project.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -108,40 +109,77 @@ public class PolicyServiceImpl implements PolicyService {
     public PolicyResponseDTO issuePolicy(
             AgentPolicyIssueRequestDTO issueDTO) {
 
-        Customer customer = customerRepository
+
+        Customer customer =
+                customerRepository
                 .findById(issueDTO.getCustomerId())
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("Customer not found"));
+                    new ResourceNotFoundException(
+                        "Customer not found"
+                    ));
 
-        PolicyPlan plan = policyPlanRepository
+
+        PolicyPlan plan =
+                policyPlanRepository
                 .findById(issueDTO.getPlanId())
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("Plan not found"));
+                    new ResourceNotFoundException(
+                        "Plan not found"
+                    ));
+
+
 
         Policy policy = new Policy();
 
+
         policy.setPolicyNumber(
-                "POL-" + UUID.randomUUID().toString().substring(0, 8));
-
-        policy.setCustomer(customer);
-        policy.setPolicyPlan(plan);
-
-        policy.setStartDate(issueDTO.getStartDate());
-
-        policy.setEndDate(
-                issueDTO.getStartDate()
-                        .plusYears(plan.getDuration()));
-
-        policy.setPolicyStatus(PolicyStatus.ACTIVE);
-
-        Policy savedPolicy = policyRepository.save(policy);
-        
-        log.info(
-                "Policy issued. Policy number: {}",
-                savedPolicy.getPolicyNumber()
+            "POL-" +
+            UUID.randomUUID()
+            .toString()
+            .substring(0,8)
         );
 
+
+        policy.setCustomer(customer);
+
+        policy.setPolicyPlan(plan);
+
+
+        policy.setStartDate(
+            issueDTO.getStartDate()
+        );
+
+
+        policy.setEndDate(
+            issueDTO.getStartDate()
+            .plusYears(plan.getDuration())
+        );
+
+
+        policy.setPolicyStatus(
+            PolicyStatus.ACTIVE
+        );
+
+
+        policy.setTotalPremiumPaid(
+            BigDecimal.ZERO
+        );
+
+
+
+        Policy savedPolicy =
+                policyRepository.save(policy);
+
+
+
+        log.info(
+            "Policy issued {}",
+            savedPolicy.getPolicyNumber()
+        );
+
+
         return mapToResponse(savedPolicy);
+
     }
 
     @Override

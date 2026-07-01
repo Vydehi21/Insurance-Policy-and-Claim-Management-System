@@ -96,33 +96,67 @@ public class CustomerServiceImplementation implements CustomerService {
 
 	@Override
 	@Transactional
-	public CustomerResponseDTO updateCustomerProfile(Long customerId, CustomerRequestDTO customerRequestDTO) {
-		log.info("Updating customer profile for customer id: {}", customerId);
+	public CustomerResponseDTO updateCustomerProfile(
+	        Long userId,
+	        CustomerRequestDTO dto) {
 
-		Customer customer = customerRepository.findById(customerId).orElseThrow(() -> {
-			log.warn("Profile update failed. Customer not found for customer id: {}", customerId);
-			return new ResourceNotFoundException("Customer not found");
-		});
 
-		customer.setDateOfBirth(customerRequestDTO.getDateOfBirth());
+	    log.info("Updating profile for user id {}", userId);
 
-		customer.setAddress(customerRequestDTO.getAddress());
 
-		customer.setCity(customerRequestDTO.getCity());
+	    Customer customer =
+	            customerRepository.findByUser_Id(userId)
+	            .orElseThrow(() ->
+	                    new ResourceNotFoundException(
+	                            "Customer profile not found"
+	                    )
+	            );
 
-		customer.setState(customerRequestDTO.getState());
 
-		customer.setPinCode(customerRequestDTO.getPinCode());
+	    User user = customer.getUser();
 
-		customer.setNomineeName(customerRequestDTO.getNomineeName());
 
-		customer.setNomineeRelation(customerRequestDTO.getNomineeRelation());
+	    // update user fields
 
-		Customer updatedCustomer = customerRepository.save(customer);
+	    user.setFullName(dto.getFullName());
 
-		log.info("Customer profile updated successfully with id: {}", updatedCustomer.getId());
+	    user.setEmail(dto.getEmail());
 
-		return modelMapper.map(updatedCustomer, CustomerResponseDTO.class);
+	    user.setMobileNumber(dto.getMobileNumber());
+
+
+	    userRepository.save(user);
+
+
+
+	    // update customer fields
+
+	    customer.setDateOfBirth(dto.getDateOfBirth());
+
+	    customer.setAddress(dto.getAddress());
+
+	    customer.setCity(dto.getCity());
+
+	    customer.setState(dto.getState());
+
+	    customer.setPinCode(dto.getPinCode());
+
+	    customer.setNomineeName(dto.getNomineeName());
+
+	    customer.setNomineeRelation(dto.getNomineeRelation());
+
+
+
+	    Customer saved =
+	            customerRepository.save(customer);
+
+
+
+	    return modelMapper.map(
+	            saved,
+	            CustomerResponseDTO.class
+	    );
+
 	}
 
 //	@Override
@@ -226,4 +260,45 @@ public class CustomerServiceImplementation implements CustomerService {
 
 	    return modelMapper.map(customer, CustomerResponseDTO.class);
 	}
+	
+	private CustomerResponseDTO convert(Customer customer){
+
+		CustomerResponseDTO dto=new CustomerResponseDTO();
+
+		dto.setCustomerId(customer.getId());
+
+		dto.setDateOfBirth(customer.getDateOfBirth());
+		dto.setAddress(customer.getAddress());
+		dto.setCity(customer.getCity());
+		dto.setState(customer.getState());
+		dto.setPinCode(customer.getPinCode());
+
+		dto.setNomineeName(customer.getNomineeName());
+		dto.setNomineeRelation(customer.getNomineeRelation());
+
+		dto.setActiveStatus(
+		customer.getUser().getActiveStatus()
+		);
+
+		dto.setUserId(
+		customer.getUser().getId()
+		);
+
+
+		dto.setFullName(
+		customer.getUser().getFullName()
+		);
+
+		dto.setEmail(
+		customer.getUser().getEmail()
+		);
+
+		dto.setMobileNumber(
+		customer.getUser().getMobileNumber()
+		);
+
+
+		return dto;
+
+		}
 }

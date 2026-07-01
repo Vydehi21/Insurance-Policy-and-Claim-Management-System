@@ -28,6 +28,8 @@ public interface ClaimService {
             String sortBy,
             String direction
     );
+	PaginatedResponseDTO<ClaimResponseDTO> getAgentClaims(int page, int size, String sortBy, String direction);
+	ClaimResponseDTO getClaimDetailsForReview(Long claimId, Long agentUserId);
 	
     
 //    PaginatedResponseDTO<ClaimResponseDTO>
