@@ -125,20 +125,65 @@ public class CustomerServiceImplementation implements CustomerService {
 		return modelMapper.map(updatedCustomer, CustomerResponseDTO.class);
 	}
 
+//	@Override
+//	@Transactional(readOnly = true)
+//	public PaginatedResponseDTO<CustomerResponseDTO> searchCustomersByName(String name, int page, int size,
+//			String sortBy, String direction) {
+//		log.info("Searching customers by name: {}", name);
+//
+//		Pageable pageable = PaginationUtil.createPageable(page, size, sortBy, direction);
+//
+//		Page<Customer> customers = customerRepository.findByUserFullNameContainingIgnoreCase(name, pageable);
+//
+//		Page<CustomerResponseDTO> responsePage = customers
+//				.map(customer -> modelMapper.map(customer, CustomerResponseDTO.class));
+//
+//		return PaginationUtil.createPaginatedResponse(responsePage, sortBy, direction);
+//	}
+	
 	@Override
 	@Transactional(readOnly = true)
-	public PaginatedResponseDTO<CustomerResponseDTO> searchCustomersByName(String name, int page, int size,
-			String sortBy, String direction) {
-		log.info("Searching customers by name: {}", name);
+	public PaginatedResponseDTO<CustomerResponseDTO> searchCustomers(
 
-		Pageable pageable = PaginationUtil.createPageable(page, size, sortBy, direction);
+	        String keyword,
 
-		Page<Customer> customers = customerRepository.findByUserFullNameContainingIgnoreCase(name, pageable);
+	        int page,
 
-		Page<CustomerResponseDTO> responsePage = customers
-				.map(customer -> modelMapper.map(customer, CustomerResponseDTO.class));
+	        int size,
 
-		return PaginationUtil.createPaginatedResponse(responsePage, sortBy, direction);
+	        String sortBy,
+
+	        String direction) {
+
+	    Pageable pageable =
+	            PaginationUtil.createPageable(
+	                    page,
+	                    size,
+	                    sortBy,
+	                    direction
+	            );
+
+	    Page<Customer> customers =
+	            customerRepository.searchCustomers(
+	                    keyword,
+	                    pageable
+	            );
+
+	    Page<CustomerResponseDTO> response =
+	            customers.map(
+	                    customer ->
+	                            modelMapper.map(
+	                                    customer,
+	                                    CustomerResponseDTO.class
+	                            )
+	            );
+
+	    return PaginationUtil.createPaginatedResponse(
+	            response,
+	            sortBy,
+	            direction
+	    );
+
 	}
 
 	@Override

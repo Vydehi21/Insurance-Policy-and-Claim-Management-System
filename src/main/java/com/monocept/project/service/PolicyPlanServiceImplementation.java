@@ -206,6 +206,20 @@ public class PolicyPlanServiceImplementation implements PolicyPlanService {
 
 		log.info("Policy plan deactivated successfully with id: {}", planId);
 	}
+	
+	@Override
+	public void activatePlan(Long planId){
+
+	    PolicyPlan plan = policyPlanRepository
+	            .findById(planId)
+	            .orElseThrow(() ->
+	                    new RuntimeException("Plan not found"));
+
+	    plan.setActiveStatus(true);
+
+	    policyPlanRepository.save(plan);
+
+	}
 
 	private PolicyPlan findPlanById(Long id) {
 		return policyPlanRepository.findById(id).orElseThrow(() -> {

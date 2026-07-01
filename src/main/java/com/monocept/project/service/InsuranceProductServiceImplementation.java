@@ -164,6 +164,22 @@ public class InsuranceProductServiceImplementation implements InsuranceProductSe
 
 		log.info("Product deactivated successfully with id: {}", productId);
 	}
+	
+	@Override
+	@Transactional
+	public void activateProduct(Long productId) {
+
+	    InsuranceProduct product =
+	            productRepository
+	            .findById(productId)
+	            .orElseThrow(() ->
+	                    new RuntimeException("Product not found"));
+
+	    product.setActiveStatus(true);
+
+	    productRepository.save(product);
+
+	}
 
 	private InsuranceProduct findProductById(Long id) {
 		return productRepository.findById(id).orElseThrow(() -> {

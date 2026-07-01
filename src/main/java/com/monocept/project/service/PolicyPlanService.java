@@ -14,4 +14,5 @@ public interface PolicyPlanService {
     PaginatedResponseDTO<PolicyPlanResponseDTO> searchPlansByName(String name, int page, int size, String sortBy, String direction);
     PolicyPlanResponseDTO updatePlan(Long planId, PolicyPlanRequestDTO planRequestDTO);
     void deactivatePlan(Long planId);
+    void activatePlan(Long planId);
 }

@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/plans")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:5173")
 @Tag(name = "Policy Plans", description = "Operations for configuring and managing specific insurance policy plans")
 public class PolicyPlanController {
 
@@ -112,5 +113,19 @@ public class PolicyPlanController {
 
         planService.deactivatePlan(planId);
         return ResponseEntity.ok("Policy plan deactivated successfully");
+    }
+    
+    @PatchMapping("/{planId}/activate")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(
+        summary = "Activate Plan",
+        description = "Activates a previously deactivated policy plan"
+    )
+    public ResponseEntity<String> activatePlan(
+            @PathVariable Long planId){
+
+        planService.activatePlan(planId);
+
+        return ResponseEntity.ok("Policy plan activated successfully");
     }
 }

@@ -126,26 +126,61 @@ public class CustomerController {
         );
     }
 
+//    @GetMapping("/search")
+//    @PreAuthorize("hasRole('ADMIN')")
+//    @Operation(summary = "Search Customers By Name", description = "Executes text-string criteria patterns to match name components in target logs")
+//    public ResponseEntity<PaginatedResponseDTO<CustomerResponseDTO>>
+//    searchCustomers(
+//            @RequestParam String name,
+//            @RequestParam(defaultValue = "0") int page,
+//            @RequestParam(defaultValue = "10") int size,
+//            @RequestParam(defaultValue = "createdDate") String sortBy,
+//            @RequestParam(defaultValue = "desc") String direction) {
+//
+//        return ResponseEntity.ok(
+//                customerService.searchCustomersByName(
+//                        name,
+//                        page,
+//                        size,
+//                        sortBy,
+//                        direction
+//                )
+//        );
+//    }
+    
     @GetMapping("/search")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Search Customers By Name", description = "Executes text-string criteria patterns to match name components in target logs")
     public ResponseEntity<PaginatedResponseDTO<CustomerResponseDTO>>
     searchCustomers(
-            @RequestParam String name,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "createdDate") String sortBy,
-            @RequestParam(defaultValue = "desc") String direction) {
+
+        @RequestParam String keyword,
+
+        @RequestParam(defaultValue = "0") int page,
+
+        @RequestParam(defaultValue = "10") int size,
+
+        @RequestParam(defaultValue = "createdDate") String sortBy,
+
+        @RequestParam(defaultValue = "desc") String direction) {
 
         return ResponseEntity.ok(
-                customerService.searchCustomersByName(
-                        name,
-                        page,
-                        size,
-                        sortBy,
-                        direction
-                )
+
+            customerService.searchCustomers(
+
+                keyword,
+
+                page,
+
+                size,
+
+                sortBy,
+
+                direction
+
+            )
+
         );
+
     }
 
     @PutMapping("/{customerId}")

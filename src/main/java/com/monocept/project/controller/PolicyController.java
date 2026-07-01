@@ -143,7 +143,7 @@ public class PolicyController {
             @PathVariable Long customerId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "policyId") String sortBy,
+            @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String direction) {
 
         return policyService.getPoliciesByCustomerId(
@@ -161,7 +161,7 @@ public class PolicyController {
             @PathVariable PolicyStatus status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "policyId") String sortBy,
+            @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String direction) {
 
         return policyService.getPoliciesByStatus(
@@ -180,7 +180,7 @@ public class PolicyController {
             @PathVariable PolicyStatus status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "policyId") String sortBy,
+            @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String direction) {
 
         return policyService.getPoliciesByCustomerAndStatus(
@@ -199,7 +199,7 @@ public class PolicyController {
             @RequestParam String policyNumber,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "policyId") String sortBy,
+            @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String direction) {
 
         return policyService.searchPoliciesByNumber(

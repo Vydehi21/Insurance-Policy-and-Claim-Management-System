@@ -15,4 +15,5 @@ public interface InsuranceProductService {
     PaginatedResponseDTO<InsuranceProductResponseDTO> searchProductsByName(String name, int page, int size, String sortBy, String direction);
     InsuranceProductResponseDTO updateProduct(Long productId, InsuranceProductRequestDTO productRequestDTO);
     void deactivateProduct(Long productId);
+    void activateProduct(Long productId);
 }
