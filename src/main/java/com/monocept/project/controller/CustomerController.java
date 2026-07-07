@@ -105,7 +105,7 @@ public class CustomerController {
 	@PreAuthorize("hasRole('CUSTOMER')")
 	@Operation(summary = "Get Current Customer Profile", description = "Fetches active session identity context profile fields cleanly")
 	public ResponseEntity<CustomerResponseDTO> getMyProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
-		// 🛠️ FIXED: Removed structural duplicate unreachable return statements cleanly
+		// FIXED: Removed structural duplicate unreachable return statements cleanly
 		return ResponseEntity.ok(customerService.getCustomerByUserId(userDetails.getUserId()));
 	}
 
@@ -113,7 +113,7 @@ public class CustomerController {
     @PreAuthorize("hasRole('CUSTOMER')")
     @Operation(summary = "Check Profile Existence", description = "Determines if the active user account has already built a matching customer record profile")
     public ResponseEntity<Boolean> profileExists(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        // 🛠️ CLEAN: Communicates explicitly with the Service Layer wrapper!
+        // CLEAN: Communicates explicitly with the Service Layer wrapper!
         boolean exists = customerService.checkIfCustomerProfileExists(userDetails.getUserId());
         return ResponseEntity.ok(exists);
     }

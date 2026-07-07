@@ -178,22 +178,6 @@ public class CustomerServiceImplementation implements CustomerService {
 	    return customerRepository.existsByUser_Id(userId);
 	}
 
-
-//	@Override
-//	@Transactional(readOnly = true)
-//	public PaginatedResponseDTO<CustomerResponseDTO> searchCustomersByName(String name, int page, int size,
-//			String sortBy, String direction) {
-//		log.info("Searching customers by name: {}", name);
-//
-//		Pageable pageable = PaginationUtil.createPageable(page, size, sortBy, direction);
-//
-//		Page<Customer> customers = customerRepository.findByUserFullNameContainingIgnoreCase(name, pageable);
-//
-//		Page<CustomerResponseDTO> responsePage = customers
-//				.map(customer -> modelMapper.map(customer, CustomerResponseDTO.class));
-//
-//		return PaginationUtil.createPaginatedResponse(responsePage, sortBy, direction);
-//	}
 	
 	@Override
 	@Transactional(readOnly = true)

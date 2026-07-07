@@ -55,4 +55,12 @@ public class PaginationUtil {
 
         throw new InvalidRequestException("Sort direction must be asc or desc");
     }
+    
+    public static Pageable buildPageable(int page, int size, String sortBy, String direction) {
+        if (page < 0) throw new InvalidRequestException("Page number cannot be negative");
+        if (size <= 0 || size > 100) throw new InvalidRequestException("Page size must be between 1 and 100");
+        String dir = (direction == null) ? "asc" : direction;
+        Sort sort = dir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        return PageRequest.of(page, size, sort);
+    }
 }

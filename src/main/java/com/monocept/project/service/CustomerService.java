@@ -21,6 +21,4 @@ public interface CustomerService {
 	boolean profileExists(Long userId);
 	boolean checkIfCustomerProfileExists(Long userId);
     
-//    PaginatedResponseDTO<InsuranceProductResponseDTO>
-//    getActiveProducts(...)
 }

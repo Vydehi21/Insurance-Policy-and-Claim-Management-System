@@ -1,11 +1,13 @@
 package com.monocept.project.dto;
 
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
+
+import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -19,6 +21,6 @@ public class AgentPolicyIssueRequestDTO {
     @NotNull(message = "Plan reference is required")
     private Long planId;
 
-    @NotNull(message = "Start date is required")
+    @FutureOrPresent(message = "Start date cannot be in the past")
     private LocalDate startDate;
 }

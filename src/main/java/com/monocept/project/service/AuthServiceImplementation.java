@@ -2,7 +2,9 @@ package com.monocept.project.service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -49,6 +51,9 @@ public class AuthServiceImplementation implements AuthService {
 
 	@Value("${app.frontend.reset-url}")
 	private String resetUrl;
+	
+	@Value("${jwt.expiration}")
+	  private Long jwtExpiration;
 
 	private final EmailOtpRepository emailOtpRepository;
 	private final PhoneOtpRepository phoneOtpRepository;
@@ -107,11 +112,11 @@ public class AuthServiceImplementation implements AuthService {
 			throw new InvalidRequestException("Invalid Phone OTP");
 		}
 
-		// 2. 🛠️ FIXED SEQUENCE: Fetch pendingUser record BEFORE attempting variable references
+		// 2. FIXED SEQUENCE: Fetch pendingUser record BEFORE attempting variable references
 		PendingUser pendingUser = pendingUserRepository.findByEmail(dto.getEmail())
 				.orElseThrow(() -> new ResourceNotFoundException("Registration expired. Please register again"));
 
-		// 3. 🛠️ FIXED DUPLICATION: Unify initialization structure using ModelMapper cleanly
+		// 3. FIXED DUPLICATION: Unify initialization structure using ModelMapper cleanly
 		User user = modelMapper.map(pendingUser, User.class);
 		user.setRole(Role.CUSTOMER);
 		user.setActiveStatus(true);
@@ -174,7 +179,7 @@ public class AuthServiceImplementation implements AuthService {
 		response.setTokenType("Bearer");
 		response.setUserEmail(user.getEmail());
 		response.setUserRole(user.getRole());
-		response.setTokenExpiryInformation(System.currentTimeMillis() + 86400000L); // 24-hour expiration window
+		response.setTokenExpiryInformation(System.currentTimeMillis() + jwtExpiration); // 24-hour expiration window
 
 		log.info("Login successful for user id: {}", user.getId());
 		return response;
@@ -190,15 +195,17 @@ public class AuthServiceImplementation implements AuthService {
 	    userRepository.findByEmail(request.getEmail()).ifPresent(user -> {
 
 	        // 1. Generate a secure, unique UUID string token
-	        String token = java.util.UUID.randomUUID().toString();
+	    	 String rawToken = UUID.randomUUID().toString();
+	    	  String hashedToken = DigestUtils.sha256Hex(rawToken); // or use passwordEncoder.encode + a lookup strategy
+	    	  user.setResetToken(hashedToken);
 
 	        // 2. Persist token with a 15-minute validity window
-	        user.setResetToken(token);
+	        user.setResetToken(rawToken);
 	        user.setResetTokenExpiry(LocalDateTime.now().plusMinutes(15));
 	        userRepository.save(user);
 
 	        // 3. Construct a direct link matching your React application routes
-	        String fullResetUrl = "http://localhost:5173/forgot-password/" + token;
+	        String fullResetUrl = resetUrl + rawToken;
 	        log.info("Password reset token generated for user id: {}", user.getId());
 
 	        try {
@@ -215,29 +222,35 @@ public class AuthServiceImplementation implements AuthService {
 	@Override
 	@Transactional
 	public void resetPassword(ResetPasswordRequestDTO request) {
+		log.info("Processing password override sequence via cryptographic link token hash verification.");
+
 		// 1. Basic validation check on payload
 		if (request.getToken() == null || request.getToken().trim().isEmpty()) {
 			throw new AuthenticationException("Missing reset token");
 		}
-		// 2. Locate user record mapped directly to this unique URL token string
-		// Note: We map request.getOtp() to the token variable to preserve DTO mapping
-		// contracts smoothly
-		User user = userRepository.findByResetToken(request.getToken())
+
+		// 2. 🛠️ FIX: Apply matching SHA-256 hashing to the incoming user request token parameters
+		String hashedIncomingToken = org.apache.commons.codec.digest.DigestUtils.sha256Hex(request.getToken().trim());
+
+		// 3. 🛠️ FIX: Query the database ledger using the calculated hash signature
+		User user = userRepository.findByResetToken(hashedIncomingToken)
 				.orElseThrow(() -> new AuthenticationException("The reset link is invalid or has already been used."));
 
-		// 3. Check expiration window rules
-		if (user.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
+		// 4. Check expiration window rules
+		if (user.getResetTokenExpiry() == null || user.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
 			throw new AuthenticationException("This reset link has expired. Please request a new one.");
 		}
 
-		// 4. Encrypt raw password entry and clear transient tokens
+		// 5. Encrypt raw password entry using BCrypt and clear transient tokens context safely
 		user.setPassword(passwordEncoder.encode(request.getNewPassword()));
 		user.setResetToken(null);
 		user.setResetTokenExpiry(null);
 
 		userRepository.save(user);
 		
-		log.info("Password reset successful for user id: {}", user.getId());
+		log.info("Password override successful for user id: {}", user.getId());
 	}
+
+	
 
 }

@@ -293,4 +293,18 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),
                 request.getRequestURI());
     }
+    
+    @ExceptionHandler(com.monocept.project.exception.FileUploadException.class)
+    public ResponseEntity<com.monocept.project.dto.ErrorResponseDTO> handleFileUploadException(
+            FileUploadException ex,
+            jakarta.servlet.http.HttpServletRequest request) {
+
+        log.error("File upload infrastructure processing boundary failure: {}", ex.getMessage());
+
+        return buildResponse(
+                HttpStatus.BAD_GATEWAY, // Return HTTP 502 as suggested
+                ex.getMessage(),
+                request.getRequestURI());
+    }
+
 }

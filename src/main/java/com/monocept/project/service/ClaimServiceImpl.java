@@ -143,7 +143,7 @@ public class ClaimServiceImpl implements ClaimService {
 
 		User currentAgent = getUser(agentUserId);
 
-		// 🛑 CONCURRENCY LOCK GUARD: If already under review, verify if the active
+		// CONCURRENCY LOCK GUARD: If already under review, verify if the active
 		// agent holds the lock
 		if (claim.getClaimStatus() == ClaimStatus.UNDER_REVIEW && claim.getReviewedBy() != null
 				&& !claim.getReviewedBy().getId().equals(agentUserId)) {
@@ -155,7 +155,7 @@ public class ClaimServiceImpl implements ClaimService {
 							+ claim.getReviewedBy().getFullName());
 		}
 
-		// 🔓 LOCK ACQUISITION: If the claim is brand new, lock it to this agent
+		//  LOCK ACQUISITION: If the claim is brand new, lock it to this agent
 		// instantly upon opening
 		if (claim.getClaimStatus() == ClaimStatus.SUBMITTED) {
 			ClaimStatus previousStatus = claim.getClaimStatus();
@@ -179,6 +179,12 @@ public class ClaimServiceImpl implements ClaimService {
 		log.info("Customer {} attempting to raise claim for policy {}", authenticatedUserId, dto.getPolicyId());
 
 		Policy policy = getPolicy(dto.getPolicyId());
+		
+		if (!policy.getCustomer().getUser().getId().equals(authenticatedUserId)) {
+			log.warn("Blocked attempt by user {} to raise claim on another customer's policy: {}", authenticatedUserId,
+					policy.getPolicyNumber());
+			throw new AuthorizationException("You cannot claim another customer's policy");
+		}
 
 		if (policy.getEndDate().isBefore(LocalDate.now())) {
 			log.warn("Business rule violation. Claim attempted on expired policy: {}", policy.getPolicyNumber());
@@ -190,11 +196,7 @@ public class ClaimServiceImpl implements ClaimService {
 			throw new BusinessRuleException("Incident date cannot be in future");
 		}
 
-		if (!policy.getCustomer().getUser().getId().equals(authenticatedUserId)) {
-			log.warn("Blocked attempt by user {} to raise claim on another customer's policy: {}", authenticatedUserId,
-					policy.getPolicyNumber());
-			throw new AuthorizationException("You cannot claim another customer's policy");
-		}
+		
 
 		if (policy.getPolicyStatus() != PolicyStatus.ACTIVE) {
 			log.warn("Business rule violation. Claim attempted on non-active policy: {} (status: {})",
@@ -404,7 +406,7 @@ public class ClaimServiceImpl implements ClaimService {
 	@Transactional(readOnly = true)
 	public PaginatedResponseDTO<ClaimResponseDTO> getAllClaims(int page, int size, String sortBy, String direction) {
 
-		Pageable pageable = createPageable(page, size, sortBy, direction);
+		Pageable pageable = PaginationUtil.buildPageable(page, size, sortBy, direction);
 
 		Page<Claim> claimPage = claimRepository.findAll(pageable);
 
@@ -418,7 +420,7 @@ public class ClaimServiceImpl implements ClaimService {
 	public PaginatedResponseDTO<ClaimResponseDTO> getClaimsByCustomerId(Long customerId, int page, int size,
 			String sortBy, String direction) {
 
-		Pageable pageable = createPageable(page, size, sortBy, direction);
+		Pageable pageable = PaginationUtil.buildPageable(page, size, sortBy, direction);
 
 		Page<Claim> claimPage =
 
@@ -431,37 +433,14 @@ public class ClaimServiceImpl implements ClaimService {
 		return PaginationUtil.createPaginatedResponse(dtoPage, sortBy, direction);
 	}
 
-	private Pageable createPageable(int page, int size, String sortBy, String direction) {
 
-		if (sortBy.equals("claimId")) {
-			sortBy = "id";
-		}
-
-		if (page < 0) {
-
-			log.warn("Invalid pagination request. Page: {}", page);
-
-			throw new InvalidRequestException("Page cannot be negative");
-		}
-
-		if (size <= 0 || size > 100) {
-
-			log.warn("Invalid pagination request. Size: {}", size);
-
-			throw new InvalidRequestException("Invalid page size");
-		}
-
-		Sort sort = direction.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
-
-		return PageRequest.of(page, size, sort);
-	}
 
 	@Override
 	@Transactional(readOnly = true)
 	public PaginatedResponseDTO<ClaimResponseDTO> getClaimsByStatus(ClaimStatus status, int page, int size,
 			String sortBy, String direction) {
 
-		Pageable pageable = createPageable(page, size, sortBy, direction);
+		Pageable pageable = PaginationUtil.buildPageable(page, size, sortBy, direction);
 
 		Page<Claim> claimPage = claimRepository.findByClaimStatus(status, pageable);
 
@@ -475,7 +454,7 @@ public class ClaimServiceImpl implements ClaimService {
 	public PaginatedResponseDTO<ClaimResponseDTO> getClaimsByCustomerAndStatus(Long customerId, ClaimStatus status,
 			int page, int size, String sortBy, String direction) {
 
-		Pageable pageable = createPageable(page, size, sortBy, direction);
+		Pageable pageable = PaginationUtil.buildPageable(page, size, sortBy, direction);
 
 		Page<Claim> claimPage = claimRepository
 
@@ -493,7 +472,7 @@ public class ClaimServiceImpl implements ClaimService {
 	public PaginatedResponseDTO<ClaimResponseDTO> searchClaimsByNumber(String claimNumber, int page, int size,
 			String sortBy, String direction) {
 
-		Pageable pageable = createPageable(page, size, sortBy, direction);
+		Pageable pageable = PaginationUtil.buildPageable(page, size, sortBy, direction);
 		Page<Claim> claimPage = claimRepository.findByClaimNumberContainingIgnoreCase(claimNumber, pageable);
 
 		Page<ClaimResponseDTO> dtoPage = claimPage.map(this::convertToResponseDTO);
@@ -509,7 +488,7 @@ public class ClaimServiceImpl implements ClaimService {
 		Customer customer = customerRepository.findByUser_Id(userId)
 				.orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
 
-		Pageable pageable = createPageable(page, size, sortBy, direction);
+		Pageable pageable = PaginationUtil.buildPageable(page, size, sortBy, direction);
 
 		Page<Claim> claimPage = claimRepository.findByPolicy_Customer_Id(customer.getId(), pageable);
 
@@ -656,7 +635,7 @@ public class ClaimServiceImpl implements ClaimService {
 	@Override
 	public PaginatedResponseDTO<ClaimResponseDTO> getAgentClaims(int page, int size, String sortBy, String direction) {
 
-		Pageable pageable = createPageable(page, size, sortBy, direction);
+		Pageable pageable = PaginationUtil.buildPageable(page, size, sortBy, direction);
 
 		Page<Claim> claims = claimRepository.findByClaimStatusIn(List.of(ClaimStatus.SUBMITTED,
 				ClaimStatus.UNDER_REVIEW, ClaimStatus.RECOMMENDED_APPROVAL, ClaimStatus.RECOMMENDED_REJECTION),

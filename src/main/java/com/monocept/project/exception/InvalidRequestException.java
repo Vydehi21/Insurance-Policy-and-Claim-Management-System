@@ -7,6 +7,3 @@ public class InvalidRequestException extends RuntimeException {
 	}
 
 }
-
-//	EXC-017 Invalid pagination request
-//	EXC-018 Invalid sorting field
