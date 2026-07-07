@@ -1,7 +1,7 @@
 package com.monocept.project.service;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -32,6 +32,7 @@ public class OtpServiceImplementation implements OtpService {
     private final EmailOtpRepository emailOtpRepository;
     private final PhoneOtpRepository phoneOtpRepository;
     private final UserRepository userRepository;
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     @Override
     public String sendPhoneOtp(String phone) {
@@ -58,7 +59,7 @@ public class OtpServiceImplementation implements OtpService {
             throw e;
         }
 
-//        log.info("Phone OTP sent successfully: {}", phone);
+
 
     }
 
@@ -105,7 +106,7 @@ public class OtpServiceImplementation implements OtpService {
         emailOtpRepository.findByEmail(email)
                 .ifPresent(emailOtpRepository::delete);
 
-        String otp = String.valueOf(new Random().nextInt(900000)+100000);
+        String otp = String.valueOf(100000 + RANDOM.nextInt(900000));
 
         EmailOtp emailOtp = new EmailOtp();
         emailOtp.setEmail(email);

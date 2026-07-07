@@ -13,11 +13,3 @@ public class InvalidStatusException extends RuntimeException{
     }
 
 }
-
-
-
-//	EXC-009 Invalid policy status
-
-//	EXC-010 Invalid claim status
-
-//	EXC-016 Modify approved/rejected claim

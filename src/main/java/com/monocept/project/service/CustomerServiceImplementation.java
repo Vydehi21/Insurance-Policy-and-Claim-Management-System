@@ -170,22 +170,14 @@ public class CustomerServiceImplementation implements CustomerService {
 	    );
 
 	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public boolean checkIfCustomerProfileExists(Long userId) {
+	    log.info("Checking if profile exists for user ID: {}", userId);
+	    return customerRepository.existsByUser_Id(userId);
+	}
 
-//	@Override
-//	@Transactional(readOnly = true)
-//	public PaginatedResponseDTO<CustomerResponseDTO> searchCustomersByName(String name, int page, int size,
-//			String sortBy, String direction) {
-//		log.info("Searching customers by name: {}", name);
-//
-//		Pageable pageable = PaginationUtil.createPageable(page, size, sortBy, direction);
-//
-//		Page<Customer> customers = customerRepository.findByUserFullNameContainingIgnoreCase(name, pageable);
-//
-//		Page<CustomerResponseDTO> responsePage = customers
-//				.map(customer -> modelMapper.map(customer, CustomerResponseDTO.class));
-//
-//		return PaginationUtil.createPaginatedResponse(responsePage, sortBy, direction);
-//	}
 	
 	@Override
 	@Transactional(readOnly = true)
@@ -262,6 +254,64 @@ public class CustomerServiceImplementation implements CustomerService {
 		});
 	}
 	
+
+	public CustomerResponseDTO getCustomerProfileByUserId(Long userId){
+
+	    Customer customer =
+	        customerRepository.findByUser_Id(userId)
+	        .orElseThrow(
+	            () -> new RuntimeException("Customer not found")
+	        );
+
+	    return modelMapper.map(customer, CustomerResponseDTO.class);
+	}
+	
+	private CustomerResponseDTO convert(Customer customer){
+
+		CustomerResponseDTO dto=new CustomerResponseDTO();
+
+		dto.setCustomerId(customer.getId());
+
+		dto.setDateOfBirth(customer.getDateOfBirth());
+		dto.setAddress(customer.getAddress());
+		dto.setCity(customer.getCity());
+		dto.setState(customer.getState());
+		dto.setPinCode(customer.getPinCode());
+
+		dto.setNomineeName(customer.getNomineeName());
+		dto.setNomineeRelation(customer.getNomineeRelation());
+
+		dto.setActiveStatus(
+		customer.getUser().getActiveStatus()
+		);
+
+		dto.setUserId(
+		customer.getUser().getId()
+		);
+
+
+		dto.setFullName(
+		customer.getUser().getFullName()
+		);
+
+		dto.setEmail(
+		customer.getUser().getEmail()
+		);
+
+		dto.setMobileNumber(
+		customer.getUser().getMobileNumber()
+		);
+
+
+		return dto;
+
+		}
+	
+	@Override
+	public boolean profileExists(Long userId) {
+	    return customerRepository.existsByUser_Id(userId);
+	}
+
 //	public CustomerResponseDTO getCustomerProfileByUserId(Long userId){
 //
 //	    Customer customer =
@@ -313,4 +363,5 @@ public class CustomerServiceImplementation implements CustomerService {
 //		return dto;
 //
 //		}
+
 }

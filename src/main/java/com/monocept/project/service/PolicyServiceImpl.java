@@ -157,7 +157,7 @@ public class PolicyServiceImpl implements PolicyService {
 	@Override
 	public PaginatedResponseDTO<PolicyResponseDTO> getAllPolicies(int page, int size, String sortBy, String direction) {
 
-		Pageable pageable = createPageable(page, size, sortBy, direction);
+		Pageable pageable = PaginationUtil.buildPageable(page, size, sortBy, direction);
 
 		Page<PolicyResponseDTO> result = policyRepository.findAll(pageable).map(this::mapToResponse);
 
@@ -168,7 +168,7 @@ public class PolicyServiceImpl implements PolicyService {
 	public PaginatedResponseDTO<PolicyResponseDTO> getPoliciesByCustomerId(Long customerId, int page, int size,
 			String sortBy, String direction) {
 
-		Pageable pageable = createPageable(page, size, sortBy, direction);
+		Pageable pageable = PaginationUtil.buildPageable(page, size, sortBy, direction);
 
 		Page<PolicyResponseDTO> result = policyRepository
 
@@ -183,7 +183,7 @@ public class PolicyServiceImpl implements PolicyService {
 	public PaginatedResponseDTO<PolicyResponseDTO> getPoliciesByStatus(PolicyStatus status, int page, int size,
 			String sortBy, String direction) {
 
-		Pageable pageable = createPageable(page, size, sortBy, direction);
+		Pageable pageable = PaginationUtil.buildPageable(page, size, sortBy, direction);
 
 		Page<PolicyResponseDTO> result = policyRepository.findByPolicyStatus(status, pageable).map(this::mapToResponse);
 
@@ -194,7 +194,7 @@ public class PolicyServiceImpl implements PolicyService {
 	public PaginatedResponseDTO<PolicyResponseDTO> getPoliciesByCustomerAndStatus(Long customerId, PolicyStatus status,
 			int page, int size, String sortBy, String direction) {
 
-		Pageable pageable = createPageable(page, size, sortBy, direction);
+		Pageable pageable = PaginationUtil.buildPageable(page, size, sortBy, direction);
 
 		Page<PolicyResponseDTO> result = policyRepository
 
@@ -210,7 +210,7 @@ public class PolicyServiceImpl implements PolicyService {
 	public PaginatedResponseDTO<PolicyResponseDTO> searchPoliciesByNumber(String policyNumber, int page, int size,
 			String sortBy, String direction) {
 
-		Pageable pageable = createPageable(page, size, sortBy, direction);
+		Pageable pageable = PaginationUtil.buildPageable(page, size, sortBy, direction);
 
 		Page<PolicyResponseDTO> result = policyRepository.findByPolicyNumberContainingIgnoreCase(policyNumber, pageable)
 				.map(this::mapToResponse);
@@ -237,26 +237,7 @@ public class PolicyServiceImpl implements PolicyService {
 		log.info("Policy cancelled successfully. Policy number: {}", policy.getPolicyNumber());
 	}
 
-	private Pageable createPageable(int page, int size, String sortBy, String direction) {
 
-		if (page < 0) {
-
-			log.warn("LOG-017 Invalid pagination request. Page cannot be negative");
-
-			throw new InvalidRequestException("Page number cannot be negative");
-		}
-
-		if (size <= 0 || size > 100) {
-
-			log.warn("LOG-017 Invalid pagination request. Invalid size {}", size);
-
-			throw new InvalidRequestException("Page size must be between 1 and 100");
-		}
-
-		Sort sort = direction.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
-
-		return PageRequest.of(page, size, sort);
-	}
 
 	private PolicyResponseDTO mapToResponse(Policy policy) {
 

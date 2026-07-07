@@ -86,18 +86,6 @@ public class PolicyController {
 	    );
 	}
 	
-//	@GetMapping("/my")
-//	@PreAuthorize("hasRole('CUSTOMER')")
-//	public ResponseEntity<?> getMyPolicies(
-//	        @AuthenticationPrincipal CustomUserDetails userDetails
-//	){
-//
-//	    return ResponseEntity.ok(
-//	        policyService.getMyPolicies(
-//	            userDetails.getUserId()
-//	        )
-//	    );
-//	}
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','AGENT','CUSTOMER')")

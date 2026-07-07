@@ -18,7 +18,7 @@ public interface CustomerService {
             String direction
     );
     CustomerResponseDTO updateCustomerProfile(Long customerId, CustomerRequestDTO customerRequestDTO);
+	boolean profileExists(Long userId);
+	boolean checkIfCustomerProfileExists(Long userId);
     
-//    PaginatedResponseDTO<InsuranceProductResponseDTO>
-//    getActiveProducts(...)
 }

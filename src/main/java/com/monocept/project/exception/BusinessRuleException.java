@@ -6,4 +6,3 @@ public class BusinessRuleException extends RuntimeException{
         super(message);
     }
 }
-//	EXC-011 Claim amount exceeding coverage

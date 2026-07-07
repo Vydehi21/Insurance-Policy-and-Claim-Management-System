@@ -36,6 +36,4 @@ public class PremiumPaymentRequestDTO {
     @Pattern(regexp = "^[A-Za-z0-9\\-_]+$", message = "Transaction reference may only contain letters, digits, hyphens, and underscores")
     private String transactionReference;
 
-    @NotNull(message = "Payment status is required")
-    private PaymentStatus paymentStatus;
 }

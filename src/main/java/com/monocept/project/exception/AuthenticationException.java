@@ -7,7 +7,3 @@ public class AuthenticationException extends RuntimeException {
 	}
 }
 
-//	EXC-005 Invalid login credentials
-//	EXC-006 Inactive user login
-//	EXC-013 Invalid JWT token
-//	EXC-014 Expired JWT token

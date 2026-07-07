@@ -6,4 +6,3 @@ public class ResourceNotFoundException extends RuntimeException {
 	}
 }
 
-//	EXC-001 Resource not found
