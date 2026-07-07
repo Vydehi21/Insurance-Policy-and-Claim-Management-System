@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface InsuranceProductRepository extends JpaRepository<InsuranceProduct, Long> {
     boolean existsByProductName(String productName);
+    boolean existsByProductNameIgnoreCase(String productName);
     Page<InsuranceProduct> findByProductType(ProductType productType, Pageable pageable);
     Page<InsuranceProduct> findByActiveStatus(Boolean activeStatus, Pageable pageable);
     Page<InsuranceProduct> findByProductTypeAndActiveStatus(ProductType productType, Boolean activeStatus, Pageable pageable);

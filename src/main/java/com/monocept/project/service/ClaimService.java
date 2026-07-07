@@ -15,7 +15,7 @@ public interface ClaimService {
     ClaimResponseDTO raiseClaim(Long authenticatedUserId, ClaimRequestDTO claimRequestDTO);
     ClaimResponseDTO reviewClaim(Long claimId, Long agentUserId, ClaimReviewRequestDTO reviewDTO);
     ClaimResponseDTO processFinalDecision(Long claimId, Long adminUserId, ClaimFinalDecisionRequestDTO decisionDTO);
-    ClaimResponseDTO getClaimById(Long claimId);
+    ClaimResponseDTO getClaimById(Long claimId, Long requesterUserId, String requesterRole);
     PaginatedResponseDTO<ClaimResponseDTO> getAllClaims(int page, int size, String sortBy, String direction);
     PaginatedResponseDTO<ClaimResponseDTO> getClaimsByCustomerId(Long customerId, int page, int size, String sortBy, String direction);
     PaginatedResponseDTO<ClaimResponseDTO> getClaimsByStatus(ClaimStatus status, int page, int size, String sortBy, String direction);
@@ -30,13 +30,5 @@ public interface ClaimService {
     );
 	PaginatedResponseDTO<ClaimResponseDTO> getAgentClaims(int page, int size, String sortBy, String direction);
 	ClaimResponseDTO getClaimDetailsForReview(Long claimId, Long agentUserId);
-	
-    
-//    PaginatedResponseDTO<ClaimResponseDTO>
-//    getClaimsByPolicyId(
-//        Long policyId,
-//        int page,
-//        int size,
-//        String sortBy,
-//        String direction);
+
 }

@@ -114,6 +114,18 @@ public class CustomerServiceImplementation implements CustomerService {
 
 
 	    User user = customer.getUser();
+	    
+	    if (!user.getEmail().equals(dto.getEmail())
+	    			            && userRepository.existsByEmail(dto.getEmail())) {
+	    			        log.warn("Customer profile update failed. Duplicate email: {}", dto.getEmail());
+	    			        throw new DuplicateResourceException("Email already exists: " + dto.getEmail());
+	    			    }
+	    		
+	    			    if (!user.getMobileNumber().equals(dto.getMobileNumber())
+	    			            && userRepository.existsByMobileNumber(dto.getMobileNumber())) {
+	    			        log.warn("Customer profile update failed. Duplicate mobile number: {}", dto.getMobileNumber());
+	    			        throw new DuplicateResourceException("Mobile number already exists: " + dto.getMobileNumber());
+	    			    }
 
 
 	    // update user fields
@@ -150,7 +162,7 @@ public class CustomerServiceImplementation implements CustomerService {
 	    Customer saved =
 	            customerRepository.save(customer);
 
-
+	    log.info("Customer profile updated successfully for user id: {}", userId);
 
 	    return modelMapper.map(
 	            saved,
@@ -158,21 +170,74 @@ public class CustomerServiceImplementation implements CustomerService {
 	    );
 
 	}
-
+	
 	@Override
 	@Transactional(readOnly = true)
-	public PaginatedResponseDTO<CustomerResponseDTO> searchCustomersByName(String name, int page, int size,
-			String sortBy, String direction) {
-		log.info("Searching customers by name: {}", name);
+	public boolean checkIfCustomerProfileExists(Long userId) {
+	    log.info("Checking if profile exists for user ID: {}", userId);
+	    return customerRepository.existsByUser_Id(userId);
+	}
 
-		Pageable pageable = PaginationUtil.createPageable(page, size, sortBy, direction);
 
-		Page<Customer> customers = customerRepository.findByUserFullNameContainingIgnoreCase(name, pageable);
+//	@Override
+//	@Transactional(readOnly = true)
+//	public PaginatedResponseDTO<CustomerResponseDTO> searchCustomersByName(String name, int page, int size,
+//			String sortBy, String direction) {
+//		log.info("Searching customers by name: {}", name);
+//
+//		Pageable pageable = PaginationUtil.createPageable(page, size, sortBy, direction);
+//
+//		Page<Customer> customers = customerRepository.findByUserFullNameContainingIgnoreCase(name, pageable);
+//
+//		Page<CustomerResponseDTO> responsePage = customers
+//				.map(customer -> modelMapper.map(customer, CustomerResponseDTO.class));
+//
+//		return PaginationUtil.createPaginatedResponse(responsePage, sortBy, direction);
+//	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public PaginatedResponseDTO<CustomerResponseDTO> searchCustomers(
 
-		Page<CustomerResponseDTO> responsePage = customers
-				.map(customer -> modelMapper.map(customer, CustomerResponseDTO.class));
+	        String keyword,
 
-		return PaginationUtil.createPaginatedResponse(responsePage, sortBy, direction);
+	        int page,
+
+	        int size,
+
+	        String sortBy,
+
+	        String direction) {
+
+	    Pageable pageable =
+	            PaginationUtil.createPageable(
+	                    page,
+	                    size,
+	                    sortBy,
+	                    direction
+	            );
+
+	    Page<Customer> customers =
+	            customerRepository.searchCustomers(
+	                    keyword,
+	                    pageable
+	            );
+
+	    Page<CustomerResponseDTO> response =
+	            customers.map(
+	                    customer ->
+	                            modelMapper.map(
+	                                    customer,
+	                                    CustomerResponseDTO.class
+	                            )
+	            );
+
+	    return PaginationUtil.createPaginatedResponse(
+	            response,
+	            sortBy,
+	            direction
+	    );
+
 	}
 
 	@Override
@@ -205,6 +270,7 @@ public class CustomerServiceImplementation implements CustomerService {
 		});
 	}
 	
+
 	public CustomerResponseDTO getCustomerProfileByUserId(Long userId){
 
 	    Customer customer =
@@ -261,4 +327,57 @@ public class CustomerServiceImplementation implements CustomerService {
 	public boolean profileExists(Long userId) {
 	    return customerRepository.existsByUser_Id(userId);
 	}
+
+//	public CustomerResponseDTO getCustomerProfileByUserId(Long userId){
+//
+//	    Customer customer =
+//	        customerRepository.findByUser_Id(userId)
+//	        .orElseThrow(
+//	            () -> new RuntimeException("Customer not found")
+//	        );
+//
+//	    return modelMapper.map(customer, CustomerResponseDTO.class);
+//	}
+//	
+//	private CustomerResponseDTO convert(Customer customer){
+//
+//		CustomerResponseDTO dto=new CustomerResponseDTO();
+//
+//		dto.setCustomerId(customer.getId());
+//
+//		dto.setDateOfBirth(customer.getDateOfBirth());
+//		dto.setAddress(customer.getAddress());
+//		dto.setCity(customer.getCity());
+//		dto.setState(customer.getState());
+//		dto.setPinCode(customer.getPinCode());
+//
+//		dto.setNomineeName(customer.getNomineeName());
+//		dto.setNomineeRelation(customer.getNomineeRelation());
+//
+//		dto.setActiveStatus(
+//		customer.getUser().getActiveStatus()
+//		);
+//
+//		dto.setUserId(
+//		customer.getUser().getId()
+//		);
+//
+//
+//		dto.setFullName(
+//		customer.getUser().getFullName()
+//		);
+//
+//		dto.setEmail(
+//		customer.getUser().getEmail()
+//		);
+//
+//		dto.setMobileNumber(
+//		customer.getUser().getMobileNumber()
+//		);
+//
+//
+//		return dto;
+//
+//		}
+
 }

@@ -1,5 +1,8 @@
 package com.monocept.project.service;
 
+import java.math.BigDecimal;
+import java.util.Optional;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -9,6 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.monocept.project.dto.PaginatedResponseDTO;
 import com.monocept.project.dto.PolicyPlanRequestDTO;
 import com.monocept.project.dto.PolicyPlanResponseDTO;
+import com.monocept.project.enums.PremiumType;
+import com.monocept.project.exception.BusinessRuleException;
+import com.monocept.project.exception.DuplicateResourceException;
 import com.monocept.project.exception.ResourceNotFoundException;
 import com.monocept.project.model.InsuranceProduct;
 import com.monocept.project.model.PolicyPlan;
@@ -24,200 +30,273 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class PolicyPlanServiceImplementation implements PolicyPlanService {
 
-	private final PolicyPlanRepository policyPlanRepository;
-	private final InsuranceProductRepository productRepository;
-	private final ModelMapper modelMapper;
+    private final PolicyPlanRepository policyPlanRepository;
+    private final InsuranceProductRepository productRepository;
+    private final ModelMapper modelMapper;
 
-	@Override
-	@Transactional
-	public PolicyPlanResponseDTO createPlan(PolicyPlanRequestDTO planRequestDTO) {
+    @Override
+    @Transactional
+    public PolicyPlanResponseDTO createPlan(PolicyPlanRequestDTO planRequestDTO) {
 
-	    log.info("Creating policy plan: {}", planRequestDTO.getPlanName());
+        log.info("Creating policy plan: {}", planRequestDTO.getPlanName());
 
-	    InsuranceProduct product = findProductById(planRequestDTO.getProductId());
+        InsuranceProduct product = findProductById(planRequestDTO.getProductId());
 
+        if (Boolean.FALSE.equals(product.getActiveStatus())) {
+            log.warn("Attempt to create a plan under inactive product id: {}", product.getId());
+            throw new BusinessRuleException("Cannot create a plan under an inactive insurance product");
+        }
 
-	    PolicyPlan plan = new PolicyPlan();
+        validateCoverageGreaterThanPremium(planRequestDTO.getCoverageAmount(), planRequestDTO.getPremiumAmount());
 
+        checkDuplicatePlanName(product.getId(), planRequestDTO.getPlanName(), null);
+        checkDuplicatePlanTerms(product.getId(), planRequestDTO.getCoverageAmount(),
+                planRequestDTO.getPremiumAmount(), planRequestDTO.getPremiumType(),
+                planRequestDTO.getDuration(), null);
 
-	    plan.setPlanName(planRequestDTO.getPlanName());
+        PolicyPlan plan = new PolicyPlan();
 
-	    plan.setCoverageAmount(planRequestDTO.getCoverageAmount());
+        plan.setPlanName(planRequestDTO.getPlanName());
+        plan.setCoverageAmount(planRequestDTO.getCoverageAmount());
+        plan.setPremiumAmount(planRequestDTO.getPremiumAmount());
+        plan.setPremiumType(planRequestDTO.getPremiumType());
+        plan.setDuration(planRequestDTO.getDuration());
+        plan.setTermsAndConditions(planRequestDTO.getTermsAndConditions());
+        plan.setActiveStatus(planRequestDTO.getActiveStatus());
+        plan.setInsuranceProduct(product);
 
-	    plan.setPremiumAmount(planRequestDTO.getPremiumAmount());
+        PolicyPlan savedPlan = policyPlanRepository.save(plan);
 
-	    plan.setPremiumType(planRequestDTO.getPremiumType());
+        log.info("Policy plan created successfully id: {}", savedPlan.getId());
 
-	    plan.setDuration(planRequestDTO.getDuration());
+        return modelMapper.map(savedPlan, PolicyPlanResponseDTO.class);
+    }
 
-	    plan.setTermsAndConditions(planRequestDTO.getTermsAndConditions());
+    @Override
+    @Transactional(readOnly = true)
+    public PolicyPlanResponseDTO getPlanById(Long planId) {
+        log.info("Fetching policy plan with id: {}", planId);
 
-	    plan.setActiveStatus(planRequestDTO.getActiveStatus());
+        PolicyPlan plan = findPlanById(planId);
 
+        return modelMapper.map(plan, PolicyPlanResponseDTO.class);
+    }
 
-	    plan.setInsuranceProduct(product);
+    @Override
+    @Transactional(readOnly = true)
+    public PaginatedResponseDTO<PolicyPlanResponseDTO> getAllPlans(int page, int size, String sortBy,
+            String direction) {
+        log.info("Fetching all policy plans");
 
+        Pageable pageable = PaginationUtil.createPageable(page, size, sortBy, direction);
 
-	    PolicyPlan savedPlan = policyPlanRepository.save(plan);
+        Page<PolicyPlan> plans = policyPlanRepository.findAll(pageable);
 
+        Page<PolicyPlanResponseDTO> responsePage = plans
+                .map(plan -> modelMapper.map(plan, PolicyPlanResponseDTO.class));
 
-	    log.info(
-	        "Policy plan created successfully id: {}",
-	        savedPlan.getId()
-	    );
+        return PaginationUtil.createPaginatedResponse(responsePage, sortBy, direction);
+    }
 
+    @Override
+    @Transactional(readOnly = true)
+    public PaginatedResponseDTO<PolicyPlanResponseDTO> getPlansByStatus(Boolean activeStatus, int page, int size,
+            String sortBy, String direction) {
+        log.info("Fetching plans with status: {}", activeStatus);
 
-	    return modelMapper.map(
-	            savedPlan,
-	            PolicyPlanResponseDTO.class
-	    );
-	}
+        Pageable pageable = PaginationUtil.createPageable(page, size, sortBy, direction);
 
-	@Override
-	@Transactional(readOnly = true)
-	public PolicyPlanResponseDTO getPlanById(Long planId) {
-		log.info("Fetching policy plan with id: {}", planId);
+        Page<PolicyPlan> plans = policyPlanRepository.findByActiveStatus(activeStatus, pageable);
 
-		PolicyPlan plan = findPlanById(planId);
+        Page<PolicyPlanResponseDTO> responsePage = plans
+                .map(plan -> modelMapper.map(plan, PolicyPlanResponseDTO.class));
 
-		return modelMapper.map(plan, PolicyPlanResponseDTO.class);
-	}
+        return PaginationUtil.createPaginatedResponse(responsePage, sortBy, direction);
+    }
 
-	@Override
-	@Transactional(readOnly = true)
-	public PaginatedResponseDTO<PolicyPlanResponseDTO> getAllPlans(int page, int size, String sortBy,
-			String direction) {
-		log.info("Fetching all policy plans");
+    @Override
+    @Transactional(readOnly = true)
+    public PaginatedResponseDTO<PolicyPlanResponseDTO> getPlansByProductId(Long productId, int page, int size,
+            String sortBy, String direction) {
+        log.info("Fetching plans for product id: {}", productId);
 
-		Pageable pageable = PaginationUtil.createPageable(page, size, sortBy, direction);
+        findProductById(productId);
 
-		Page<PolicyPlan> plans = policyPlanRepository.findAll(pageable);
+        Pageable pageable = PaginationUtil.createPageable(page, size, sortBy, direction);
 
-		Page<PolicyPlanResponseDTO> responsePage = plans
-				.map(plan -> modelMapper.map(plan, PolicyPlanResponseDTO.class));
+        Page<PolicyPlan> plans = policyPlanRepository.findByInsuranceProductId(productId, pageable);
 
-		return PaginationUtil.createPaginatedResponse(responsePage, sortBy, direction);
-	}
+        Page<PolicyPlanResponseDTO> responsePage = plans
+                .map(plan -> modelMapper.map(plan, PolicyPlanResponseDTO.class));
 
-	@Override
-	@Transactional(readOnly = true)
-	public PaginatedResponseDTO<PolicyPlanResponseDTO> getPlansByStatus(Boolean activeStatus, int page, int size,
-			String sortBy, String direction) {
-		log.info("Fetching plans with status: {}", activeStatus);
+        return PaginationUtil.createPaginatedResponse(responsePage, sortBy, direction);
+    }
 
-		Pageable pageable = PaginationUtil.createPageable(page, size, sortBy, direction);
+    @Override
+    @Transactional(readOnly = true)
+    public PaginatedResponseDTO<PolicyPlanResponseDTO> getPlansByProductIdAndStatus(Long productId,
+            Boolean activeStatus, int page, int size, String sortBy, String direction) {
+        log.info("Fetching plans for product id: {} and status: {}", productId, activeStatus);
 
-		Page<PolicyPlan> plans = policyPlanRepository.findByActiveStatus(activeStatus, pageable);
+        findProductById(productId);
 
-		Page<PolicyPlanResponseDTO> responsePage = plans
-				.map(plan -> modelMapper.map(plan, PolicyPlanResponseDTO.class));
+        Pageable pageable = PaginationUtil.createPageable(page, size, sortBy, direction);
 
-		return PaginationUtil.createPaginatedResponse(responsePage, sortBy, direction);
-	}
+        Page<PolicyPlan> plans = policyPlanRepository.findByInsuranceProductIdAndActiveStatus(productId, activeStatus,
+                pageable);
 
-	@Override
-	@Transactional(readOnly = true)
-	public PaginatedResponseDTO<PolicyPlanResponseDTO> getPlansByProductId(Long productId, int page, int size,
-			String sortBy, String direction) {
-		log.info("Fetching plans for product id: {}", productId);
+        Page<PolicyPlanResponseDTO> responsePage = plans
+                .map(plan -> modelMapper.map(plan, PolicyPlanResponseDTO.class));
 
-		findProductById(productId);
+        return PaginationUtil.createPaginatedResponse(responsePage, sortBy, direction);
+    }
 
-		Pageable pageable = PaginationUtil.createPageable(page, size, sortBy, direction);
+    @Override
+    @Transactional(readOnly = true)
+    public PaginatedResponseDTO<PolicyPlanResponseDTO> searchPlansByName(String name, int page, int size,
+            String sortBy, String direction) {
+        log.info("Searching plans by name: {}", name);
 
-		Page<PolicyPlan> plans = policyPlanRepository.findByInsuranceProductId(productId, pageable);
+        Pageable pageable = PaginationUtil.createPageable(page, size, sortBy, direction);
 
-		Page<PolicyPlanResponseDTO> responsePage = plans
-				.map(plan -> modelMapper.map(plan, PolicyPlanResponseDTO.class));
+        Page<PolicyPlan> plans = policyPlanRepository.findByPlanNameContainingIgnoreCase(name, pageable);
 
-		return PaginationUtil.createPaginatedResponse(responsePage, sortBy, direction);
-	}
+        Page<PolicyPlanResponseDTO> responsePage = plans
+                .map(plan -> modelMapper.map(plan, PolicyPlanResponseDTO.class));
 
-	@Override
-	@Transactional(readOnly = true)
-	public PaginatedResponseDTO<PolicyPlanResponseDTO> getPlansByProductIdAndStatus(Long productId,
-			Boolean activeStatus, int page, int size, String sortBy, String direction) {
-		log.info("Fetching plans for product id: {} and status: {}", productId, activeStatus);
+        return PaginationUtil.createPaginatedResponse(responsePage, sortBy, direction);
+    }
 
-		findProductById(productId);
+    @Override
+    @Transactional
+    public PolicyPlanResponseDTO updatePlan(Long planId, PolicyPlanRequestDTO planRequestDTO) {
+        log.info("Updating policy plan with id: {}", planId);
 
-		Pageable pageable = PaginationUtil.createPageable(page, size, sortBy, direction);
+        PolicyPlan plan = findPlanById(planId);
 
-		Page<PolicyPlan> plans = policyPlanRepository.findByInsuranceProductIdAndActiveStatus(productId, activeStatus,
-				pageable);
+        InsuranceProduct product = findProductById(planRequestDTO.getProductId());
 
-		Page<PolicyPlanResponseDTO> responsePage = plans
-				.map(plan -> modelMapper.map(plan, PolicyPlanResponseDTO.class));
+        if (Boolean.FALSE.equals(product.getActiveStatus())) {
+            log.warn("Attempt to move plan {} under inactive product id: {}", planId, product.getId());
+            throw new BusinessRuleException("Cannot assign a plan to an inactive insurance product");
+        }
 
-		return PaginationUtil.createPaginatedResponse(responsePage, sortBy, direction);
-	}
+        validateCoverageGreaterThanPremium(planRequestDTO.getCoverageAmount(), planRequestDTO.getPremiumAmount());
 
-	@Override
-	@Transactional(readOnly = true)
-	public PaginatedResponseDTO<PolicyPlanResponseDTO> searchPlansByName(String name, int page, int size, String sortBy,
-			String direction) {
-		log.info("Searching plans by name: {}", name);
-
-		Pageable pageable = PaginationUtil.createPageable(page, size, sortBy, direction);
-
-		Page<PolicyPlan> plans = policyPlanRepository.findByPlanNameContainingIgnoreCase(name, pageable);
-
-		Page<PolicyPlanResponseDTO> responsePage = plans
-				.map(plan -> modelMapper.map(plan, PolicyPlanResponseDTO.class));
-
-		return PaginationUtil.createPaginatedResponse(responsePage, sortBy, direction);
-	}
-
-	@Override
-	@Transactional
-	public PolicyPlanResponseDTO updatePlan(Long planId, PolicyPlanRequestDTO planRequestDTO) {
-		log.info("Updating policy plan with id: {}", planId);
-
-		PolicyPlan plan = findPlanById(planId);
-
-		InsuranceProduct product = findProductById(planRequestDTO.getProductId());
-
-		plan.setPlanName(planRequestDTO.getPlanName());
-		plan.setCoverageAmount(planRequestDTO.getCoverageAmount());
-		plan.setPremiumAmount(planRequestDTO.getPremiumAmount());
-		plan.setPremiumType(planRequestDTO.getPremiumType());
-		plan.setDuration(planRequestDTO.getDuration());
-		plan.setTermsAndConditions(planRequestDTO.getTermsAndConditions());
-		plan.setActiveStatus(planRequestDTO.getActiveStatus());
-		plan.setInsuranceProduct(product);
-
-		PolicyPlan updatedPlan = policyPlanRepository.save(plan);
-
-		log.info("Policy plan updated successfully with id: {}", updatedPlan.getId());
-
-		return modelMapper.map(updatedPlan, PolicyPlanResponseDTO.class);
-	}
-
-	@Override
-	@Transactional
-	public void deactivatePlan(Long planId) {
-		log.info("Deactivating policy plan with id: {}", planId);
-
-		PolicyPlan plan = findPlanById(planId);
-
-		plan.setActiveStatus(false);
-
-		policyPlanRepository.save(plan);
-
-		log.info("Policy plan deactivated successfully with id: {}", planId);
-	}
-
-	private PolicyPlan findPlanById(Long id) {
-		return policyPlanRepository.findById(id).orElseThrow(() -> {
-			log.warn("Policy plan not found with id: {}", id);
-			return new ResourceNotFoundException("Policy plan not found with id: " + id);
-		});
-	}
-
-	private InsuranceProduct findProductById(Long id) {
-		return productRepository.findById(id).orElseThrow(() -> {
-			log.warn("Insurance product not found with id: {}", id);
-			return new ResourceNotFoundException("Insurance product not found with id: " + id);
-		});
-	}
+        checkDuplicatePlanName(product.getId(), planRequestDTO.getPlanName(), planId);
+        checkDuplicatePlanTerms(product.getId(), planRequestDTO.getCoverageAmount(),
+                planRequestDTO.getPremiumAmount(), planRequestDTO.getPremiumType(),
+                planRequestDTO.getDuration(), planId);
+
+        plan.setPlanName(planRequestDTO.getPlanName());
+        plan.setCoverageAmount(planRequestDTO.getCoverageAmount());
+        plan.setPremiumAmount(planRequestDTO.getPremiumAmount());
+        plan.setPremiumType(planRequestDTO.getPremiumType());
+        plan.setDuration(planRequestDTO.getDuration());
+        plan.setTermsAndConditions(planRequestDTO.getTermsAndConditions());
+        plan.setActiveStatus(planRequestDTO.getActiveStatus());
+        plan.setInsuranceProduct(product);
+
+        PolicyPlan updatedPlan = policyPlanRepository.save(plan);
+
+        log.info("Policy plan updated successfully with id: {}", updatedPlan.getId());
+
+        return modelMapper.map(updatedPlan, PolicyPlanResponseDTO.class);
+    }
+
+    @Override
+    @Transactional
+    public void deactivatePlan(Long planId) {
+        log.info("Deactivating policy plan with id: {}", planId);
+
+        PolicyPlan plan = findPlanById(planId);
+
+        plan.setActiveStatus(false);
+
+        policyPlanRepository.save(plan);
+
+        log.info("Policy plan deactivated successfully with id: {}", planId);
+    }
+
+    @Override
+    @Transactional
+    public void activatePlan(Long planId) {
+
+        PolicyPlan plan = findPlanById(planId);
+
+        plan.setActiveStatus(true);
+
+        policyPlanRepository.save(plan);
+
+        log.info("Policy plan activated successfully with id: {}", planId);
+
+    }
+
+    private PolicyPlan findPlanById(Long id) {
+        return policyPlanRepository.findById(id).orElseThrow(() -> {
+            log.warn("Policy plan not found with id: {}", id);
+            return new ResourceNotFoundException("Policy plan not found with id: " + id);
+        });
+    }
+
+    private void validateCoverageGreaterThanPremium(BigDecimal coverageAmount, BigDecimal premiumAmount) {
+        if (coverageAmount.compareTo(premiumAmount) <= 0) {
+            log.warn("Rejected plan: coverage amount {} is not greater than premium amount {}",
+                    coverageAmount, premiumAmount);
+            throw new BusinessRuleException("Coverage amount must be greater than premium amount");
+        }
+    }
+
+    /**
+     * Enforces that a plan name is unique within its product (case-insensitive).
+     * excludePlanId is null on create, and set to the plan's own id on update
+     * (so a plan isn't flagged as a duplicate of itself).
+     */
+    private void checkDuplicatePlanName(Long productId, String planName, Long excludePlanId) {
+        Optional<PolicyPlan> existing = (excludePlanId == null)
+                ? policyPlanRepository.findByInsuranceProduct_IdAndPlanNameIgnoreCase(productId, planName)
+                : policyPlanRepository.findByInsuranceProduct_IdAndPlanNameIgnoreCaseAndIdNot(productId, planName,
+                        excludePlanId);
+
+        existing.ifPresent(plan -> {
+            log.warn("Rejected plan: duplicate name under product id {}", productId);
+            String message = String.format(
+                    "A plan named '%s' already exists under this product (Plan ID: %d). Please choose a different name, or update the existing plan instead.",
+                    plan.getPlanName(), plan.getId());
+            throw new DuplicateResourceException(message);
+        });
+    }
+
+    /**
+     * Enforces that coverage amount, premium amount, premium type, and duration
+     * together aren't identical to another plan under the same product. A change
+     * in premium type (e.g. one-time vs annual) is treated as a genuinely
+     * different plan, not a duplicate.
+     */
+    private void checkDuplicatePlanTerms(Long productId, BigDecimal coverageAmount, BigDecimal premiumAmount,
+            PremiumType premiumType, Integer duration, Long excludePlanId) {
+
+        Optional<PolicyPlan> existing = (excludePlanId == null)
+                ? policyPlanRepository.findByInsuranceProduct_IdAndCoverageAmountAndPremiumAmountAndPremiumTypeAndDuration(
+                        productId, coverageAmount, premiumAmount, premiumType, duration)
+                : policyPlanRepository
+                        .findByInsuranceProduct_IdAndCoverageAmountAndPremiumAmountAndPremiumTypeAndDurationAndIdNot(
+                                productId, coverageAmount, premiumAmount, premiumType, duration, excludePlanId);
+
+        existing.ifPresent(plan -> {
+            log.warn("Rejected plan: identical terms to existing plan id {} under product id {}", plan.getId(),
+                    productId);
+            String message = String.format(
+                    "An identical plan (same coverage amount, premium amount, premium type, and duration) already exists under this product: '%s' (Plan ID: %d). Please update that plan instead of creating a duplicate.",
+                    plan.getPlanName(), plan.getId());
+            throw new DuplicateResourceException(message);
+        });
+    }
+
+    private InsuranceProduct findProductById(Long id) {
+        return productRepository.findById(id).orElseThrow(() -> {
+            log.warn("Insurance product not found with id: {}", id);
+            return new ResourceNotFoundException("Insurance product not found with id: " + id);
+        });
+    }
 }

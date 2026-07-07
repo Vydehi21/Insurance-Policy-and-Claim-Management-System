@@ -8,6 +8,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import com.monocept.project.exception.DuplicateResourceException;
 import com.monocept.project.model.EmailOtp;
 import com.monocept.project.model.PhoneOtp;
 import com.monocept.project.repository.EmailOtpRepository;
@@ -39,8 +40,7 @@ public class OtpServiceImplementation implements OtpService {
 
         if(userRepository.findByMobileNumber(phone).isPresent()) {
             log.warn("Mobile number already registered: {}", phone);
-            throw new RuntimeException("Mobile number already registered");
-        }
+            throw new DuplicateResourceException("Mobile number already registered");        }
 
         try {
             Verification verification = Verification.creator(
@@ -100,8 +100,7 @@ public class OtpServiceImplementation implements OtpService {
 
         if(userRepository.findByEmail(email).isPresent()) {
             log.warn("Email already registered: {}", email);
-            throw new RuntimeException("Email already registered");
-        }
+            throw new DuplicateResourceException("Email already registered");        }
 
         emailOtpRepository.findByEmail(email)
                 .ifPresent(emailOtpRepository::delete);

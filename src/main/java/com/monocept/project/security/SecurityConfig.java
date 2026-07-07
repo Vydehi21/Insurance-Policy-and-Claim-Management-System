@@ -44,9 +44,6 @@ public class SecurityConfig {
                 .cors(cors->cors.configurationSource(corsConfigurationSource()))
 
 
-        .csrf(csrf -> csrf.disable())
-
-
         .sessionManagement(session ->
             session.sessionCreationPolicy(
                 SessionCreationPolicy.STATELESS
@@ -148,17 +145,18 @@ public class SecurityConfig {
             )
             .hasRole("CUSTOMER")
 
-            // admin policy management
+            // remaining policy endpoints share role/ownership enforcement
+            // between @PreAuthorize on the controller and the service-layer
+            // ownership checks in PolicyServiceImpl
             .requestMatchers(
                     "/api/policies/**"
             )
-            .hasRole("ADMIN")
+            .hasAnyRole("ADMIN", "AGENT", "CUSTOMER")
+
 
 
 
             
-
-
 
 
             // =========================
@@ -201,6 +199,13 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.POST, "/api/claims")
             .hasRole("CUSTOMER")
 
+            // remaining claim endpoints share role/ownership enforcement
+            // between @PreAuthorize on the controller and the service-layer
+            // ownership checks added in ClaimServiceImpl
+            .requestMatchers(
+                    "/api/claims/**"
+            )
+            .hasAnyRole("ADMIN", "AGENT", "CUSTOMER")
 
 
 
@@ -213,13 +218,22 @@ public class SecurityConfig {
             .requestMatchers(
                     "/api/premium-payments/agent"
             )
-            .hasRole("AGENT")
+            .hasAnyRole("ADMIN", "AGENT")
+
             // customer pays and views own payments
             .requestMatchers(
-                    "/api/premium-payments/my",
-                    "/api/premium-payments/**"
+                    "/api/premium-payments/my"
             )
             .hasRole("CUSTOMER")
+
+            // remaining payment endpoints are shared by all three roles;
+            // per-role and per-owner enforcement happens via @PreAuthorize
+            // on the controller and the ownership checks in
+            // PremiumPaymentServiceImpl
+            .requestMatchers(
+                    "/api/premium-payments/**"
+            )
+            .hasAnyRole("ADMIN", "AGENT", "CUSTOMER")
 
             // =========================
             // CLAIM HISTORY
@@ -230,7 +244,8 @@ public class SecurityConfig {
             )
             .hasAnyRole(
                     "ADMIN",
-                    "AGENT"
+                    "AGENT",
+                    "CUSTOMER"
             )
 
 

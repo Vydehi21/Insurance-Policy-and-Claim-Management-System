@@ -15,8 +15,7 @@ public class CustomerPolicyPurchaseRequestDTO {
 
     @NotNull(message = "Plan reference is required")
     private Long planId;
+    
+    @NotNull(message = "Start date is required")
     private LocalDate startDate;
-
-//    @NotNull(message = "Start date is required")
-//    private LocalDate startDate;
 }

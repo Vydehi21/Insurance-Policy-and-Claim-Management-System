@@ -19,7 +19,9 @@ import com.monocept.project.dto.ClaimResponseDTO;
 import com.monocept.project.dto.ClaimReviewRequestDTO;
 import com.monocept.project.dto.PaginatedResponseDTO;
 import com.monocept.project.enums.ClaimStatus;
+import com.monocept.project.exception.AuthorizationException;
 import com.monocept.project.exception.ResourceNotFoundException;
+import com.monocept.project.model.Claim;
 import com.monocept.project.model.ClaimDocument;
 import com.monocept.project.repository.ClaimDocumentRepository;
 import com.monocept.project.security.CustomUserDetails;
@@ -110,7 +112,7 @@ public class ClaimController {
 
         // Default read-only payload fallback for admins and customers
         return ResponseEntity.ok(
-                claimService.getClaimById(claimId));
+                claimService.getClaimById(claimId, userDetails.getUserId(), userDetails.getRole()));
     }
 
 
@@ -245,7 +247,8 @@ public class ClaimController {
     @GetMapping("/documents/{documentId}")
     @PreAuthorize("hasAnyRole('ADMIN','AGENT','CUSTOMER')")
     public ResponseEntity<Void> viewDocument(
-            @PathVariable Long documentId
+            @PathVariable Long documentId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
 
 
@@ -258,6 +261,14 @@ public class ClaimController {
                     )
                 );
 
+        // Enforces the same "own claims only" boundary as FR-CLM-005 for the
+        // documents attached to those claims.
+        Claim claim = document.getClaim();
+        boolean isCustomer = userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_CUSTOMER"));
+        if (isCustomer && !claim.getPolicy().getCustomer().getUser().getId().equals(userDetails.getUserId())) {
+            throw new AuthorizationException("You are not authorized to view this document");
+        }
 
         return ResponseEntity
                 .status(HttpStatus.FOUND)

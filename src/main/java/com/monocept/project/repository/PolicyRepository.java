@@ -31,4 +31,6 @@
         Optional<Policy> findLatestPolicyByCustomerAndPlan(
                 @Param("customerId") Long customerId,
                 @Param("planId") Long planId);
+        
+        java.util.List<Policy> findByPolicyStatusAndEndDateBefore(PolicyStatus policyStatus, java.time.LocalDate date);
     }

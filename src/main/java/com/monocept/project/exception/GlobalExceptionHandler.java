@@ -1,7 +1,6 @@
 package com.monocept.project.exception;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -222,7 +221,19 @@ public class GlobalExceptionHandler {
                 request.getRequestURI());
     }
 
- 
+    @ExceptionHandler(org.springframework.data.core.PropertyReferenceException.class)
+    public ResponseEntity<ErrorResponseDTO> handleInvalidSortField(
+            org.springframework.data.core.PropertyReferenceException ex,
+            HttpServletRequest request) {
+
+        log.warn("LOG-017 Invalid pagination request. Unknown sort field: {}", ex.getPropertyName());
+
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                "Invalid sort field: " + ex.getPropertyName(),
+                request.getRequestURI());
+    }
+
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDTO> handleGeneric(

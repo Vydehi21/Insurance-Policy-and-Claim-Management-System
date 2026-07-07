@@ -6,7 +6,9 @@ import com.monocept.project.enums.PaymentMode;
 import com.monocept.project.enums.PaymentStatus;
 
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,8 +31,9 @@ public class PremiumPaymentRequestDTO {
     @NotNull(message = "Payment mode is required")
     private PaymentMode paymentMode;
 
-    @NotNull(message = "Transaction reference is required")
-    @Size(max = 100)
+    @NotBlank(message = "Transaction reference is required")
+    @Size(min = 4, max = 100, message = "Transaction reference must be between 4 and 100 characters")
+    @Pattern(regexp = "^[A-Za-z0-9\\-_]+$", message = "Transaction reference may only contain letters, digits, hyphens, and underscores")
     private String transactionReference;
 
     @NotNull(message = "Payment status is required")

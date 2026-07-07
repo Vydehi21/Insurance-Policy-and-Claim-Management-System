@@ -10,13 +10,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.monocept.project.dto.AgentPolicyIssueRequestDTO;
 import com.monocept.project.dto.CustomerPolicyPurchaseRequestDTO;
 import com.monocept.project.dto.PaginatedResponseDTO;
 import com.monocept.project.dto.PolicyResponseDTO;
 import com.monocept.project.enums.PolicyStatus;
+import com.monocept.project.exception.AuthorizationException;
 import com.monocept.project.exception.BusinessRuleException;
 import com.monocept.project.exception.InvalidRequestException;
 import com.monocept.project.exception.ResourceNotFoundException;
@@ -26,7 +29,6 @@ import com.monocept.project.model.PolicyPlan;
 import com.monocept.project.repository.CustomerRepository;
 import com.monocept.project.repository.PolicyPlanRepository;
 import com.monocept.project.repository.PolicyRepository;
-import com.monocept.project.service.PolicyService;
 import com.monocept.project.util.PaginationUtil;
 
 import lombok.RequiredArgsConstructor;
@@ -37,492 +39,301 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class PolicyServiceImpl implements PolicyService {
 
-    private final PolicyRepository policyRepository;
-    private final CustomerRepository customerRepository;
-    private final PolicyPlanRepository policyPlanRepository;
-    private final ModelMapper modelMapper;
+	private final PolicyRepository policyRepository;
+	private final CustomerRepository customerRepository;
+	private final PolicyPlanRepository policyPlanRepository;
+	private final ModelMapper modelMapper;
 
-    @Override
-    public PolicyResponseDTO purchasePolicy(
-            Long authenticatedUserId,
-            CustomerPolicyPurchaseRequestDTO purchaseDTO) {
+	@Override
+	@Transactional
+	public PolicyResponseDTO purchasePolicy(Long authenticatedUserId, CustomerPolicyPurchaseRequestDTO purchaseDTO) {
 
-    	 System.out.println("Authenticated User ID = " + authenticatedUserId);
-        Customer customer = customerRepository
-                .findByUser_Id(authenticatedUserId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Customer not found"));
+		Customer customer = customerRepository.findByUser_Id(authenticatedUserId)
+				.orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
 
-        PolicyPlan plan = policyPlanRepository
-                .findById(purchaseDTO.getPlanId())
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Plan not found"));
+		PolicyPlan plan = policyPlanRepository.findById(purchaseDTO.getPlanId())
+				.orElseThrow(() -> new ResourceNotFoundException("Plan not found"));
+		
+		if (Boolean.FALSE.equals(plan.getActiveStatus())) {
+			log.warn("Business rule violation. Attempt to purchase inactive plan: {}", plan.getId());
+			
+			throw new BusinessRuleException("This plan is no longer available for purchase");
+			}
 
-        policyRepository
-                .findLatestPolicyByCustomerAndPlan(
-                        customer.getId(),
-                        plan.getId())
-                .ifPresent(policy -> {
+		policyRepository.findLatestPolicyByCustomerAndPlan(customer.getId(), plan.getId()).ifPresent(policy -> {
 
-                    if (policy.getPolicyStatus() == PolicyStatus.PENDING_PAYMENT
-                            || policy.getPolicyStatus() == PolicyStatus.ACTIVE) {
+			if (policy.getPolicyStatus() == PolicyStatus.PENDING_PAYMENT
+					|| policy.getPolicyStatus() == PolicyStatus.ACTIVE) {
 
-                    	log.warn(
-                    	        "Business rule violation. Customer {} already has policy for plan {}",
-                    	        customer.getId(),
-                    	        plan.getId()
-                    	);
-                    	
-                    	throw new BusinessRuleException(
-                                "Policy already exists for this plan");
-                    }
-                });
+				log.warn("Business rule violation. Customer {} already has policy for plan {}", customer.getId(),
+						plan.getId());
 
-        Policy policy = new Policy();
-        System.out.println("Authenticated User ID = " + authenticatedUserId);
+				throw new BusinessRuleException("Policy already exists for this plan");
+			}
+		});
 
-        policy.setPolicyNumber(
-                "POL-" + UUID.randomUUID().toString().substring(0, 8));
+		Policy policy = new Policy();
 
-        policy.setCustomer(customer);
-        policy.setPolicyPlan(plan);
+		policy.setPolicyNumber("POL-" + UUID.randomUUID().toString().substring(0, 8));
 
-        policy.setStartDate(purchaseDTO.getStartDate());
+		policy.setCustomer(customer);
+		policy.setPolicyPlan(plan);
 
-        policy.setEndDate(
-                purchaseDTO.getStartDate()
-                        .plusYears(plan.getDuration()));
+		policy.setStartDate(purchaseDTO.getStartDate());
 
-        policy.setPolicyStatus(PolicyStatus.PENDING_PAYMENT);
+		policy.setEndDate(purchaseDTO.getStartDate().plusYears(plan.getDuration()));
 
-        Policy savedPolicy = policyRepository.save(policy);
-        
-        log.info(
-        		 "LOG-006 Policy purchased. Policy number: {}",
-        		 policy.getPolicyNumber()
-        		);
+		policy.setPolicyStatus(PolicyStatus.PENDING_PAYMENT);
 
-        return mapToResponse(savedPolicy);
-    }
+		Policy savedPolicy = policyRepository.save(policy);
 
-    @Override
-    public PolicyResponseDTO issuePolicy(
-            AgentPolicyIssueRequestDTO issueDTO) {
+		log.info("LOG-006 Policy purchased. Policy number: {}", policy.getPolicyNumber());
 
+		return mapToResponse(savedPolicy);
+	}
 
-        Customer customer =
-                customerRepository
-                .findById(issueDTO.getCustomerId())
-                .orElseThrow(() ->
-                    new ResourceNotFoundException(
-                        "Customer not found"
-                    ));
+	@Override
+	@Transactional
+	public PolicyResponseDTO issuePolicy(AgentPolicyIssueRequestDTO issueDTO) {
 
+		Customer customer = customerRepository.findById(issueDTO.getCustomerId())
+				.orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
 
-        PolicyPlan plan =
-                policyPlanRepository
-                .findById(issueDTO.getPlanId())
-                .orElseThrow(() ->
-                    new ResourceNotFoundException(
-                        "Plan not found"
-                    ));
+		PolicyPlan plan = policyPlanRepository.findById(issueDTO.getPlanId())
+				.orElseThrow(() -> new ResourceNotFoundException("Plan not found"));
+		
+		if (Boolean.FALSE.equals(plan.getActiveStatus())) {
+			log.warn("Business rule violation. Attempt to purchase inactive plan: {}", plan.getId());
+			
+			throw new BusinessRuleException("This plan is no longer available for purchase");
+			}
 
+		Policy policy = new Policy();
 
+		policy.setPolicyNumber("POL-" + UUID.randomUUID().toString().substring(0, 8));
 
-        Policy policy = new Policy();
+		policy.setCustomer(customer);
 
+		policy.setPolicyPlan(plan);
 
-        policy.setPolicyNumber(
-            "POL-" +
-            UUID.randomUUID()
-            .toString()
-            .substring(0,8)
-        );
+		policy.setStartDate(issueDTO.getStartDate());
 
+		policy.setEndDate(issueDTO.getStartDate().plusYears(plan.getDuration()));
 
-        policy.setCustomer(customer);
+		policy.setPolicyStatus(PolicyStatus.PENDING_PAYMENT);
 
-        policy.setPolicyPlan(plan);
+		policy.setTotalPremiumPaid(BigDecimal.ZERO);
 
+		Policy savedPolicy = policyRepository.save(policy);
 
-        policy.setStartDate(
-            issueDTO.getStartDate()
-        );
+		log.info("Policy issued {}", savedPolicy.getPolicyNumber());
 
+		return mapToResponse(savedPolicy);
 
-        policy.setEndDate(
-            issueDTO.getStartDate()
-            .plusYears(plan.getDuration())
-        );
+	}
 
+	@Override
+	public PolicyResponseDTO getPolicyById(Long policyId, Long requesterUserId, String requesterRole) {
 
-        policy.setPolicyStatus(
-            PolicyStatus.ACTIVE
-        );
+		Policy policy = policyRepository.findById(policyId)
+				.orElseThrow(() -> new ResourceNotFoundException("Policy not found"));
 
+		enforcePolicyOwnership(policy, requesterUserId, requesterRole);
 
-        policy.setTotalPremiumPaid(
-            BigDecimal.ZERO
-        );
+		return mapToResponse(policy);
+	}
 
+	@Override
+	public PolicyResponseDTO getPolicyByNumber(String policyNumber, Long requesterUserId, String requesterRole) {
 
+		Policy policy = policyRepository.findByPolicyNumber(policyNumber)
+				.orElseThrow(() -> new ResourceNotFoundException("Policy not found"));
 
-        Policy savedPolicy =
-                policyRepository.save(policy);
+		enforcePolicyOwnership(policy, requesterUserId, requesterRole);
 
+		return mapToResponse(policy);
+	}
 
+	@Override
+	public PaginatedResponseDTO<PolicyResponseDTO> getAllPolicies(int page, int size, String sortBy, String direction) {
 
-        log.info(
-            "Policy issued {}",
-            savedPolicy.getPolicyNumber()
-        );
+		Pageable pageable = createPageable(page, size, sortBy, direction);
 
+		Page<PolicyResponseDTO> result = policyRepository.findAll(pageable).map(this::mapToResponse);
 
-        return mapToResponse(savedPolicy);
+		return PaginationUtil.createPaginatedResponse(result, sortBy, direction);
+	}
 
-    }
+	@Override
+	public PaginatedResponseDTO<PolicyResponseDTO> getPoliciesByCustomerId(Long customerId, int page, int size,
+			String sortBy, String direction) {
 
-    @Override
-    public PolicyResponseDTO getPolicyById(Long policyId) {
+		Pageable pageable = createPageable(page, size, sortBy, direction);
 
-        Policy policy = policyRepository.findById(policyId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Policy not found"));
+		Page<PolicyResponseDTO> result = policyRepository
 
-        return mapToResponse(policy);
-    }
+				.findByCustomer_Id(customerId, pageable)
 
-    @Override
-    public PolicyResponseDTO getPolicyByNumber(String policyNumber) {
+				.map(this::mapToResponse);
 
-        Policy policy = policyRepository.findByPolicyNumber(policyNumber)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Policy not found"));
+		return PaginationUtil.createPaginatedResponse(result, sortBy, direction);
+	}
 
-        return mapToResponse(policy);
-    }
+	@Override
+	public PaginatedResponseDTO<PolicyResponseDTO> getPoliciesByStatus(PolicyStatus status, int page, int size,
+			String sortBy, String direction) {
 
-    @Override
-    public PaginatedResponseDTO<PolicyResponseDTO> getAllPolicies(
-            int page,
-            int size,
-            String sortBy,
-            String direction) {
+		Pageable pageable = createPageable(page, size, sortBy, direction);
 
-        Pageable pageable = createPageable(
-                page,
-                size,
-                sortBy,
-                direction);
+		Page<PolicyResponseDTO> result = policyRepository.findByPolicyStatus(status, pageable).map(this::mapToResponse);
 
-        Page<PolicyResponseDTO> result =
-                policyRepository.findAll(pageable)
-                        .map(this::mapToResponse);
+		return PaginationUtil.createPaginatedResponse(result, sortBy, direction);
+	}
 
-        return PaginationUtil.createPaginatedResponse(
-                result,
-                sortBy,
-                direction);
-    }
+	@Override
+	public PaginatedResponseDTO<PolicyResponseDTO> getPoliciesByCustomerAndStatus(Long customerId, PolicyStatus status,
+			int page, int size, String sortBy, String direction) {
 
-    @Override
-    public PaginatedResponseDTO<PolicyResponseDTO> getPoliciesByCustomerId(
-            Long customerId,
-            int page,
-            int size,
-            String sortBy,
-            String direction) {
+		Pageable pageable = createPageable(page, size, sortBy, direction);
 
-        Pageable pageable = createPageable(
-                page,
-                size,
-                sortBy,
-                direction);
+		Page<PolicyResponseDTO> result = policyRepository
 
-        Page<PolicyResponseDTO> result =
-                policyRepository
+				.findByCustomer_IdAndPolicyStatus(
 
-                        .findByCustomer_Id(customerId, pageable)
+						customerId, status, pageable)
+				.map(this::mapToResponse);
 
-                        .map(this::mapToResponse);
+		return PaginationUtil.createPaginatedResponse(result, sortBy, direction);
+	}
 
-        return PaginationUtil.createPaginatedResponse(
-                result,
-                sortBy,
-                direction);
-    }
-
-    @Override
-    public PaginatedResponseDTO<PolicyResponseDTO> getPoliciesByStatus(
-            PolicyStatus status,
-            int page,
-            int size,
-            String sortBy,
-            String direction) {
-
-        Pageable pageable = createPageable(
-                page,
-                size,
-                sortBy,
-                direction);
+	@Override
+	public PaginatedResponseDTO<PolicyResponseDTO> searchPoliciesByNumber(String policyNumber, int page, int size,
+			String sortBy, String direction) {
 
-        Page<PolicyResponseDTO> result =
-                policyRepository
-                        .findByPolicyStatus(status, pageable)
-                        .map(this::mapToResponse);
-
-        return PaginationUtil.createPaginatedResponse(
-                result,
-                sortBy,
-                direction);
-    }
-
-    @Override
-    public PaginatedResponseDTO<PolicyResponseDTO>
-            getPoliciesByCustomerAndStatus(
-                    Long customerId,
-                    PolicyStatus status,
-                    int page,
-                    int size,
-                    String sortBy,
-                    String direction) {
-
-        Pageable pageable = createPageable(
-                page,
-                size,
-                sortBy,
-                direction);
+		Pageable pageable = createPageable(page, size, sortBy, direction);
 
-        Page<PolicyResponseDTO> result =
-                policyRepository
+		Page<PolicyResponseDTO> result = policyRepository.findByPolicyNumberContainingIgnoreCase(policyNumber, pageable)
+				.map(this::mapToResponse);
 
-                        .findByCustomer_IdAndPolicyStatus(
+		return PaginationUtil.createPaginatedResponse(result, sortBy, direction);
+	}
 
-                                customerId,
-                                status,
-                                pageable)
-                        .map(this::mapToResponse);
+	@Override
+	@Transactional
+	public void cancelPolicy(Long policyId) {
 
-        return PaginationUtil.createPaginatedResponse(
-                result,
-                sortBy,
-                direction);
-    }
+		Policy policy = policyRepository.findById(policyId)
+				.orElseThrow(() -> new ResourceNotFoundException("Policy not found"));
 
-    @Override
-    public PaginatedResponseDTO<PolicyResponseDTO> searchPoliciesByNumber(
-            String policyNumber,
-            int page,
-            int size,
-            String sortBy,
-            String direction) {
+		if (policy.getPolicyStatus() == PolicyStatus.CANCELLED) {
 
-        Pageable pageable = createPageable(
-                page,
-                size,
-                sortBy,
-                direction);
+			log.warn("Business rule violation. Policy already cancelled: {}", policy.getPolicyNumber());
+			throw new BusinessRuleException("Policy already cancelled");
+		}
+		
+		policy.setPolicyStatus(PolicyStatus.CANCELLED);
 
-        Page<PolicyResponseDTO> result =
-                policyRepository
-                        .findByPolicyNumberContainingIgnoreCase(
-                                policyNumber,
-                                pageable)
-                        .map(this::mapToResponse);
+		policyRepository.save(policy);
+		log.info("Policy cancelled successfully. Policy number: {}", policy.getPolicyNumber());
+	}
 
-        return PaginationUtil.createPaginatedResponse(
-                result,
-                sortBy,
-                direction);
-    }
+	private Pageable createPageable(int page, int size, String sortBy, String direction) {
 
-    @Override
-    public void cancelPolicy(Long policyId) {
+		if (page < 0) {
 
-        Policy policy = policyRepository.findById(policyId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Policy not found"));
+			log.warn("LOG-017 Invalid pagination request. Page cannot be negative");
 
-        if (policy.getPolicyStatus() == PolicyStatus.CANCELLED) {
-        	
-        	  log.warn(
-        	            "Business rule violation. Policy already cancelled: {}",
-        	            policy.getPolicyNumber()
-        	    );
-            throw new BusinessRuleException(
-                    "Policy already cancelled");
-        }
-        if (policy.getPolicyStatus() == PolicyStatus.CANCELLED) {
+			throw new InvalidRequestException("Page number cannot be negative");
+		}
 
-            log.warn(
-                    "Business rule violation. Policy already cancelled: {}",
-                    policy.getPolicyNumber()
-            );
+		if (size <= 0 || size > 100) {
 
-            throw new BusinessRuleException(
-                    "Policy already cancelled");
-        }
+			log.warn("LOG-017 Invalid pagination request. Invalid size {}", size);
 
-        policy.setPolicyStatus(PolicyStatus.CANCELLED);
+			throw new InvalidRequestException("Page size must be between 1 and 100");
+		}
 
-        policyRepository.save(policy);
-        log.info(
-                "Policy cancelled successfully. Policy number: {}",
-                policy.getPolicyNumber()
-        );
-    }
+		Sort sort = direction.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
 
-    private Pageable createPageable(
-            int page,
-            int size,
-            String sortBy,
-            String direction) {
+		return PageRequest.of(page, size, sort);
+	}
 
+	private PolicyResponseDTO mapToResponse(Policy policy) {
 
-        if(page < 0) {
+		PolicyResponseDTO dto = new PolicyResponseDTO();
 
-            log.warn(
-                    "LOG-017 Invalid pagination request. Page cannot be negative"
-            );
+		dto.setPolicyId(policy.getId());
+		dto.setPolicyNumber(policy.getPolicyNumber());
 
-            throw new InvalidRequestException(
-                    "Page number cannot be negative");
-        }
+		dto.setCustomerName(policy.getCustomer().getUser().getFullName());
 
+		dto.setPlanName(policy.getPolicyPlan().getPlanName());
 
-        if(size <= 0 || size > 100) {
+		dto.setProductType(policy.getPolicyPlan().getInsuranceProduct().getProductType());
 
-            log.warn(
-                    "LOG-017 Invalid pagination request. Invalid size {}",
-                    size
-            );
+		dto.setCoverageAmount(policy.getPolicyPlan().getCoverageAmount());
 
-            throw new InvalidRequestException(
-                    "Page size must be between 1 and 100");
-        }
+		dto.setPremiumAmount(policy.getPolicyPlan().getPremiumAmount());
 
+		dto.setPremiumType(policy.getPolicyPlan().getPremiumType());
 
-        Sort sort = direction.equalsIgnoreCase("desc")
-                ? Sort.by(sortBy).descending()
-                : Sort.by(sortBy).ascending();
+		dto.setStartDate(policy.getStartDate());
+		dto.setEndDate(policy.getEndDate());
 
+		dto.setPolicyStatus(policy.getPolicyStatus());
 
-        return PageRequest.of(page, size, sort);
-    }
+		dto.setTotalPremiumPaid(policy.getTotalPremiumPaid());
 
-    private PolicyResponseDTO mapToResponse(Policy policy) {
+		return dto;
+	}
 
-        PolicyResponseDTO dto = new PolicyResponseDTO();
+	@Override
+	public PaginatedResponseDTO<PolicyResponseDTO> getMyPolicies(Long userId, int page, int size, String sortBy,
+			String direction) {
 
-        dto.setPolicyId(policy.getId());
-        dto.setPolicyNumber(policy.getPolicyNumber());
+		Customer customer = customerRepository.findByUser_Id(userId)
+				.orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
 
-        dto.setCustomerName(
-                policy.getCustomer().getUser().getFullName());
 
-        dto.setPlanName(
-                policy.getPolicyPlan().getPlanName());
+		return getPoliciesByCustomerId(customer.getId(), page, size, sortBy, direction);
 
-        dto.setProductType(
-                policy.getPolicyPlan()
-                        .getInsuranceProduct()
-                        .getProductType());
+	}
 
-        dto.setCoverageAmount(
-                policy.getPolicyPlan()
-                        .getCoverageAmount());
+	@Override
+	public PaginatedResponseDTO<PolicyResponseDTO> getAgentPolicies(int page, int size, String sortBy,
+			String direction) {
 
-        dto.setPremiumAmount(
-                policy.getPolicyPlan()
-                        .getPremiumAmount());
+		Sort sort = direction.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
 
-        dto.setPremiumType(
-                policy.getPolicyPlan()
-                        .getPremiumType());
+		Pageable pageable = PageRequest.of(page, size, sort);
 
-        dto.setStartDate(policy.getStartDate());
-        dto.setEndDate(policy.getEndDate());
+		Page<PolicyResponseDTO> result = policyRepository.findAll(pageable).map(this::mapToResponse);
 
-        dto.setPolicyStatus(policy.getPolicyStatus());
+		return PaginationUtil.createPaginatedResponse(result, sortBy, direction);
 
-        dto.setTotalPremiumPaid(
-                policy.getTotalPremiumPaid());
+	}
+	
+	@Scheduled(cron = "0 5 0 * * *")
+	@Transactional
+	public void expireOverduePolicies() {
+	List<Policy> overdue = policyRepository
+	               .findByPolicyStatusAndEndDateBefore(PolicyStatus.ACTIVE, LocalDate.now());
+	
+	        for (Policy policy : overdue) {
+	            policy.setPolicyStatus(PolicyStatus.EXPIRED);
+	        }
+	        policyRepository.saveAll(overdue);
+	
+	        if (!overdue.isEmpty()) {
+	            log.info("Policy expiry sweep completed. {} policies marked EXPIRED", overdue.size());
+	        }
+	    }
 
-        return dto;
-    }
-    
-    @Override
-    public PaginatedResponseDTO<PolicyResponseDTO> getMyPolicies(
-            Long userId,
-            int page,
-            int size,
-            String sortBy,
-            String direction) {
-
-
-        Customer customer =
-                customerRepository.findByUser_Id(userId)
-                .orElseThrow(() ->
-                    new ResourceNotFoundException(
-                        "Customer not found"
-                    )
-                );
-        
-        System.out.println(
-                "CUSTOMER TABLE ID = "
-                + customer.getId()
-            );
-
-
-        return getPoliciesByCustomerId(
-                customer.getId(),
-                page,
-                size,
-                sortBy,
-                direction
-        );
-
-    }
-    
-    @Override
-    public PaginatedResponseDTO<PolicyResponseDTO> getAgentPolicies(
-            int page,
-            int size,
-            String sortBy,
-            String direction) {
-
-
-        Sort sort =
-            direction.equalsIgnoreCase("asc")
-            ?
-            Sort.by(sortBy).ascending()
-            :
-            Sort.by(sortBy).descending();
-
-
-
-        Pageable pageable =
-                PageRequest.of(
-                        page,
-                        size,
-                        sort
-                );
-
-
-
-        Page<PolicyResponseDTO> result =
-                policyRepository.findAll(pageable)
-                .map(this::mapToResponse);
-
-
-        return PaginationUtil.createPaginatedResponse(
-                result,
-                sortBy,
-                direction
-        );
-
-
-        
-
-    }
+	private void enforcePolicyOwnership(Policy policy, Long requesterUserId, String requesterRole) {
+		if ("CUSTOMER".equals(requesterRole) && !policy.getCustomer().getUser().getId().equals(requesterUserId)) {
+			log.warn("Blocked attempt by user {} to access another customer's policy: {}", requesterUserId,
+					policy.getPolicyNumber());
+			throw new AuthorizationException("You are not authorized to view this policy");
+		}
+	}
 }

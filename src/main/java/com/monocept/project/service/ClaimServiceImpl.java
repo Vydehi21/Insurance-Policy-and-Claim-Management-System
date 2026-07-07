@@ -56,1008 +56,615 @@ import lombok.extern.slf4j.Slf4j;
 
 public class ClaimServiceImpl implements ClaimService {
 
-    private final ClaimRepository claimRepository;
-    private final PolicyRepository policyRepository;
-    private final CustomerRepository customerRepository;
-    private final UserRepository userRepository;
-    private final ClaimDocumentRepository claimDocumentRepository;
-    private final ClaimStatusHistoryRepository claimStatusHistoryRepository;
-    private final ModelMapper modelMapper;
+	private final ClaimRepository claimRepository;
+	private final PolicyRepository policyRepository;
+	private final CustomerRepository customerRepository;
+	private final UserRepository userRepository;
+	private final ClaimDocumentRepository claimDocumentRepository;
+	private final ClaimStatusHistoryRepository claimStatusHistoryRepository;
+	private final ModelMapper modelMapper;
 
-    private String generateClaimNumber() {
-        return "CLM-" +
-                UUID.randomUUID()
-                        .toString()
-                        .substring(0, 8)
-                        .toUpperCase();
-    }
+	private String generateClaimNumber() {
+		return "CLM-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+	}
 
-    private void createHistory(
-            Claim claim,
-            ClaimStatus previousStatus,
-            ClaimStatus newStatus,
-            String remarks,
-            User updatedBy) {
+	private void createHistory(Claim claim, ClaimStatus previousStatus, ClaimStatus newStatus, String remarks,
+			User updatedBy) {
 
-        ClaimStatusHistory history = new ClaimStatusHistory();
+		ClaimStatusHistory history = new ClaimStatusHistory();
 
-        history.setClaim(claim);
-        history.setPreviousStatus(previousStatus);
-        history.setNewStatus(newStatus);
-        history.setRemarks(remarks);
-        history.setUser(updatedBy);
+		history.setClaim(claim);
+		history.setPreviousStatus(previousStatus);
+		history.setNewStatus(newStatus);
+		history.setRemarks(remarks);
+		history.setUser(updatedBy);
 
-        claimStatusHistoryRepository.save(history);
-    }
+		claimStatusHistoryRepository.save(history);
+	}
 
-    
-    private List<ClaimDocument> buildDocuments(
-            Claim claim,
-            List<ClaimDocumentDTO> documentDTOs) {
-
-
-        List<ClaimDocument> documents = new ArrayList<>();
-
-
-        if(documentDTOs == null){
-            return documents;
-        }
-
+	private List<ClaimDocument> buildDocuments(Claim claim, List<ClaimDocumentDTO> documentDTOs) {
 
-        for(ClaimDocumentDTO dto : documentDTOs){
-
-            ClaimDocument document = new ClaimDocument();
-
-            document.setClaim(claim);
-
-            document.setDocumentName(
-                    dto.getDocumentName()
-            );
-
-            document.setDocumentType(
-                    dto.getDocumentType()
-            );
-
-            document.setDocumentReference(
-                    dto.getDocumentReference()
-            );
-
-
-            documents.add(document);
-
-        }
-
-
-        return documents;
-    }
-
-    private User getUser(Long userId) {
-
-        return userRepository.findById(userId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "User not found with id: "
-                                        + userId));
-    }
-
-    private Claim getClaim(Long claimId) {
-
-        return claimRepository.findById(claimId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Claim not found with id: "
-                                        + claimId));
-    }
-
-    private Policy getPolicy(Long policyId) {
-
-        return policyRepository.findById(policyId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Policy not found with id: "
-                                        + policyId));
-    }
-
-    private Customer getCustomerByUserId(
-            Long userId) {
-
-        return customerRepository
-                .findByUser_Id(userId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Customer profile not found"));
-    }
-    
-    @Override
-    @Transactional
-    public ClaimResponseDTO getClaimDetailsForReview(Long claimId, Long agentUserId) {
-        log.info("Agent user {} is opening claim ID {} for inspection", agentUserId, claimId);
-
-        Claim claim = claimRepository.findById(claimId)
-                .orElseThrow(() -> new ResourceNotFoundException("Claim record not found"));
-
-        User currentAgent = getUser(agentUserId);
-
-        // 🛑 CONCURRENCY LOCK GUARD: If already under review, verify if the active agent holds the lock
-        if (claim.getClaimStatus() == ClaimStatus.UNDER_REVIEW && 
-            claim.getReviewedBy() != null && 
-            !claim.getReviewedBy().getId().equals(agentUserId)) {
-            
-            log.warn("Collision prevented: Agent {} blocked from accessing claim {} locked by Agent {}", 
-                    agentUserId, claimId, claim.getReviewedBy().getFullName());
-            throw new BusinessRuleException("Access Denied. This claim file is currently locked and being processed by: " 
-                    + claim.getReviewedBy().getFullName());
-        }
-
-        // 🔓 LOCK ACQUISITION: If the claim is brand new, lock it to this agent instantly upon opening
-        if (claim.getClaimStatus() == ClaimStatus.SUBMITTED) {
-            ClaimStatus previousStatus = claim.getClaimStatus();
-            claim.setClaimStatus(ClaimStatus.UNDER_REVIEW);
-            claim.setReviewedBy(currentAgent);
-            claim = claimRepository.save(claim);
-
-            createHistory(claim, previousStatus, ClaimStatus.UNDER_REVIEW, "Claim locked for inspection by agent.", currentAgent);
-            log.info("Claim {} successfully locked under active review by agent {}", claim.getClaimNumber(), agentUserId);
-        }
-
-        return convertToResponseDTO(claim);
-    }
-
-    
-//    @Override
-//    @Transactional
-//    public ClaimResponseDTO raiseClaim(
-//            Long authenticatedUserId,
-//            ClaimRequestDTO claimRequestDTO) {
-//
-//        Customer customer =
-//                getCustomerByUserId(authenticatedUserId);
-//
-//        Policy policy =
-//                getPolicy(claimRequestDTO.getPolicyId());
-//
-//        if (!policy.getCustomer()
-//                .getId()
-//                .equals(customer.getId())) {
-//
-//            throw new AuthorizationException(
-//                    "You can only raise claims for your own policies");
-//        }
-//
- 
-//        if (policy.getPolicyStatus() != PolicyStatus.ACTIVE) {
-//
-//            throw new BusinessRuleException(
-//                    "Claims can only be raised for active policies");
-//        }
-//
-//        if (claimRequestDTO.getClaimAmount()
-//                .compareTo(
-//                        policy.getPolicyPlan()
-//                              .getCoverageAmount()) > 0) {
-//
-//            throw new BusinessRuleException(
-//                    "Claim amount exceeds policy coverage amount");
-//        }
-//
-//        Claim claim = new Claim();
-//
-//        claim.setClaimNumber(generateClaimNumber());
-//
-//        claim.setPolicy(policy);
-//
-//        claim.setClaimAmount(
-//                claimRequestDTO.getClaimAmount());
-//
-//        claim.setClaimReason(
-//                claimRequestDTO.getClaimReason());
-//
-//        claim.setIncidentDate(
-//                claimRequestDTO.getIncidentDate());
-//
-//        claim.setClaimStatus(
-//                ClaimStatus.SUBMITTED);
-//
-//        Claim savedClaim =
-//                claimRepository.save(claim);
-//
-//        List<ClaimDocument> documents =
-//                buildDocuments(
-//                        savedClaim,
-//                        claimRequestDTO
-//                                .getSupportingDocuments());
-//
-//        claimDocumentRepository.saveAll(documents);
-//
-//        savedClaim.setClaimDocuments(documents);
-//
-//        User customerUser =
-//                getUser(authenticatedUserId);
-//
-//        createHistory(
-//                savedClaim,
-//                ClaimStatus.SUBMITTED,
-//                ClaimStatus.SUBMITTED,
-//                "Claim submitted",
-//                customerUser);
-//
-//        return convertToResponseDTO(savedClaim);
-//    }
-    
-    @Override
-    @Transactional
-    public ClaimResponseDTO raiseClaim(
-            Long authenticatedUserId,
-            ClaimRequestDTO dto) {
-
-        log.info(
-                "Customer {} attempting to raise claim for policy {}",
-                authenticatedUserId,
-                dto.getPolicyId()
-        );
-
-        Policy policy = getPolicy(dto.getPolicyId());
-
-        if (policy.getEndDate().isBefore(LocalDate.now())) {
-            throw new BusinessRuleException("Policy has expired");
-        }
-
-        if (dto.getIncidentDate().isAfter(LocalDate.now())) {
-            throw new BusinessRuleException("Incident date cannot be in future");
-        }
-
-        if (!policy.getCustomer().getUser().getId().equals(authenticatedUserId)) {
-            throw new AuthorizationException("You cannot claim another customer's policy");
-        }
-        
-        if (policy.getPolicyStatus() != PolicyStatus.ACTIVE) {
-            throw new BusinessRuleException("Claim can only be raised for active policies");
-        }
-
-        if (policy.getPolicyStatus() == PolicyStatus.CANCELLED) {
-            throw new BusinessRuleException("Cannot raise claim for cancelled policy");
-        }
-
-        BigDecimal approvedClaims = claimRepository.getApprovedClaimAmount(policy.getId());
-        
-        // --- SAFE CONVERSION FOR FIRST-TIME CLAIMS ---
-        if (approvedClaims == null) {
-            approvedClaims = BigDecimal.ZERO;
-        }
-
-        BigDecimal totalClaimAmount = approvedClaims.add(dto.getClaimAmount());
-
-        if (totalClaimAmount.compareTo(policy.getPolicyPlan().getCoverageAmount()) > 0) {
-            throw new BusinessRuleException("Claim exceeds remaining coverage amount");
-        }
-
-        boolean exists = claimRepository.existsByPolicyIdAndClaimStatusIn(
-                policy.getId(),
-                List.of(
-                        ClaimStatus.SUBMITTED,
-                        ClaimStatus.UNDER_REVIEW
-                ));
-
-        if (exists) {
-            throw new BusinessRuleException("A claim already exists for this policy");
-        }
-
-        Claim claim = new Claim();
-        claim.setClaimNumber(generateClaimNumber());
-        claim.setPolicy(policy);
-        claim.setClaimAmount(dto.getClaimAmount());
-        claim.setClaimReason(dto.getClaimReason());
-        claim.setIncidentDate(dto.getIncidentDate());
-        claim.setClaimStatus(ClaimStatus.SUBMITTED);
-
-        Claim savedClaim = claimRepository.save(claim);
-
-        List<ClaimDocument> documents = buildDocuments(
-                savedClaim,
-                dto.getSupportingDocuments()
-        );
-
-        claimDocumentRepository.saveAll(documents);
-        savedClaim.setClaimDocuments(documents);
-
-        User customer = getUser(authenticatedUserId);
-
-        createHistory(
-                savedClaim,
-                ClaimStatus.SUBMITTED,
-                ClaimStatus.SUBMITTED,
-                "Claim submitted",
-                customer
-        );
-
-        log.info("Claim {} submitted successfully", savedClaim.getClaimNumber());
-
-        return convertToResponseDTO(savedClaim);
-    }
-
- 
-    
-    @Override
-    @Transactional
-    public ClaimResponseDTO reviewClaim(
-            Long claimId,
-            Long agentId,
-            ClaimReviewRequestDTO dto
-    ) {
-        log.info("Agent user {} is attempting to process a review update for claim ID {}", agentId, claimId);
-
-        Claim claim = claimRepository.findById(claimId)
-            .orElseThrow(() -> new ResourceNotFoundException("Claim file reference not found"));
-
-        User agent = getUser(agentId);
-
-        // --- PHASE 1: CONCURRENCY LOCK ENGINE ---
-        // If the claim is brand new, automatically assign it to this agent and set it to UNDER_REVIEW
-        if (claim.getClaimStatus() == ClaimStatus.SUBMITTED) {
-            ClaimStatus previousStatus = claim.getClaimStatus();
-            claim.setClaimStatus(ClaimStatus.UNDER_REVIEW);
-            claim.setReviewedBy(agent);
-            claim = claimRepository.save(claim);
-
-            createHistory(claim, previousStatus, ClaimStatus.UNDER_REVIEW, "Claim assigned and locked for agent inspection.", agent);
-            log.info("Claim {} successfully locked under active review by agent {}", claim.getClaimNumber(), agentId);
-        } 
-        
-        // If the claim is already under review, verify that the current agent holds the active lock
-        else if (claim.getClaimStatus() == ClaimStatus.UNDER_REVIEW) {
-            if (claim.getReviewedBy() != null && !claim.getReviewedBy().getId().equals(agentId)) {
-                log.warn("Collision blocked: Agent {} tried to review claim {} which is locked by Agent {}", 
-                        agentId, claimId, claim.getReviewedBy().getId());
-                throw new BusinessRuleException("This claim file is currently locked and being audited by another agent.");
-            }
-        } 
-        
-        // Prevent updates if the claim has already passed the review stage
-        else {
-            throw new BusinessRuleException("This claim has already been processed beyond the review stage. Status: " + claim.getClaimStatus());
-        }
-
-        // --- PHASE 2: RECOMMENDATION ENGINE ---
-        // Enforce constraint that agents can only submit a recommendation status
-        if (dto.getRecommendedStatus() != ClaimStatus.RECOMMENDED_APPROVAL
-                && dto.getRecommendedStatus() != ClaimStatus.RECOMMENDED_REJECTION) {
-            throw new InvalidStatusException("Agents can only submit RECOMMENDED_APPROVAL or RECOMMENDED_REJECTION statuses.");
-        }
-
-        ClaimStatus previousStatus = claim.getClaimStatus();
-        
-        // Apply form values and transition the state out of the active review lock
-        claim.setClaimStatus(dto.getRecommendedStatus());
-        claim.setAgentRemarks(dto.getRemarks());
-        claim.setReviewedBy(agent); // Maintains accountability for the final recommendation
-
-        Claim updatedClaim = claimRepository.save(claim);
-
-        // Log the final recommendation to the status history ledger
-        createHistory(
-            updatedClaim,
-            previousStatus,
-            dto.getRecommendedStatus(),
-            dto.getRemarks(),
-            agent
-        );
-
-        log.info("Agent {} successfully submitted recommendation ({}) for claim {}", 
-                agentId, dto.getRecommendedStatus(), updatedClaim.getClaimNumber());
-
-        return convertToResponseDTO(updatedClaim);
-    }
-
-    
-    @Override
-    @Transactional
-    public ClaimResponseDTO processFinalDecision(
-            Long claimId,
-            Long adminUserId,
-            ClaimFinalDecisionRequestDTO decisionDTO) {
-    	log.info(
-    	        "Admin {} processing final decision for claim {}",
-    	        adminUserId,
-    	        claimId);
-
-        User admin = getUser(adminUserId);
-        
-        
-
-        if (admin.getRole() != Role.ADMIN) {
-            throw new AuthorizationException(
-                    "Only admins can make final claim decisions");
-        }
-
-        Claim claim = getClaim(claimId);
-
-        if (claim.getClaimStatus() != ClaimStatus.RECOMMENDED_APPROVAL
-                && claim.getClaimStatus() != ClaimStatus.RECOMMENDED_REJECTION) {
-
-            throw new InvalidStatusException(
-                    "Claim must be recommended before final decision");
-        }
-
-        if (decisionDTO.getFinalDecisionStatus() != ClaimStatus.APPROVED
-                && decisionDTO.getFinalDecisionStatus() != ClaimStatus.REJECTED) {
-
-            throw new InvalidStatusException(
-                    "Final decision must be APPROVED or REJECTED");
-        }
-
-        if (claim.getClaimStatus() == ClaimStatus.RECOMMENDED_APPROVAL
-                && decisionDTO.getFinalDecisionStatus() != ClaimStatus.APPROVED) {
-
-            throw new InvalidStatusException(
-                    "Recommended approval claims can only be approved");
-        }
-
-        if (claim.getClaimStatus() == ClaimStatus.RECOMMENDED_REJECTION
-                && decisionDTO.getFinalDecisionStatus() != ClaimStatus.REJECTED) {
-
-            throw new InvalidStatusException(
-                    "Recommended rejection claims can only be rejected");
-        }
-
-        ClaimStatus previousStatus =
-                claim.getClaimStatus();
-
-        claim.setClaimStatus(
-                decisionDTO.getFinalDecisionStatus());
-
-        claim.setAdminRemarks(
-                decisionDTO.getRemarks());
-
-        Claim updatedClaim =
-                claimRepository.save(claim);
-
-        createHistory(
-                updatedClaim,
-                previousStatus,
-                decisionDTO.getFinalDecisionStatus(),
-                decisionDTO.getRemarks(),
-                admin);
-        
-        if(updatedClaim.getClaimStatus()
-                == ClaimStatus.REJECTED) {
-
-
-            log.info(
-                    "Final claim rejection. Claim {} rejected by admin {}",
-                    updatedClaim.getClaimNumber(),
-                    adminUserId);
-
-        }
-        
-        if(updatedClaim.getClaimStatus()
-                == ClaimStatus.APPROVED) {
-
-
-            log.info(
-                    "Final claim approval. Claim {} approved by admin {}",
-                    updatedClaim.getClaimNumber(),
-                    adminUserId);
-
-        }
-
-        return convertToResponseDTO(updatedClaim);
-    }
-    @Override
-    @Transactional(readOnly = true)
-    public ClaimResponseDTO getClaimById(Long claimId) {
-
-        Claim claim = getClaim(claimId);
-
-        return convertToResponseDTO(claim);
-    }
-    
-    @Override
-    @Transactional(readOnly = true)
-    public PaginatedResponseDTO<ClaimResponseDTO> getAllClaims(
-            int page,
-            int size,
-            String sortBy,
-            String direction) {
-
-    	Pageable pageable =
-    	        createPageable(
-    	                page,
-    	                size,
-    	                sortBy,
-    	                direction);
-
-        Page<Claim> claimPage =
-                claimRepository.findAll(pageable);
-
-        Page<ClaimResponseDTO> dtoPage =
-                claimPage.map(this::convertToResponseDTO);
-
-        return PaginationUtil.createPaginatedResponse(
-                dtoPage,
-                sortBy,
-                direction);
-    }
-    
-    @Override
-    @Transactional(readOnly = true)
-    public PaginatedResponseDTO<ClaimResponseDTO> getClaimsByCustomerId(
-            Long customerId,
-            int page,
-            int size,
-            String sortBy,
-            String direction) {
-
-    	Pageable pageable =
-    	        createPageable(
-    	                page,
-    	                size,
-    	                sortBy,
-    	                direction);
-
-        Page<Claim> claimPage =
-
-                claimRepository.findByPolicy_Customer_Id(
-
-                
-
-                        customerId,
-                        pageable);
-
-        Page<ClaimResponseDTO> dtoPage =
-                claimPage.map(this::convertToResponseDTO);
-
-        return PaginationUtil.createPaginatedResponse(
-                dtoPage,
-                sortBy,
-                direction);
-    }
-    
-    private Pageable createPageable(
-            int page,
-            int size,
-            String sortBy,
-            String direction) {
-    	
-    	 if(sortBy.equals("claimId")){
-    	        sortBy = "id";
-    	    }
-
-
-        if(page < 0) {
-
-            log.warn(
-                    "Invalid pagination request. Page: {}",
-                    page);
-
-            throw new InvalidRequestException(
-                    "Page cannot be negative");
-        }
-
-
-        if(size <=0 || size >100) {
-
-            log.warn(
-                    "Invalid pagination request. Size: {}",
-                    size);
-
-            throw new InvalidRequestException(
-                    "Invalid page size");
-        }
-
-
-        Sort sort =
-                direction.equalsIgnoreCase("desc")
-                ? Sort.by(sortBy).descending()
-                : Sort.by(sortBy).ascending();
-
-
-        return PageRequest.of(
-                page,
-                size,
-                sort);
-    }
-    
-    @Override
-    @Transactional(readOnly = true)
-    public PaginatedResponseDTO<ClaimResponseDTO> getClaimsByStatus(
-            ClaimStatus status,
-            int page,
-            int size,
-            String sortBy,
-            String direction) {
-
-    	Pageable pageable =
-    	        createPageable(
-    	                page,
-    	                size,
-    	                sortBy,
-    	                direction);
-
-        Page<Claim> claimPage =
-                claimRepository.findByClaimStatus(
-                        status,
-                        pageable);
-
-        Page<ClaimResponseDTO> dtoPage =
-                claimPage.map(this::convertToResponseDTO);
-
-        return PaginationUtil.createPaginatedResponse(
-                dtoPage,
-                sortBy,
-                direction);
-    }
-    
-    @Override
-    @Transactional(readOnly = true)
-    public PaginatedResponseDTO<ClaimResponseDTO> getClaimsByCustomerAndStatus(
-            Long customerId,
-            ClaimStatus status,
-            int page,
-            int size,
-            String sortBy,
-            String direction) {
-
-    	Pageable pageable =
-    	        createPageable(
-    	                page,
-    	                size,
-    	                sortBy,
-    	                direction);
-
-        Page<Claim> claimPage =
-                claimRepository
-
-                        .findByPolicy_Customer_IdAndClaimStatus(
-
-                                customerId,
-                                status,
-                                pageable);
-
-        Page<ClaimResponseDTO> dtoPage =
-                claimPage.map(this::convertToResponseDTO);
-
-        return PaginationUtil.createPaginatedResponse(
-                dtoPage,
-                sortBy,
-                direction);
-    }
-    
-    @Override
-    @Transactional(readOnly = true)
-    public PaginatedResponseDTO<ClaimResponseDTO> searchClaimsByNumber(
-            String claimNumber,
-            int page,
-            int size,
-            String sortBy,
-            String direction) {
-
-    	Pageable pageable =
-    	        createPageable(
-    	                page,
-    	                size,
-    	                sortBy,
-    	                direction);
-        Page<Claim> claimPage =
-                claimRepository
-                        .findByClaimNumberContainingIgnoreCase(
-                                claimNumber,
-                                pageable);
-
-        Page<ClaimResponseDTO> dtoPage =
-                claimPage.map(this::convertToResponseDTO);
-
-        return PaginationUtil.createPaginatedResponse(
-                dtoPage,
-                sortBy,
-                direction);
-    }
-    
-    @Override
-    @Transactional(readOnly = true)
-    public PaginatedResponseDTO<ClaimResponseDTO> getMyClaims(
-            Long userId,
-            int page,
-            int size,
-            String sortBy,
-            String direction) {
-
-
-        Customer customer =
-                customerRepository
-                .findByUser_Id(userId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Customer not found"
-                        )
-                );
-
-
-        Pageable pageable =
-                createPageable(
-                        page,
-                        size,
-                        sortBy,
-                        direction
-                );
-
-
-        Page<Claim> claimPage =
-                claimRepository
-                .findByPolicy_Customer_Id(
-                        customer.getId(),
-                        pageable
-                );
-
-
-        Page<ClaimResponseDTO> dtoPage =
-                claimPage.map(this::convertToResponseDTO);
-
-
-        return PaginationUtil.createPaginatedResponse(
-                dtoPage,
-                sortBy,
-                direction
-        );
-    }
-    
-    private ClaimResponseDTO convertToResponseDTO(Claim claim) {
-
-        ClaimResponseDTO dto = new ClaimResponseDTO();
-
-        // BASIC CLAIM DETAILS
-        dto.setClaimId(
-                claim.getId()
-        );
-
-        dto.setClaimNumber(
-                claim.getClaimNumber()
-        );
-
-        dto.setClaimAmount(
-                claim.getClaimAmount()
-        );
-
-        dto.setClaimReason(
-                claim.getClaimReason()
-        );
-
-        dto.setIncidentDate(
-                claim.getIncidentDate()
-        );
-
-        dto.setClaimStatus(
-                claim.getClaimStatus()
-        );
-
-        dto.setAgentRemarks(
-                claim.getAgentRemarks()
-        );
-
-        dto.setAdminRemarks(
-                claim.getAdminRemarks()
-        );
-
-        dto.setCreatedDate(
-                claim.getCreatedDate()
-        );
-
-        dto.setUpdatedDate(
-                claim.getUpdatedDate()
-        );
-
-        Policy policy = claim.getPolicy();
-
-        if(policy != null){
-
-            // POLICY NUMBER
-            dto.setPolicyNumber(
-                    policy.getPolicyNumber()
-            );
-
-            // CUSTOMER NAME
-            if(policy.getCustomer()!=null
-            && policy.getCustomer().getUser()!=null){
-                dto.setCustomerName(
-                        policy.getCustomer()
-                        .getUser()
-                        .getFullName()
-                );
-            }
-
-            // COVERAGE
-            BigDecimal coverage =
-                    policy.getPolicyPlan()
-                    .getCoverageAmount();
-
-            dto.setPolicyCoverageAmount(
-                    coverage
-            );
-
-            // APPROVED CLAIM TOTAL
-            BigDecimal approvedAmount =
-                    claimRepository
-                    .getApprovedClaimAmount(
-                            policy.getId()
-                    );
-
-            if (approvedAmount == null) {
-                approvedAmount = BigDecimal.ZERO;
-            }
-
-            dto.setTotalApprovedClaimAmount(
-                    approvedAmount
-            );
-
-            // REMAINING
-            dto.setRemainingCoverageAmount(
-                    coverage.subtract(approvedAmount)
-            );
-
-            // PREVIOUS CLAIM COUNT & DETAILED TIMELINE MAP
-            List<Claim> previousClaims =
-                    claimRepository
-                    .findByPolicy_Id(
-                            policy.getId(),
-                            Pageable.unpaged()
-                    )
-                    .getContent();
-
-            dto.setPreviousClaimCount(
-                    previousClaims.size()
-            );
-
-            // 🕒 DYNAMIC HISTORICAL CLAIMS TIMELINE MAP
-            // Filters out the active claim currently being reviewed so only real past history displays
-            List<ClaimResponseDTO.PastClaimTimelineDTO> timeline = previousClaims.stream()
-                .filter(c -> !c.getId().equals(claim.getId()))
-                .map(c -> {
-                    ClaimResponseDTO.PastClaimTimelineDTO tDto = new ClaimResponseDTO.PastClaimTimelineDTO();
-                    tDto.setClaimNumber(c.getClaimNumber());
-                    tDto.setAmount(c.getClaimAmount());
-                    tDto.setReason(c.getClaimReason());
-                    tDto.setStatus(c.getClaimStatus().toString());
-                    tDto.setIncidentDate(c.getIncidentDate());
-                    return tDto;
-                })
-                .toList();
-
-            dto.setPastClaimsTimeline(timeline);
-        }
-
-        // REVIEWED BY AGENT
-        if(claim.getReviewedBy()!=null){
-        	 dto.setReviewedById(claim.getReviewedBy().getId()); 
-            dto.setReviewedByName(
-                    claim.getReviewedBy()
-                    .getFullName()
-            );
-        }
-
-        // HISTORY
-        if(claim.getClaimStatusHistories()!=null){
-
-            List<ClaimStatusHistoryResponseDTO> historyList =
-                    claim.getClaimStatusHistories()
-                    .stream()
-                    .map(h -> {
-
-                        ClaimStatusHistoryResponseDTO history =
-                                new ClaimStatusHistoryResponseDTO();
-
-                        history.setHistoryId(
-                                h.getId()
-                        );
-
-                        history.setClaimId(
-                                claim.getId()
-                        );
-
-                        history.setPreviousStatus(
-                                h.getPreviousStatus()
-                        );
-
-                        history.setNewStatus(
-                                h.getNewStatus()
-                        );
-
-                        history.setRemarks(
-                                h.getRemarks()
-                        );
-
-                        history.setUpdatedDate(
-                                h.getUpdatedDate()
-                        );
-
-                        if(h.getUser()!=null){
-                            history.setUpdatedByFullName(
-                                    h.getUser()
-                                    .getFullName()
-                            );
-                        }
-
-                        return history;
-
-                    })
-                    .toList();
-
-            dto.setHistory(
-                    historyList
-            );
-        }
-        
-        if(claim.getClaimDocuments() != null) {
-
-            List<ClaimDocumentDTO> docs =
-                    claim.getClaimDocuments()
-                    .stream()
-                    .map(doc -> {
-                        ClaimDocumentDTO documentDTO =
-                                new ClaimDocumentDTO();
-
-                        documentDTO.setDocumentId(
-                                doc.getId()
-                        );
-
-                        documentDTO.setDocumentName(
-                                doc.getDocumentName()
-                        );
-
-                        documentDTO.setDocumentType(
-                                doc.getDocumentType()
-                        );
-
-                        documentDTO.setDocumentReference(
-                                doc.getDocumentReference()
-                        );
-
-                        return documentDTO;
-                    })
-                    .toList();
-
-            dto.setDocuments(docs);
-        }
-
-        return dto;
-    }
-
-    @Override
-    public PaginatedResponseDTO<ClaimResponseDTO> getAgentClaims(
-            int page,
-            int size,
-            String sortBy,
-            String direction
-    ){
-
-        Pageable pageable =
-                createPageable(
-                        page,
-                        size,
-                        sortBy,
-                        direction
-                );
-
-
-        Page<Claim> claims =
-                claimRepository.findByClaimStatusIn(
-                        List.of(
-                            ClaimStatus.SUBMITTED,
-                            ClaimStatus.UNDER_REVIEW,
-                            ClaimStatus.RECOMMENDED_APPROVAL,
-                            ClaimStatus.RECOMMENDED_REJECTION
-                        ),
-                        pageable
-                );
-
-
-        Page<ClaimResponseDTO> dto =
-                claims.map(this::convertToResponseDTO);
-
-
-        return PaginationUtil.createPaginatedResponse(
-                dto,
-                sortBy,
-                direction
-        );
-    }
-    
+		List<ClaimDocument> documents = new ArrayList<>();
+
+		if (documentDTOs == null) {
+			return documents;
+		}
+
+		for (ClaimDocumentDTO dto : documentDTOs) {
+
+			ClaimDocument document = new ClaimDocument();
+
+			document.setClaim(claim);
+
+			document.setDocumentName(dto.getDocumentName());
+
+			document.setDocumentType(dto.getDocumentType());
+
+			document.setDocumentReference(dto.getDocumentReference());
+
+			documents.add(document);
+
+		}
+
+		return documents;
+	}
+
+	private User getUser(Long userId) {
+
+		return userRepository.findById(userId)
+				.orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+	}
+
+	private Claim getClaim(Long claimId) {
+
+		return claimRepository.findById(claimId)
+				.orElseThrow(() -> new ResourceNotFoundException("Claim not found with id: " + claimId));
+	}
+
+	private Policy getPolicy(Long policyId) {
+
+		return policyRepository.findById(policyId)
+				.orElseThrow(() -> new ResourceNotFoundException("Policy not found with id: " + policyId));
+	}
+
+	private Customer getCustomerByUserId(Long userId) {
+
+		return customerRepository.findByUser_Id(userId)
+				.orElseThrow(() -> new ResourceNotFoundException("Customer profile not found"));
+	}
+
+	@Override
+	@Transactional
+	public ClaimResponseDTO getClaimDetailsForReview(Long claimId, Long agentUserId) {
+		log.info("Agent user {} is opening claim ID {} for inspection", agentUserId, claimId);
+
+		Claim claim = claimRepository.findById(claimId)
+				.orElseThrow(() -> new ResourceNotFoundException("Claim record not found"));
+
+		User currentAgent = getUser(agentUserId);
+
+		// 🛑 CONCURRENCY LOCK GUARD: If already under review, verify if the active
+		// agent holds the lock
+		if (claim.getClaimStatus() == ClaimStatus.UNDER_REVIEW && claim.getReviewedBy() != null
+				&& !claim.getReviewedBy().getId().equals(agentUserId)) {
+
+			log.warn("Collision prevented: Agent {} blocked from accessing claim {} locked by Agent {}", agentUserId,
+					claimId, claim.getReviewedBy().getFullName());
+			throw new BusinessRuleException(
+					"Access Denied. This claim file is currently locked and being processed by: "
+							+ claim.getReviewedBy().getFullName());
+		}
+
+		// 🔓 LOCK ACQUISITION: If the claim is brand new, lock it to this agent
+		// instantly upon opening
+		if (claim.getClaimStatus() == ClaimStatus.SUBMITTED) {
+			ClaimStatus previousStatus = claim.getClaimStatus();
+			claim.setClaimStatus(ClaimStatus.UNDER_REVIEW);
+			claim.setReviewedBy(currentAgent);
+			claim = claimRepository.save(claim);
+
+			createHistory(claim, previousStatus, ClaimStatus.UNDER_REVIEW, "Claim locked for inspection by agent.",
+					currentAgent);
+			log.info("Claim {} successfully locked under active review by agent {}", claim.getClaimNumber(),
+					agentUserId);
+		}
+
+		return convertToResponseDTO(claim);
+	}
+
+	@Override
+	@Transactional
+	public ClaimResponseDTO raiseClaim(Long authenticatedUserId, ClaimRequestDTO dto) {
+
+		log.info("Customer {} attempting to raise claim for policy {}", authenticatedUserId, dto.getPolicyId());
+
+		Policy policy = getPolicy(dto.getPolicyId());
+
+		if (policy.getEndDate().isBefore(LocalDate.now())) {
+			log.warn("Business rule violation. Claim attempted on expired policy: {}", policy.getPolicyNumber());
+			throw new BusinessRuleException("Policy has expired");
+		}
+
+		if (dto.getIncidentDate().isAfter(LocalDate.now())) {
+			log.warn("Business rule violation. Future incident date submitted: {}", dto.getIncidentDate());
+			throw new BusinessRuleException("Incident date cannot be in future");
+		}
+
+		if (!policy.getCustomer().getUser().getId().equals(authenticatedUserId)) {
+			log.warn("Blocked attempt by user {} to raise claim on another customer's policy: {}", authenticatedUserId,
+					policy.getPolicyNumber());
+			throw new AuthorizationException("You cannot claim another customer's policy");
+		}
+
+		if (policy.getPolicyStatus() != PolicyStatus.ACTIVE) {
+			log.warn("Business rule violation. Claim attempted on non-active policy: {} (status: {})",
+					policy.getPolicyNumber(), policy.getPolicyStatus());
+			throw new BusinessRuleException("Claim can only be raised for active policies");
+		}
+
+		BigDecimal approvedClaims = claimRepository.getApprovedClaimAmount(policy.getId());
+
+		// --- SAFE CONVERSION FOR FIRST-TIME CLAIMS ---
+		if (approvedClaims == null) {
+			approvedClaims = BigDecimal.ZERO;
+		}
+
+		BigDecimal totalClaimAmount = approvedClaims.add(dto.getClaimAmount());
+
+		if (totalClaimAmount.compareTo(policy.getPolicyPlan().getCoverageAmount()) > 0) {
+			log.warn("Business rule violation. Claim amount {} (cumulative {}) exceeds coverage {} for policy {}",
+					dto.getClaimAmount(), totalClaimAmount, policy.getPolicyPlan().getCoverageAmount(),
+					policy.getPolicyNumber());
+			throw new BusinessRuleException("Claim exceeds remaining coverage amount");
+		}
+
+		boolean exists = claimRepository.existsByPolicyIdAndClaimStatusIn(policy.getId(),
+				List.of(ClaimStatus.SUBMITTED, ClaimStatus.UNDER_REVIEW));
+
+		if (exists) {
+			log.warn("Business rule violation. Duplicate open claim attempted for policy: {}",
+					policy.getPolicyNumber());
+			throw new BusinessRuleException("A claim already exists for this policy");
+		}
+
+		Claim claim = new Claim();
+		claim.setClaimNumber(generateClaimNumber());
+		claim.setPolicy(policy);
+		claim.setClaimAmount(dto.getClaimAmount());
+		claim.setClaimReason(dto.getClaimReason());
+		claim.setIncidentDate(dto.getIncidentDate());
+		claim.setClaimStatus(ClaimStatus.SUBMITTED);
+
+		Claim savedClaim = claimRepository.save(claim);
+
+		List<ClaimDocument> documents = buildDocuments(savedClaim, dto.getSupportingDocuments());
+
+		claimDocumentRepository.saveAll(documents);
+		savedClaim.setClaimDocuments(documents);
+
+		User customer = getUser(authenticatedUserId);
+
+		createHistory(savedClaim, ClaimStatus.SUBMITTED, ClaimStatus.SUBMITTED, "Claim submitted", customer);
+
+		log.info("Claim {} submitted successfully", savedClaim.getClaimNumber());
+
+		return convertToResponseDTO(savedClaim);
+	}
+
+	@Override
+	@Transactional
+	public ClaimResponseDTO reviewClaim(Long claimId, Long agentId, ClaimReviewRequestDTO dto) {
+		log.info("Agent user {} is attempting to process a review update for claim ID {}", agentId, claimId);
+
+		Claim claim = claimRepository.findById(claimId)
+				.orElseThrow(() -> new ResourceNotFoundException("Claim file reference not found"));
+
+		User agent = getUser(agentId);
+
+		// --- PHASE 1: CONCURRENCY LOCK ENGINE ---
+		// If the claim is brand new, automatically assign it to this agent and set it
+		// to UNDER_REVIEW
+		if (claim.getClaimStatus() == ClaimStatus.SUBMITTED) {
+			ClaimStatus previousStatus = claim.getClaimStatus();
+			claim.setClaimStatus(ClaimStatus.UNDER_REVIEW);
+			claim.setReviewedBy(agent);
+			claim = claimRepository.save(claim);
+
+			createHistory(claim, previousStatus, ClaimStatus.UNDER_REVIEW,
+					"Claim assigned and locked for agent inspection.", agent);
+			log.info("Claim {} successfully locked under active review by agent {}", claim.getClaimNumber(), agentId);
+		}
+
+		// If the claim is already under review, verify that the current agent holds the
+		// active lock
+		else if (claim.getClaimStatus() == ClaimStatus.UNDER_REVIEW) {
+			if (claim.getReviewedBy() != null && !claim.getReviewedBy().getId().equals(agentId)) {
+				log.warn("Collision blocked: Agent {} tried to review claim {} which is locked by Agent {}", agentId,
+						claimId, claim.getReviewedBy().getId());
+				throw new BusinessRuleException(
+						"This claim file is currently locked and being audited by another agent.");
+			}
+		}
+
+		// Prevent updates if the claim has already passed the review stage
+		else {
+			throw new BusinessRuleException(
+					"This claim has already been processed beyond the review stage. Status: " + claim.getClaimStatus());
+		}
+
+		// --- PHASE 2: RECOMMENDATION ENGINE ---
+		// Enforce constraint that agents can only submit a recommendation status
+		if (dto.getRecommendedStatus() != ClaimStatus.RECOMMENDED_APPROVAL
+				&& dto.getRecommendedStatus() != ClaimStatus.RECOMMENDED_REJECTION) {
+			throw new InvalidStatusException(
+					"Agents can only submit RECOMMENDED_APPROVAL or RECOMMENDED_REJECTION statuses.");
+		}
+
+		ClaimStatus previousStatus = claim.getClaimStatus();
+
+		// Apply form values and transition the state out of the active review lock
+		claim.setClaimStatus(dto.getRecommendedStatus());
+		claim.setAgentRemarks(dto.getRemarks());
+		claim.setReviewedBy(agent); // Maintains accountability for the final recommendation
+
+		Claim updatedClaim = claimRepository.save(claim);
+
+		// Log the final recommendation to the status history ledger
+		createHistory(updatedClaim, previousStatus, dto.getRecommendedStatus(), dto.getRemarks(), agent);
+
+		log.info("Agent {} successfully submitted recommendation ({}) for claim {}", agentId,
+				dto.getRecommendedStatus(), updatedClaim.getClaimNumber());
+
+		return convertToResponseDTO(updatedClaim);
+	}
+
+	@Override
+	@Transactional
+	public ClaimResponseDTO processFinalDecision(Long claimId, Long adminUserId,
+			ClaimFinalDecisionRequestDTO decisionDTO) {
+		log.info("Admin {} processing final decision for claim {}", adminUserId, claimId);
+
+		User admin = getUser(adminUserId);
+
+		if (admin.getRole() != Role.ADMIN) {
+			throw new AuthorizationException("Only admins can make final claim decisions");
+		}
+
+		Claim claim = getClaim(claimId);
+
+		if (claim.getClaimStatus() != ClaimStatus.RECOMMENDED_APPROVAL
+				&& claim.getClaimStatus() != ClaimStatus.RECOMMENDED_REJECTION) {
+
+			throw new InvalidStatusException("Claim must be recommended before final decision");
+		}
+
+		if (decisionDTO.getFinalDecisionStatus() != ClaimStatus.APPROVED
+				&& decisionDTO.getFinalDecisionStatus() != ClaimStatus.REJECTED) {
+
+			throw new InvalidStatusException("Final decision must be APPROVED or REJECTED");
+		}
+
+		if (claim.getClaimStatus() == ClaimStatus.RECOMMENDED_APPROVAL
+				&& decisionDTO.getFinalDecisionStatus() != ClaimStatus.APPROVED) {
+
+			throw new InvalidStatusException("Recommended approval claims can only be approved");
+		}
+
+		if (claim.getClaimStatus() == ClaimStatus.RECOMMENDED_REJECTION
+				&& decisionDTO.getFinalDecisionStatus() != ClaimStatus.REJECTED) {
+
+			throw new InvalidStatusException("Recommended rejection claims can only be rejected");
+		}
+
+		ClaimStatus previousStatus = claim.getClaimStatus();
+
+		claim.setClaimStatus(decisionDTO.getFinalDecisionStatus());
+
+		claim.setAdminRemarks(decisionDTO.getRemarks());
+
+		Claim updatedClaim = claimRepository.save(claim);
+
+		createHistory(updatedClaim, previousStatus, decisionDTO.getFinalDecisionStatus(), decisionDTO.getRemarks(),
+				admin);
+
+		if (updatedClaim.getClaimStatus() == ClaimStatus.REJECTED) {
+
+			log.info("Final claim rejection. Claim {} rejected by admin {}", updatedClaim.getClaimNumber(),
+					adminUserId);
+
+		}
+
+		if (updatedClaim.getClaimStatus() == ClaimStatus.APPROVED) {
+
+			log.info("Final claim approval. Claim {} approved by admin {}", updatedClaim.getClaimNumber(), adminUserId);
+
+		}
+
+		return convertToResponseDTO(updatedClaim);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public ClaimResponseDTO getClaimById(Long claimId, Long requesterUserId, String requesterRole) {
+
+		Claim claim = getClaim(claimId);
+
+		// Enforces FR-CLM-005: customers may view only their own claims
+		if ("CUSTOMER".equals(requesterRole)
+				&& !claim.getPolicy().getCustomer().getUser().getId().equals(requesterUserId)) {
+			log.warn("Blocked attempt by user {} to view another customer's claim: {}", requesterUserId,
+					claim.getClaimNumber());
+			throw new AuthorizationException("You are not authorized to view this claim");
+		}
+
+		return convertToResponseDTO(claim);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public PaginatedResponseDTO<ClaimResponseDTO> getAllClaims(int page, int size, String sortBy, String direction) {
+
+		Pageable pageable = createPageable(page, size, sortBy, direction);
+
+		Page<Claim> claimPage = claimRepository.findAll(pageable);
+
+		Page<ClaimResponseDTO> dtoPage = claimPage.map(this::convertToResponseDTO);
+
+		return PaginationUtil.createPaginatedResponse(dtoPage, sortBy, direction);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public PaginatedResponseDTO<ClaimResponseDTO> getClaimsByCustomerId(Long customerId, int page, int size,
+			String sortBy, String direction) {
+
+		Pageable pageable = createPageable(page, size, sortBy, direction);
+
+		Page<Claim> claimPage =
+
+				claimRepository.findByPolicy_Customer_Id(
+
+						customerId, pageable);
+
+		Page<ClaimResponseDTO> dtoPage = claimPage.map(this::convertToResponseDTO);
+
+		return PaginationUtil.createPaginatedResponse(dtoPage, sortBy, direction);
+	}
+
+	private Pageable createPageable(int page, int size, String sortBy, String direction) {
+
+		if (sortBy.equals("claimId")) {
+			sortBy = "id";
+		}
+
+		if (page < 0) {
+
+			log.warn("Invalid pagination request. Page: {}", page);
+
+			throw new InvalidRequestException("Page cannot be negative");
+		}
+
+		if (size <= 0 || size > 100) {
+
+			log.warn("Invalid pagination request. Size: {}", size);
+
+			throw new InvalidRequestException("Invalid page size");
+		}
+
+		Sort sort = direction.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+
+		return PageRequest.of(page, size, sort);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public PaginatedResponseDTO<ClaimResponseDTO> getClaimsByStatus(ClaimStatus status, int page, int size,
+			String sortBy, String direction) {
+
+		Pageable pageable = createPageable(page, size, sortBy, direction);
+
+		Page<Claim> claimPage = claimRepository.findByClaimStatus(status, pageable);
+
+		Page<ClaimResponseDTO> dtoPage = claimPage.map(this::convertToResponseDTO);
+
+		return PaginationUtil.createPaginatedResponse(dtoPage, sortBy, direction);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public PaginatedResponseDTO<ClaimResponseDTO> getClaimsByCustomerAndStatus(Long customerId, ClaimStatus status,
+			int page, int size, String sortBy, String direction) {
+
+		Pageable pageable = createPageable(page, size, sortBy, direction);
+
+		Page<Claim> claimPage = claimRepository
+
+				.findByPolicy_Customer_IdAndClaimStatus(
+
+						customerId, status, pageable);
+
+		Page<ClaimResponseDTO> dtoPage = claimPage.map(this::convertToResponseDTO);
+
+		return PaginationUtil.createPaginatedResponse(dtoPage, sortBy, direction);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public PaginatedResponseDTO<ClaimResponseDTO> searchClaimsByNumber(String claimNumber, int page, int size,
+			String sortBy, String direction) {
+
+		Pageable pageable = createPageable(page, size, sortBy, direction);
+		Page<Claim> claimPage = claimRepository.findByClaimNumberContainingIgnoreCase(claimNumber, pageable);
+
+		Page<ClaimResponseDTO> dtoPage = claimPage.map(this::convertToResponseDTO);
+
+		return PaginationUtil.createPaginatedResponse(dtoPage, sortBy, direction);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public PaginatedResponseDTO<ClaimResponseDTO> getMyClaims(Long userId, int page, int size, String sortBy,
+			String direction) {
+
+		Customer customer = customerRepository.findByUser_Id(userId)
+				.orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
+
+		Pageable pageable = createPageable(page, size, sortBy, direction);
+
+		Page<Claim> claimPage = claimRepository.findByPolicy_Customer_Id(customer.getId(), pageable);
+
+		Page<ClaimResponseDTO> dtoPage = claimPage.map(this::convertToResponseDTO);
+
+		return PaginationUtil.createPaginatedResponse(dtoPage, sortBy, direction);
+	}
+
+	private ClaimResponseDTO convertToResponseDTO(Claim claim) {
+
+		ClaimResponseDTO dto = new ClaimResponseDTO();
+
+		// BASIC CLAIM DETAILS
+		dto.setClaimId(claim.getId());
+
+		dto.setClaimNumber(claim.getClaimNumber());
+
+		dto.setClaimAmount(claim.getClaimAmount());
+
+		dto.setClaimReason(claim.getClaimReason());
+
+		dto.setIncidentDate(claim.getIncidentDate());
+
+		dto.setClaimStatus(claim.getClaimStatus());
+
+		dto.setAgentRemarks(claim.getAgentRemarks());
+
+		dto.setAdminRemarks(claim.getAdminRemarks());
+
+		dto.setCreatedDate(claim.getCreatedDate());
+
+		dto.setUpdatedDate(claim.getUpdatedDate());
+
+		Policy policy = claim.getPolicy();
+
+		if (policy != null) {
+
+			// POLICY NUMBER
+			dto.setPolicyNumber(policy.getPolicyNumber());
+
+			// CUSTOMER NAME
+			if (policy.getCustomer() != null && policy.getCustomer().getUser() != null) {
+				dto.setCustomerName(policy.getCustomer().getUser().getFullName());
+			}
+
+			// COVERAGE
+			BigDecimal coverage = policy.getPolicyPlan().getCoverageAmount();
+
+			dto.setPolicyCoverageAmount(coverage);
+
+			// APPROVED CLAIM TOTAL
+			BigDecimal approvedAmount = claimRepository.getApprovedClaimAmount(policy.getId());
+
+			if (approvedAmount == null) {
+				approvedAmount = BigDecimal.ZERO;
+			}
+
+			dto.setTotalApprovedClaimAmount(approvedAmount);
+
+			// REMAINING
+			dto.setRemainingCoverageAmount(coverage.subtract(approvedAmount));
+
+			// PREVIOUS CLAIM COUNT & DETAILED TIMELINE MAP
+			List<Claim> previousClaims = claimRepository.findByPolicy_Id(policy.getId(), Pageable.unpaged())
+					.getContent();
+
+			dto.setPreviousClaimCount(previousClaims.size());
+
+			// 🕒 DYNAMIC HISTORICAL CLAIMS TIMELINE MAP
+			// Filters out the active claim currently being reviewed so only real past
+			// history displays
+			List<ClaimResponseDTO.PastClaimTimelineDTO> timeline = previousClaims.stream()
+					.filter(c -> !c.getId().equals(claim.getId())).map(c -> {
+						ClaimResponseDTO.PastClaimTimelineDTO tDto = new ClaimResponseDTO.PastClaimTimelineDTO();
+						tDto.setClaimNumber(c.getClaimNumber());
+						tDto.setAmount(c.getClaimAmount());
+						tDto.setReason(c.getClaimReason());
+						tDto.setStatus(c.getClaimStatus().toString());
+						tDto.setIncidentDate(c.getIncidentDate());
+						return tDto;
+					}).toList();
+
+			dto.setPastClaimsTimeline(timeline);
+		}
+
+		// REVIEWED BY AGENT
+		if (claim.getReviewedBy() != null) {
+			dto.setReviewedById(claim.getReviewedBy().getId());
+			dto.setReviewedByName(claim.getReviewedBy().getFullName());
+		}
+
+		// HISTORY
+		if (claim.getClaimStatusHistories() != null) {
+
+			List<ClaimStatusHistoryResponseDTO> historyList = claim.getClaimStatusHistories().stream().map(h -> {
+
+				ClaimStatusHistoryResponseDTO history = new ClaimStatusHistoryResponseDTO();
+
+				history.setHistoryId(h.getId());
+
+				history.setClaimId(claim.getId());
+
+				history.setPreviousStatus(h.getPreviousStatus());
+
+				history.setNewStatus(h.getNewStatus());
+
+				history.setRemarks(h.getRemarks());
+
+				history.setUpdatedDate(h.getUpdatedDate());
+
+				if (h.getUser() != null) {
+					history.setUpdatedByFullName(h.getUser().getFullName());
+				}
+
+				return history;
+
+			}).toList();
+
+			dto.setHistory(historyList);
+		}
+
+		if (claim.getClaimDocuments() != null) {
+
+			List<ClaimDocumentDTO> docs = claim.getClaimDocuments().stream().map(doc -> {
+				ClaimDocumentDTO documentDTO = new ClaimDocumentDTO();
+
+				documentDTO.setDocumentId(doc.getId());
+
+				documentDTO.setDocumentName(doc.getDocumentName());
+
+				documentDTO.setDocumentType(doc.getDocumentType());
+
+				documentDTO.setDocumentReference(doc.getDocumentReference());
+
+				return documentDTO;
+			}).toList();
+
+			dto.setDocuments(docs);
+		}
+
+		return dto;
+	}
+
+	@Override
+	public PaginatedResponseDTO<ClaimResponseDTO> getAgentClaims(int page, int size, String sortBy, String direction) {
+
+		Pageable pageable = createPageable(page, size, sortBy, direction);
+
+		Page<Claim> claims = claimRepository.findByClaimStatusIn(List.of(ClaimStatus.SUBMITTED,
+				ClaimStatus.UNDER_REVIEW, ClaimStatus.RECOMMENDED_APPROVAL, ClaimStatus.RECOMMENDED_REJECTION),
+				pageable);
+
+		Page<ClaimResponseDTO> dto = claims.map(this::convertToResponseDTO);
+
+		return PaginationUtil.createPaginatedResponse(dto, sortBy, direction);
+	}
+
 }

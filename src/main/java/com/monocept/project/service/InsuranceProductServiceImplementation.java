@@ -10,6 +10,7 @@ import com.monocept.project.dto.InsuranceProductRequestDTO;
 import com.monocept.project.dto.InsuranceProductResponseDTO;
 import com.monocept.project.dto.PaginatedResponseDTO;
 import com.monocept.project.enums.ProductType;
+import com.monocept.project.exception.DuplicateResourceException;
 import com.monocept.project.exception.ResourceNotFoundException;
 import com.monocept.project.model.InsuranceProduct;
 import com.monocept.project.repository.InsuranceProductRepository;
@@ -30,6 +31,12 @@ public class InsuranceProductServiceImplementation implements InsuranceProductSe
 	@Transactional
 	public InsuranceProductResponseDTO createProduct(InsuranceProductRequestDTO productRequestDTO) {
 		log.info("Creating insurance product: {}", productRequestDTO.getProductName());
+
+		if (productRepository.existsByProductNameIgnoreCase(productRequestDTO.getProductName())) {
+			log.warn("Attempt to create duplicate product with name: {}", productRequestDTO.getProductName());
+			throw new DuplicateResourceException(
+					"An insurance product with name '" + productRequestDTO.getProductName() + "' already exists");
+		}
 
 		InsuranceProduct product = modelMapper.map(productRequestDTO, InsuranceProduct.class);
 
@@ -140,6 +147,14 @@ public class InsuranceProductServiceImplementation implements InsuranceProductSe
 
 		InsuranceProduct product = findProductById(productId);
 
+		if (!product.getProductName().equalsIgnoreCase(productRequestDTO.getProductName())
+				&& productRepository.existsByProductNameIgnoreCase(productRequestDTO.getProductName())) {
+			log.warn("Attempt to rename product {} to a name already in use: {}", productId,
+					productRequestDTO.getProductName());
+			throw new DuplicateResourceException(
+					"An insurance product with name '" + productRequestDTO.getProductName() + "' already exists");
+		}
+
 		product.setProductName(productRequestDTO.getProductName());
 		product.setDescription(productRequestDTO.getDescription());
 		product.setProductType(productRequestDTO.getProductType());
@@ -163,6 +178,20 @@ public class InsuranceProductServiceImplementation implements InsuranceProductSe
 		productRepository.save(product);
 
 		log.info("Product deactivated successfully with id: {}", productId);
+	}
+	
+	@Override
+	@Transactional
+	public void activateProduct(Long productId) {
+
+	    InsuranceProduct product = findProductById(productId);
+
+	    product.setActiveStatus(true);
+
+	    productRepository.save(product);
+
+	    log.info("Product activated successfully with id: {}", productId);
+
 	}
 
 	private InsuranceProduct findProductById(Long id) {

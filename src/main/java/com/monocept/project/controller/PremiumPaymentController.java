@@ -35,13 +35,14 @@ public class PremiumPaymentController {
     private final PremiumPaymentService premiumPaymentService;
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('CUSTOMER', 'AGENT')")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'AGENT', 'ADMIN')")
     @Operation(summary = "Record Payment", description = "Registers and submits a new premium transaction receipt structure into the system ledger")
     public ResponseEntity<PremiumPaymentResponseDTO> recordPayment(
-            @Valid @RequestBody PremiumPaymentRequestDTO requestDTO) {
+            @Valid @RequestBody PremiumPaymentRequestDTO requestDTO,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(premiumPaymentService.recordPayment(requestDTO));
+                .body(premiumPaymentService.recordPayment(requestDTO, userDetails.getUserId(), userDetails.getRole()));
     }
     
 
@@ -63,10 +64,11 @@ public class PremiumPaymentController {
     @PreAuthorize("hasAnyRole('ADMIN', 'AGENT', 'CUSTOMER')")
     @Operation(summary = "Get Payment By ID", description = "Fetches explicit transaction states matching the targeted unique ledger ID parameter")
     public ResponseEntity<PremiumPaymentResponseDTO> getPaymentById(
-            @PathVariable Long paymentId) {
+            @PathVariable Long paymentId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         return ResponseEntity.ok(
-                premiumPaymentService.getPaymentById(paymentId));
+                premiumPaymentService.getPaymentById(paymentId, userDetails.getUserId(), userDetails.getRole()));
     }
 
     @GetMapping("/policy/{policyId}")
@@ -78,7 +80,8 @@ public class PremiumPaymentController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "paymentDate") String sortBy,
-            @RequestParam(defaultValue = "desc") String direction) {
+            @RequestParam(defaultValue = "desc") String direction,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         return ResponseEntity.ok(
                 premiumPaymentService.getPaymentsByPolicyId(
@@ -86,7 +89,9 @@ public class PremiumPaymentController {
                         page,
                         size,
                         sortBy,
-                        direction));
+                        direction,
+                        userDetails.getUserId(),
+                        userDetails.getRole()));
     }
 
     @GetMapping("/status/{status}")
@@ -130,7 +135,7 @@ public class PremiumPaymentController {
     }
     
     @GetMapping("/agent")
-    @PreAuthorize("hasRole('AGENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
     @Operation(
         summary = "Get Payments For Agent",
         description = "Returns premium payments handled by agent"

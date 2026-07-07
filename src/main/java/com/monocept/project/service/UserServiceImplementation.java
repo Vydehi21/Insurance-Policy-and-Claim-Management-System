@@ -185,6 +185,9 @@ public class UserServiceImplementation implements UserService {
 		user.setActiveStatus(statusUpdateDTO.getActiveStatus());
 
 		User updatedUser = userRepository.save(user);
+		
+		log.info("User status updated successfully. id: {}, activeStatus: {}, remarks: {}",
+				               updatedUser.getId(), updatedUser.getActiveStatus(), statusUpdateDTO.getRemarks());
 
 		return modelMapper.map(updatedUser, UserResponseDTO.class);
 	}
