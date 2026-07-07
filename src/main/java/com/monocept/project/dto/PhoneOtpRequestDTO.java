@@ -12,9 +12,10 @@ import lombok.Setter;
 @AllArgsConstructor
 public class PhoneOtpRequestDTO {
 
-    @Pattern(regexp = "^[6-9][0-9]{9}$", message = "Phone number must be a valid 10 digit Indian number")
+	@Pattern(regexp = "^[6-9][0-9]{9}$", message = "Phone number must be a valid 10 digit Indian number")
     private String phone;
 
     @Pattern(regexp = "^[0-9]{6}$", message = "OTP must be a 6 digit numeric code")
     private String otp;
+
 }

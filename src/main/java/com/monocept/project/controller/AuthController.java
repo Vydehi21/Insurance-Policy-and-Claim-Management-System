@@ -1,11 +1,9 @@
 package com.monocept.project.controller;
 
-import java.util.Map;
-
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +17,7 @@ import com.monocept.project.dto.ResendRegistrationOtpDTO;
 import com.monocept.project.dto.ResetPasswordRequestDTO;
 import com.monocept.project.dto.UserResponseDTO;
 import com.monocept.project.dto.VerifyRegistrationOtpDTO;
+import com.monocept.project.security.RSAUtil;
 import com.monocept.project.service.AuthService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,6 +33,12 @@ import lombok.RequiredArgsConstructor;
 public class AuthController {
 
     private final AuthService authService;
+    private final RSAUtil rsaUtil;
+    
+    @GetMapping("/public-key")
+    public ResponseEntity<String> getPublicKey() {
+        return ResponseEntity.ok(rsaUtil.getPublicKey());
+    }
 
     @PostMapping("/register")
     @Operation(summary = "Register Customer", description = "Registers a new customer user into the system")

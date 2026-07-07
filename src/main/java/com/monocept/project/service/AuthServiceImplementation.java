@@ -1,6 +1,5 @@
 package com.monocept.project.service;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 
 import org.modelmapper.ModelMapper;
@@ -30,6 +29,7 @@ import com.monocept.project.repository.PendingUserRepository;
 import com.monocept.project.repository.PhoneOtpRepository;
 import com.monocept.project.repository.UserRepository;
 import com.monocept.project.security.JwtService;
+import com.monocept.project.security.RSAUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +46,7 @@ public class AuthServiceImplementation implements AuthService {
 
 	private final CustomerRepository customerRepository;
 	private final EmailService emailService;
+	private final RSAUtil rsaUtil;
 
 	@Value("${app.frontend.reset-url}")
 	private String resetUrl;
@@ -114,9 +115,13 @@ public class AuthServiceImplementation implements AuthService {
 		otpService.sendEmailOtp(registrationRequestDTO.getEmail());
 		otpService.sendPhoneOtp(registrationRequestDTO.getMobileNumber());
 
+		String decryptedPassword = rsaUtil.decrypt(registrationRequestDTO.getPassword());
+
 		PendingUser pendingUser = modelMapper.map(registrationRequestDTO, PendingUser.class);
 
-		pendingUser.setPassword(passwordEncoder.encode(registrationRequestDTO.getPassword()));
+		pendingUser.setPassword(
+		    passwordEncoder.encode(decryptedPassword)
+		);
 
 		pendingUserRepository.save(pendingUser);
 
@@ -191,9 +196,12 @@ public class AuthServiceImplementation implements AuthService {
 
 		// FIXED: Safely verify hashed passwords instead of standard text equals
 		// comparisons
-		if (!passwordEncoder.matches(loginRequestDTO.getPassword(), user.getPassword())) {
+				
+		String decryptedPassword = rsaUtil.decrypt(loginRequestDTO.getPassword());
+
+		if (!passwordEncoder.matches(decryptedPassword, user.getPassword())) {
 			log.warn("Wrong password attempt for email: {}", user.getEmail());
-			throw new AuthenticationException("Invalid credentials");
+		    throw new AuthenticationException("Invalid credentials");
 		}
 
 		if (!user.getActiveStatus()) {
@@ -266,7 +274,11 @@ public class AuthServiceImplementation implements AuthService {
 		}
 
 		// 4. Encrypt raw password entry and clear transient tokens
-		user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+		String decryptedPassword = rsaUtil.decrypt(request.getNewPassword());
+
+		user.setPassword(
+		    passwordEncoder.encode(decryptedPassword)
+		);
 		user.setResetToken(null);
 		user.setResetTokenExpiry(null);
 
