@@ -1,6 +1,5 @@
 package com.monocept.project.controller;
 
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -37,95 +36,56 @@ import lombok.RequiredArgsConstructor;
 @Tag(name = "customers", description = "Operations for managing insurance customer profile information")
 public class CustomerController {
 
-    private final CustomerService customerService;
+	private final CustomerService customerService;
 
-    @PostMapping("/profile")
-    @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<CustomerResponseDTO> createProfile(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @Valid @RequestBody CustomerRequestDTO dto){
+	@PostMapping("/profile")
+	@PreAuthorize("hasRole('CUSTOMER')")
+	public ResponseEntity<CustomerResponseDTO> createProfile(@AuthenticationPrincipal CustomUserDetails userDetails,
+			@Valid @RequestBody CustomerRequestDTO dto) {
 
+		CustomerResponseDTO response = customerService.createCustomerProfile(userDetails.getUserId(), dto);
 
-        CustomerResponseDTO response =
-                customerService.createCustomerProfile(
-                        userDetails.getUserId(),
-                        dto
-                );
+		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
+	}
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(response);
+	@GetMapping("/{customerId}")
+	@PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+	@Operation(summary = "Get Customer By ID", description = "Fetches core customer entity attributes matching the designated primary key identifier")
+	public ResponseEntity<CustomerResponseDTO> getCustomerById(@PathVariable Long customerId) {
 
-    }
-    
-    @GetMapping("/{customerId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
-    @Operation(summary = "Get Customer By ID", description = "Fetches core customer entity attributes matching the designated primary key identifier")
-    public ResponseEntity<CustomerResponseDTO> getCustomerById(
-            @PathVariable Long customerId) {
+		return ResponseEntity.ok(customerService.getCustomerById(customerId));
+	}
 
-        return ResponseEntity.ok(
-                customerService.getCustomerById(
-                        customerId
-                )
-        );
-    }
+	@GetMapping("/user/{userId}")
+	@PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+	@Operation(summary = "Get Customer By User ID", description = "Retrieves relational customer structural configurations using the security user profile identity record link")
+	public ResponseEntity<CustomerResponseDTO> getCustomerByUserId(@PathVariable Long userId) {
 
-    @GetMapping("/user/{userId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT', 'CUSTOMER')")
-    @Operation(summary = "Get Customer By User ID", description = "Retrieves relational customer structural configurations using the security user profile identity record link")
-    public ResponseEntity<CustomerResponseDTO> getCustomerByUserId(
-            @PathVariable Long userId) {
+		return ResponseEntity.ok(customerService.getCustomerByUserId(userId));
+	}
 
-        return ResponseEntity.ok(
-                customerService.getCustomerByUserId(
-                        userId
-                )
-        );
-    }
+	@GetMapping
+	@PreAuthorize("hasAnyRole('ADMIN','AGENT')")
+	@Operation(summary = "Get All Customers", description = "Returns an indexed catalog tracking customer files registered system-wide")
+	public ResponseEntity<PaginatedResponseDTO<CustomerResponseDTO>> getAllCustomers(
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
+			@RequestParam(defaultValue = "createdDate") String sortBy,
+			@RequestParam(defaultValue = "desc") String direction) {
 
-    @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','AGENT')")
-    @Operation(summary = "Get All Customers", description = "Returns an indexed catalog tracking customer files registered system-wide")
-    public ResponseEntity<PaginatedResponseDTO<CustomerResponseDTO>>
-    getAllCustomers(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "createdDate") String sortBy,
-            @RequestParam(defaultValue = "desc") String direction) {
+		return ResponseEntity.ok(customerService.getAllCustomers(page, size, sortBy, direction));
+	}
 
-        return ResponseEntity.ok(
-                customerService.getAllCustomers(
-                        page,
-                        size,
-                        sortBy,
-                        direction
-                )
-        );
-    }
+	@GetMapping("/status/{activeStatus}")
+	@PreAuthorize("hasRole('ADMIN')")
+	@Operation(summary = "Get Customers By Status", description = "Filters target catalog profiles using categorical operational state parameters")
+	public ResponseEntity<PaginatedResponseDTO<CustomerResponseDTO>> getCustomersByStatus(
+			@PathVariable Boolean activeStatus, @RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size, @RequestParam(defaultValue = "createdDate") String sortBy,
+			@RequestParam(defaultValue = "desc") String direction) {
 
-    @GetMapping("/status/{activeStatus}")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Get Customers By Status", description = "Filters target catalog profiles using categorical operational state parameters")
-    public ResponseEntity<PaginatedResponseDTO<CustomerResponseDTO>>
-    getCustomersByStatus(
-            @PathVariable Boolean activeStatus,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "createdDate") String sortBy,
-            @RequestParam(defaultValue = "desc") String direction) {
-
-        return ResponseEntity.ok(
-                customerService.getCustomersByStatus(
-                        activeStatus,
-                        page,
-                        size,
-                        sortBy,
-                        direction
-                )
-        );
-    }
+		return ResponseEntity.ok(customerService.getCustomersByStatus(activeStatus, page, size, sortBy, direction));
+	}
 
 //    @GetMapping("/search")
 //    @PreAuthorize("hasRole('ADMIN')")
@@ -148,41 +108,40 @@ public class CustomerController {
 //                )
 //        );
 //    }
-    
-    @GetMapping("/search")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<PaginatedResponseDTO<CustomerResponseDTO>>
-    searchCustomers(
 
-        @RequestParam String keyword,
+	@GetMapping("/search")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<PaginatedResponseDTO<CustomerResponseDTO>> searchCustomers(
 
-        @RequestParam(defaultValue = "0") int page,
+			@RequestParam String keyword,
 
-        @RequestParam(defaultValue = "10") int size,
+			@RequestParam(defaultValue = "0") int page,
 
-        @RequestParam(defaultValue = "createdDate") String sortBy,
+			@RequestParam(defaultValue = "10") int size,
 
-        @RequestParam(defaultValue = "desc") String direction) {
+			@RequestParam(defaultValue = "createdDate") String sortBy,
 
-        return ResponseEntity.ok(
+			@RequestParam(defaultValue = "desc") String direction) {
 
-            customerService.searchCustomers(
+		return ResponseEntity.ok(
 
-                keyword,
+				customerService.searchCustomers(
 
-                page,
+						keyword,
 
-                size,
+						page,
 
-                sortBy,
+						size,
 
-                direction
+						sortBy,
 
-            )
+						direction
 
-        );
+				)
 
-    }
+		);
+
+	}
 
 //    @PutMapping("/{customerId}")
 //    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT', 'CUSTOMER')")
@@ -198,37 +157,21 @@ public class CustomerController {
 //                )
 //        );
 //    }
-    
-    @GetMapping("/me")
-    @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<CustomerResponseDTO> getMyProfile(
-            @AuthenticationPrincipal CustomUserDetails userDetails
-    ){
 
-        return ResponseEntity.ok(
-            customerService.getCustomerByUserId(
-                userDetails.getUserId()
-            )
-        );
+	@GetMapping("/me")
+	@PreAuthorize("hasRole('CUSTOMER')")
+	public ResponseEntity<CustomerResponseDTO> getMyProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
 
-    }
-    
-    @PutMapping("/profile")
-    @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<CustomerResponseDTO> updateMyProfile(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @Valid @RequestBody CustomerRequestDTO dto){
+		return ResponseEntity.ok(customerService.getCustomerByUserId(userDetails.getUserId()));
 
-        return ResponseEntity.ok(
-            customerService.updateCustomerProfile(
-                userDetails.getUserId(),
-                dto
-            )
-        );
-    }
-    
-   
-    
-    
+	}
+
+	@PutMapping("/profile")
+	@PreAuthorize("hasRole('CUSTOMER')")
+	public ResponseEntity<CustomerResponseDTO> updateMyProfile(@AuthenticationPrincipal CustomUserDetails userDetails,
+			@Valid @RequestBody CustomerRequestDTO dto) {
+
+		return ResponseEntity.ok(customerService.updateCustomerProfile(userDetails.getUserId(), dto));
+	}
 
 }

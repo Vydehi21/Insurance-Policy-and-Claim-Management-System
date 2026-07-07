@@ -5,7 +5,7 @@ import com.monocept.project.dto.PaginatedResponseDTO;
 import com.monocept.project.enums.ClaimStatus;
 
 public interface ClaimStatusHistoryService {
-    PaginatedResponseDTO<ClaimStatusHistoryResponseDTO> getHistoryByClaimId(Long claimId, int page, int size, String sortBy, String direction);
+    PaginatedResponseDTO<ClaimStatusHistoryResponseDTO> getHistoryByClaimId(Long claimId, int page, int size, String sortBy, String direction, Long requesterUserId, String requesterRole);
     PaginatedResponseDTO<ClaimStatusHistoryResponseDTO> getHistoryByUpdatedBy(Long userId, int page, int size, String sortBy, String direction);
     PaginatedResponseDTO<ClaimStatusHistoryResponseDTO> getHistoryByStatus(ClaimStatus status, int page, int size, String sortBy, String direction);
     PaginatedResponseDTO<ClaimStatusHistoryResponseDTO> getHistoryByClaimAndUserAndStatus(Long claimId, Long userId, ClaimStatus status, int page, int size, String sortBy, String direction);

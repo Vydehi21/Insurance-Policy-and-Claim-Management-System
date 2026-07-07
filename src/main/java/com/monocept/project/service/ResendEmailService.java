@@ -37,7 +37,11 @@ public class ResendEmailService {
                 .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                 .build();
 
-        HttpClient.newHttpClient()
+        HttpResponse<String> response = HttpClient.newHttpClient()
                 .send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() >= 400) {
+            throw new IOException("Resend API error " + response.statusCode() + ": " + response.body());
+        }
     }
 }

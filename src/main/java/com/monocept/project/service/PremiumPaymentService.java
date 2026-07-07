@@ -9,9 +9,9 @@ import com.monocept.project.dto.PaginatedResponseDTO;
 import com.monocept.project.enums.PaymentStatus;
 
 public interface PremiumPaymentService {
-    PremiumPaymentResponseDTO recordPayment(PremiumPaymentRequestDTO paymentRequestDTO);
-    PremiumPaymentResponseDTO getPaymentById(Long paymentId);
-    PaginatedResponseDTO<PremiumPaymentResponseDTO> getPaymentsByPolicyId(Long policyId, int page, int size, String sortBy, String direction);
+    PremiumPaymentResponseDTO recordPayment(PremiumPaymentRequestDTO paymentRequestDTO, Long requesterUserId, String requesterRole);
+    PremiumPaymentResponseDTO getPaymentById(Long paymentId, Long requesterUserId, String requesterRole);
+    PaginatedResponseDTO<PremiumPaymentResponseDTO> getPaymentsByPolicyId(Long policyId, int page, int size, String sortBy, String direction, Long requesterUserId, String requesterRole);
     PaginatedResponseDTO<PremiumPaymentResponseDTO> getPaymentsByStatus(PaymentStatus status, int page, int size, String sortBy, String direction);
     PaginatedResponseDTO<PremiumPaymentResponseDTO> getPaymentsByPolicyAndStatus(Long policyId, PaymentStatus status, int page, int size, String sortBy, String direction);
     PaginatedResponseDTO<PremiumPaymentResponseDTO> searchPaymentsByReference(String reference, int page, int size, String sortBy, String direction);
@@ -23,6 +23,4 @@ public interface PremiumPaymentService {
             String sortBy,
             String direction
     );
-    //PremiumPaymentResponseDTO
-   // getPaymentByReference(String reference);
 }

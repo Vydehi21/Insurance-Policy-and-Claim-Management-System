@@ -13,9 +13,12 @@ import org.springframework.stereotype.Service;
 import com.monocept.project.dto.ClaimStatusHistoryResponseDTO;
 import com.monocept.project.dto.PaginatedResponseDTO;
 import com.monocept.project.enums.ClaimStatus;
+import com.monocept.project.exception.AuthorizationException;
 import com.monocept.project.exception.InvalidRequestException;
 import com.monocept.project.exception.ResourceNotFoundException;
+import com.monocept.project.model.Claim;
 import com.monocept.project.model.ClaimStatusHistory;
+import com.monocept.project.repository.ClaimRepository;
 import com.monocept.project.repository.ClaimStatusHistoryRepository;
 import com.monocept.project.service.ClaimStatusHistoryService;
 import com.monocept.project.util.PaginationUtil;
@@ -29,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ClaimStatusHistoryServiceImpl implements ClaimStatusHistoryService {
 
     private final ClaimStatusHistoryRepository claimStatusHistoryRepository;
+    private final ClaimRepository claimRepository;
     private final ModelMapper modelMapper;
 
     @Override
@@ -37,7 +41,20 @@ public class ClaimStatusHistoryServiceImpl implements ClaimStatusHistoryService 
             int page,
             int size,
             String sortBy,
-            String direction) {
+            String direction,
+            Long requesterUserId,
+            String requesterRole) {
+
+        // Enforces role matrix: "View claim status history" -> Customer, own claims only
+        if ("CUSTOMER".equals(requesterRole)) {
+            Claim claim = claimRepository.findById(claimId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Claim not found with id: " + claimId));
+            if (!claim.getPolicy().getCustomer().getUser().getId().equals(requesterUserId)) {
+                log.warn("Blocked attempt by user {} to view history for another customer's claim: {}",
+                        requesterUserId, claimId);
+                throw new AuthorizationException("You are not authorized to view this claim's history");
+            }
+        }
 
         Pageable pageable = createPageable(page, size, sortBy, direction);
 

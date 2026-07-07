@@ -3,6 +3,7 @@ package com.monocept.project.controller;
 import com.monocept.project.dto.ClaimStatusHistoryResponseDTO;
 import com.monocept.project.dto.PaginatedResponseDTO;
 import com.monocept.project.enums.ClaimStatus;
+import com.monocept.project.security.CustomUserDetails;
 import com.monocept.project.service.ClaimStatusHistoryService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -30,7 +32,8 @@ public class ClaimStatusHistoryController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "updatedDate") String sortBy,
-            @RequestParam(defaultValue = "desc") String direction) {
+            @RequestParam(defaultValue = "desc") String direction,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         return ResponseEntity.ok(
                 claimStatusHistoryService.getHistoryByClaimId(
@@ -38,7 +41,9 @@ public class ClaimStatusHistoryController {
                         page,
                         size,
                         sortBy,
-                        direction));
+                        direction,
+                        userDetails.getUserId(),
+                        userDetails.getRole()));
     }
 
     @GetMapping("/user/{userId}")

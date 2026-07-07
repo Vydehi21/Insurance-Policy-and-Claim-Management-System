@@ -9,6 +9,8 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,6 +30,8 @@ public class ClaimRequestDTO {
     private BigDecimal claimAmount;
 
     @NotBlank(message = "Claim reason is required")
+    @Size(min = 10, max = 1000, message = "Claim reason must be between 10 and 1000 characters")
+    @Pattern(regexp = ".*[A-Za-z]{3,}.*", message = "Claim reason must contain meaningful text")
     private String claimReason;
 
     @NotNull(message = "Incident date is required")
@@ -37,4 +41,8 @@ public class ClaimRequestDTO {
 
     @NotNull(message = "Supporting document details are required")
     private List<ClaimDocumentDTO> supportingDocuments;
+
+    public void setClaimReason(String claimReason) {
+        this.claimReason = com.monocept.project.util.TextNormalizationUtil.trimAndCollapseSpaces(claimReason);
+    }
 }

@@ -55,7 +55,7 @@ public class AuthController {
     
     @PostMapping("/register/resend-otp")
     public ResponseEntity<String> resendRegistrationOtp(
-            @RequestBody ResendRegistrationOtpDTO dto){
+            @Valid @RequestBody ResendRegistrationOtpDTO dto){
 
         return ResponseEntity.ok(
                 authService.resendRegistrationOtp(dto)
@@ -78,7 +78,7 @@ public class AuthController {
 
         authService.forgotPassword(request);
         // Universal message prevents user enumeration attacks
-        return ResponseEntity.ok("If the email matches an account, a 6-digit OTP has been sent.");
+        return ResponseEntity.ok("If the email matches an account, a password reset link has been sent.");
     }
     
     @PostMapping("/reset-password")

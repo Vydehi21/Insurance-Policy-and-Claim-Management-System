@@ -73,9 +73,6 @@ public class PolicyController {
 
 	){
 
-	    System.out.println("JWT USER ID = " + userDetails.getUserId());
-
-
 	    return ResponseEntity.ok(
 
 	        policyService.getMyPolicies(
@@ -106,18 +103,20 @@ public class PolicyController {
     @PreAuthorize("hasAnyRole('ADMIN','AGENT','CUSTOMER')")
     @Operation(summary = "Get Policy By ID", description = "Fetches complete entity schema fields for an active policy via primary record ID")
     public PolicyResponseDTO getPolicyById(
-            @PathVariable Long id) {
+    		@PathVariable Long id,
+    		@AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        return policyService.getPolicyById(id);
+    	return policyService.getPolicyById(id, userDetails.getUserId(), userDetails.getRole());
     }
 
     @GetMapping("/number/{policyNumber}")
     @PreAuthorize("hasAnyRole('ADMIN','AGENT','CUSTOMER')")
     @Operation(summary = "Get Policy By Number", description = "Retrieves specific insurance file parameters based on its alpha-numeric policy reference code")
     public PolicyResponseDTO getPolicyByNumber(
-            @PathVariable String policyNumber) {
+    		@PathVariable String policyNumber,
+    		@AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        return policyService.getPolicyByNumber(policyNumber);
+    	return policyService.getPolicyByNumber(policyNumber, userDetails.getUserId(), userDetails.getRole());
     }
 
     @GetMapping
@@ -211,7 +210,7 @@ public class PolicyController {
     }
 
 	@PatchMapping("/{policyId}/cancel")
-	@PreAuthorize("hasAnyRole('ADMIN','CUSTOMER')")
+	@PreAuthorize("hasAnyRole('ADMIN','AGENT')")
 	@Operation(summary = "Cancel Policy", description = "Transitions an operational contract straight into a cancelled classification status state")
 	public ResponseEntity<String> cancelPolicy(
 			@PathVariable Long policyId) {

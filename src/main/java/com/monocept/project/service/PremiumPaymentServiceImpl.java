@@ -18,6 +18,7 @@ import com.monocept.project.dto.PremiumPaymentRequestDTO;
 import com.monocept.project.dto.PremiumPaymentResponseDTO;
 import com.monocept.project.enums.PaymentStatus;
 import com.monocept.project.enums.PolicyStatus;
+import com.monocept.project.exception.AuthorizationException;
 import com.monocept.project.exception.BusinessRuleException;
 import com.monocept.project.exception.DuplicateResourceException;
 import com.monocept.project.exception.InvalidRequestException;
@@ -44,11 +45,18 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
 
     @Override
     @Transactional
-    public PremiumPaymentResponseDTO recordPayment(PremiumPaymentRequestDTO paymentRequestDTO) {
+    public PremiumPaymentResponseDTO recordPayment(PremiumPaymentRequestDTO paymentRequestDTO, Long requesterUserId, String requesterRole) {
         log.info("Processing premium payment request for policy ID: {}", paymentRequestDTO.getPolicyId());
 
         Policy policy = policyRepository.findById(paymentRequestDTO.getPolicyId())
                 .orElseThrow(() -> new ResourceNotFoundException("Policy not found"));
+
+        if ("CUSTOMER".equals(requesterRole)
+                && !policy.getCustomer().getUser().getId().equals(requesterUserId)) {
+            log.warn("Blocked attempt by user {} to record payment on another customer's policy: {}",
+                    requesterUserId, policy.getPolicyNumber());
+            throw new AuthorizationException("You are not authorized to record a payment for this policy");
+        }
 
         // --- BUSINESS RULE: VALIDATE ANNUAL LOCK STATUS ---
         if (policy.getNextPremiumDueDate() != null && LocalDate.now().isBefore(policy.getNextPremiumDueDate())) {
@@ -67,12 +75,12 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
             throw new BusinessRuleException("Cannot record payment for cancelled policy");
         }
 
-        // Auto-assign premium cost from core entity settings
-        BigDecimal exactPremiumDue = (policy.getPolicyPlan() != null) ? policy.getPolicyPlan().getPremiumAmount() : paymentRequestDTO.getAmount();
+        BigDecimal paidAmount = paymentRequestDTO.getAmount();
+        BigDecimal requiredPremium = policy.getPolicyPlan().getPremiumAmount();
 
         PremiumPayment payment = new PremiumPayment();
         payment.setPolicy(policy);
-        payment.setAmount(exactPremiumDue);
+        payment.setAmount(paidAmount);
         payment.setPaymentMode(paymentRequestDTO.getPaymentMode());
         payment.setTransactionReference(paymentRequestDTO.getTransactionReference());
         payment.setPaymentStatus(paymentRequestDTO.getPaymentStatus());
@@ -88,15 +96,21 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
                 policy.setTotalPremiumPaid(BigDecimal.ZERO);
             }
             
-            policy.setTotalPremiumPaid(policy.getTotalPremiumPaid().add(exactPremiumDue));
+            policy.setTotalPremiumPaid(policy.getTotalPremiumPaid().add(paidAmount));
 
             // Set the lock out threshold 1 year into the future
             policy.setNextPremiumDueDate(LocalDate.now().plusYears(1));
             log.info("Policy {} next annual due date advanced to: {}", policy.getPolicyNumber(), policy.getNextPremiumDueDate());
 
-            if (policy.getPolicyStatus() == PolicyStatus.PENDING_PAYMENT) {
+            // Enforces PAYBR-007: first successful payment equal to or greater
+            // than the required premium activates the policy.
+            if (policy.getPolicyStatus() == PolicyStatus.PENDING_PAYMENT
+                    && paidAmount.compareTo(requiredPremium) >= 0) {
                 policy.setPolicyStatus(PolicyStatus.ACTIVE);
                 log.info("Policy issued after payment. Policy number: {}", policy.getPolicyNumber());
+            } else if (policy.getPolicyStatus() == PolicyStatus.PENDING_PAYMENT) {
+                log.warn("Successful payment of {} on policy {} did not meet required premium {}. Policy remains Pending Payment.",
+                        paidAmount, policy.getPolicyNumber(), requiredPremium);
             }
 
             policyRepository.save(policy);
@@ -107,10 +121,13 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
 
     @Override
     @Transactional(readOnly = true)
-    public PremiumPaymentResponseDTO getPaymentById(Long paymentId) {
+    public PremiumPaymentResponseDTO getPaymentById(Long paymentId, Long requesterUserId, String requesterRole) {
         log.info("Fetching payment details with ID: {}", paymentId);
         PremiumPayment payment = premiumPaymentRepository.findById(paymentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
+
+        enforcePaymentOwnership(payment, requesterUserId, requesterRole);
+
         return mapToResponse(payment);
     }
 
@@ -129,8 +146,20 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
     @Override
     @Transactional(readOnly = true)
     public PaginatedResponseDTO<PremiumPaymentResponseDTO> getPaymentsByPolicyId(
-            Long policyId, int page, int size, String sortBy, String direction) {
+            Long policyId, int page, int size, String sortBy, String direction,
+            Long requesterUserId, String requesterRole) {
         log.info("Fetching paginated payments for policy ID: {}", policyId);
+
+        // Enforces PAYBR-009: customers may only view payments for their own policies.
+        if ("CUSTOMER".equals(requesterRole)) {
+            Policy policy = policyRepository.findById(policyId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Policy not found"));
+            if (!policy.getCustomer().getUser().getId().equals(requesterUserId)) {
+                log.warn("Blocked attempt by user {} to view payments for another customer's policy: {}",
+                        requesterUserId, policyId);
+                throw new AuthorizationException("You are not authorized to view payments for this policy");
+            }
+        }
 
         Pageable pageable = createPageable(page, size, sortBy, direction);
         Page<PremiumPaymentResponseDTO> result = premiumPaymentRepository
@@ -203,7 +232,16 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
         Sort sort = direction.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
         return PageRequest.of(page, size, sort);
     }
-    
+
+    private void enforcePaymentOwnership(PremiumPayment payment, Long requesterUserId, String requesterRole) {
+        if ("CUSTOMER".equals(requesterRole)
+                && !payment.getPolicy().getCustomer().getUser().getId().equals(requesterUserId)) {
+            log.warn("Blocked attempt by user {} to view another customer's payment record: {}",
+                    requesterUserId, payment.getId());
+            throw new AuthorizationException("You are not authorized to view this payment");
+        }
+    }
+
     private PremiumPaymentResponseDTO mapToResponse(PremiumPayment payment) {
         PremiumPaymentResponseDTO dto = new PremiumPaymentResponseDTO();
         dto.setPaymentId(payment.getId());
@@ -217,7 +255,6 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
             dto.setPolicyNumber(payment.getPolicy().getPolicyNumber());
             dto.setNextPremiumDueDate(payment.getPolicy().getNextPremiumDueDate());
             
-            // --- EXTRACT NESTED CUSTOMER FULL NAME SAFELY ---
             if (payment.getPolicy().getCustomer() != null && 
                 payment.getPolicy().getCustomer().getUser() != null) {
                 
