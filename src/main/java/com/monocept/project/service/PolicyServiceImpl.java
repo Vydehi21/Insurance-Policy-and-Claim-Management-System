@@ -14,7 +14,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.monocept.project.dto.AgentPolicyIssueRequestDTO;
+import com.monocept.project.dto.InternalStaffPolicyIssueRequestDTO;
 import com.monocept.project.dto.CustomerPolicyPurchaseRequestDTO;
 import com.monocept.project.dto.PaginatedResponseDTO;
 import com.monocept.project.dto.PolicyResponseDTO;
@@ -94,7 +94,7 @@ public class PolicyServiceImpl implements PolicyService {
 
 	@Override
 	@Transactional
-	public PolicyResponseDTO issuePolicy(AgentPolicyIssueRequestDTO issueDTO) {
+	public PolicyResponseDTO issuePolicy(InternalStaffPolicyIssueRequestDTO issueDTO) {
 
 		Customer customer = customerRepository.findById(issueDTO.getCustomerId())
 				.orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
@@ -281,7 +281,7 @@ public class PolicyServiceImpl implements PolicyService {
 	}
 
 	@Override
-	public PaginatedResponseDTO<PolicyResponseDTO> getAgentPolicies(int page, int size, String sortBy,
+	public PaginatedResponseDTO<PolicyResponseDTO> getInternalStaffPolicies(int page, int size, String sortBy,
 			String direction) {
 
 		Sort sort = direction.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();

@@ -32,11 +32,11 @@ public class UserServiceImplementation implements UserService {
 
 	@Override
 	@Transactional
-	public UserResponseDTO createAgent(UserRequestDTO userRequestDTO) {
-	    log.info("Creating agent with email: {}", userRequestDTO.getEmail());
+	public UserResponseDTO createInternalStaff(UserRequestDTO userRequestDTO) {
+	    log.info("Creating internal staff with email: {}", userRequestDTO.getEmail());
 
 	    if (userRepository.existsByEmail(userRequestDTO.getEmail())) {
-	        log.warn("Agent creation failed. Duplicate email: {}", userRequestDTO.getEmail());
+	        log.warn("Internal Staff creation failed. Duplicate email: {}", userRequestDTO.getEmail());
 	        throw new DuplicateResourceException("Email already exists: " + userRequestDTO.getEmail());
 	    }
 
@@ -44,12 +44,12 @@ public class UserServiceImplementation implements UserService {
 
 	    user.setPassword(passwordEncoder.encode(userRequestDTO.getPassword()));
 
-	    user.setRole(Role.AGENT);
+	    user.setRole(Role.INTERNAL_STAFF);
 	    user.setActiveStatus(true);
 
 	    User savedUser = userRepository.save(user);
 
-	    log.info("Agent created successfully with id: {}", savedUser.getId());
+	    log.info("Internal Staff created successfully with id: {}", savedUser.getId());
 
 	    return modelMapper.map(savedUser, UserResponseDTO.class);
 	}
@@ -187,7 +187,7 @@ public class UserServiceImplementation implements UserService {
 		User updatedUser = userRepository.save(user);
 		
 		log.info("User status updated successfully. id: {}, activeStatus: {}, remarks: {}",
-				               updatedUser.getId(), updatedUser.getActiveStatus(), statusUpdateDTO.getRemarks());
+			               updatedUser.getId(), updatedUser.getActiveStatus(), statusUpdateDTO.getRemarks());
 
 		return modelMapper.map(updatedUser, UserResponseDTO.class);
 	}

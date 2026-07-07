@@ -40,7 +40,7 @@ public class PolicyPlanController {
     }
 
     @GetMapping("/{planId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT', 'CUSTOMER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INTERNAL_STAFF', 'CUSTOMER')")
     @Operation(summary = "Get Plan By ID", description = "Fetches the full specification data of a policy plan via its primary key")
     public ResponseEntity<PolicyPlanResponseDTO> getPlanById(
             @PathVariable Long planId) {
@@ -51,7 +51,7 @@ public class PolicyPlanController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT', 'CUSTOMER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INTERNAL_STAFF', 'CUSTOMER')")
     @Operation(summary = "Get All Plans", description = "Returns a paginated list tracking every active and structural plan variant system-wide")
     public ResponseEntity<PaginatedResponseDTO<PolicyPlanResponseDTO>> getAllPlans(
             @RequestParam(defaultValue = "0") int page,
@@ -70,7 +70,7 @@ public class PolicyPlanController {
     }
 
     @GetMapping("/product/{productId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT', 'CUSTOMER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INTERNAL_STAFF', 'CUSTOMER')")
     @Operation(summary = "Get Plans By Product ID", description = "Filters the plan schemas to return configurations nested under a common insurance product type")
     public ResponseEntity<PaginatedResponseDTO<PolicyPlanResponseDTO>> getPlansByProduct(
             @PathVariable Long productId,

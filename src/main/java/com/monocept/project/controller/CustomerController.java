@@ -48,21 +48,21 @@ public class CustomerController {
 	}
 
 	@GetMapping("/{customerId}")
-	@PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'INTERNAL_STAFF')")
 	@Operation(summary = "Get Customer By ID", description = "Fetches core customer entity attributes matching the designated primary key identifier")
 	public ResponseEntity<CustomerResponseDTO> getCustomerById(@PathVariable Long customerId) {
 		return ResponseEntity.ok(customerService.getCustomerById(customerId));
 	}
 
 	@GetMapping("/user/{userId}")
-	@PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'INTERNAL_STAFF')")
 	@Operation(summary = "Get Customer By User ID", description = "Retrieves relational customer structural configurations using the security user profile identity record link")
 	public ResponseEntity<CustomerResponseDTO> getCustomerByUserId(@PathVariable Long userId) {
 		return ResponseEntity.ok(customerService.getCustomerByUserId(userId));
 	}
 
 	@GetMapping
-	@PreAuthorize("hasAnyRole('ADMIN','AGENT')")
+	@PreAuthorize("hasAnyRole('ADMIN','INTERNAL_STAFF')")
 	@Operation(summary = "Get All Customers", description = "Returns an indexed catalog tracking customer files registered system-wide")
 	public ResponseEntity<PaginatedResponseDTO<CustomerResponseDTO>> getAllCustomers(
 			@RequestParam(defaultValue = "0") int page, 

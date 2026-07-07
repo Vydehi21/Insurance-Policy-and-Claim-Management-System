@@ -13,7 +13,7 @@ import com.monocept.project.enums.ClaimStatus;
 
 public interface ClaimService {
     ClaimResponseDTO raiseClaim(Long authenticatedUserId, ClaimRequestDTO claimRequestDTO);
-    ClaimResponseDTO reviewClaim(Long claimId, Long agentUserId, ClaimReviewRequestDTO reviewDTO);
+    ClaimResponseDTO reviewClaim(Long claimId, Long staffUserId, ClaimReviewRequestDTO reviewDTO);
     ClaimResponseDTO processFinalDecision(Long claimId, Long adminUserId, ClaimFinalDecisionRequestDTO decisionDTO);
     ClaimResponseDTO getClaimById(Long claimId, Long requesterUserId, String requesterRole);
     PaginatedResponseDTO<ClaimResponseDTO> getAllClaims(int page, int size, String sortBy, String direction);
@@ -28,7 +28,7 @@ public interface ClaimService {
             String sortBy,
             String direction
     );
-	PaginatedResponseDTO<ClaimResponseDTO> getAgentClaims(int page, int size, String sortBy, String direction);
-	ClaimResponseDTO getClaimDetailsForReview(Long claimId, Long agentUserId);
+	PaginatedResponseDTO<ClaimResponseDTO> getInternalStaffClaims(int page, int size, String sortBy, String direction);
+	ClaimResponseDTO getClaimDetailsForReview(Long claimId, Long staffUserId);
 
 }

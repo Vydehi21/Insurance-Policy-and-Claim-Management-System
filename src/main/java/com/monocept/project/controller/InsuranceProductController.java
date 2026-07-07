@@ -40,7 +40,7 @@ public class InsuranceProductController {
     }
 
     @GetMapping("/{productId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT', 'CUSTOMER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INTERNAL_STAFF', 'CUSTOMER')")
     @Operation(summary = "Get Product By ID", description = "Fetches comprehensive descriptive configuration states for a specific item identifier mapping")
     public ResponseEntity<InsuranceProductResponseDTO> getProductById(
             @PathVariable Long productId) {
@@ -51,7 +51,7 @@ public class InsuranceProductController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT', 'CUSTOMER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INTERNAL_STAFF', 'CUSTOMER')")
     @Operation(summary = "Get All Products", description = "Retrieves an indexed pagination data payload matching active active classification catalogs system-wide")
     public ResponseEntity<PaginatedResponseDTO<InsuranceProductResponseDTO>> getAllProducts(
             @RequestParam(defaultValue = "0") int page,
@@ -70,7 +70,7 @@ public class InsuranceProductController {
     }
 
     @GetMapping("/status/{activeStatus}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INTERNAL_STAFF')")
     @Operation(summary = "Get Products By Status", description = "Filters the catalog indexes by active or dormant lifecycle states")
     public ResponseEntity<PaginatedResponseDTO<InsuranceProductResponseDTO>> getProductsByStatus(
             @PathVariable Boolean activeStatus,

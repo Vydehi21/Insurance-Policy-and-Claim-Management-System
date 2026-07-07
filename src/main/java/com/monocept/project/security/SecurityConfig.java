@@ -80,7 +80,7 @@ public class SecurityConfig {
             )
             .hasAnyRole(
                     "ADMIN",
-                    "AGENT",
+                    "INTERNAL_STAFF",
                     "CUSTOMER"
             )
 
@@ -111,7 +111,7 @@ public class SecurityConfig {
             )
             .hasAnyRole(
                     "ADMIN",
-                    "AGENT",
+                    "INTERNAL_STAFF",
                     "CUSTOMER"
             )
 
@@ -132,12 +132,12 @@ public class SecurityConfig {
                     "/api/policies/issue"
             )
             .hasAnyRole("ADMIN",
-                    "AGENT")
+                    "INTERNAL_STAFF")
             
             .requestMatchers(
-                    "/api/policies/agent"
+                    "/api/policies/internal-staff"
             )
-            .hasRole("AGENT")
+            .hasRole("INTERNAL_STAFF")
             
          // customer purchase policy
             .requestMatchers(
@@ -151,7 +151,7 @@ public class SecurityConfig {
             .requestMatchers(
                     "/api/policies/**"
             )
-            .hasAnyRole("ADMIN", "AGENT", "CUSTOMER")
+            .hasAnyRole("ADMIN", "INTERNAL_STAFF", "CUSTOMER")
 
 
 
@@ -175,11 +175,11 @@ public class SecurityConfig {
             // admin sees all claims
 
 
-            // agent review claim
+            // internal staff review claim
             .requestMatchers(
                     "/api/claims/*/review"
             )
-            .hasRole("AGENT")
+            .hasRole("INTERNAL_STAFF")
 
 
 
@@ -205,7 +205,7 @@ public class SecurityConfig {
             .requestMatchers(
                     "/api/claims/**"
             )
-            .hasAnyRole("ADMIN", "AGENT", "CUSTOMER")
+            .hasAnyRole("ADMIN", "INTERNAL_STAFF", "CUSTOMER")
 
 
 
@@ -216,9 +216,9 @@ public class SecurityConfig {
 
 
             .requestMatchers(
-                    "/api/premium-payments/agent"
+                    "/api/premium-payments/internal-staff"
             )
-            .hasAnyRole("ADMIN", "AGENT")
+            .hasAnyRole("ADMIN", "INTERNAL_STAFF")
 
             // customer pays and views own payments
             .requestMatchers(
@@ -233,7 +233,7 @@ public class SecurityConfig {
             .requestMatchers(
                     "/api/premium-payments/**"
             )
-            .hasAnyRole("ADMIN", "AGENT", "CUSTOMER")
+            .hasAnyRole("ADMIN", "INTERNAL_STAFF", "CUSTOMER")
 
             // =========================
             // CLAIM HISTORY
@@ -244,7 +244,7 @@ public class SecurityConfig {
             )
             .hasAnyRole(
                     "ADMIN",
-                    "AGENT",
+                    "INTERNAL_STAFF",
                     "CUSTOMER"
             )
 

@@ -13,7 +13,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AgentPolicyIssueRequestDTO {
+public class InternalStaffPolicyIssueRequestDTO {
 
     @NotNull(message = "Customer reference is required")
     private Long customerId;

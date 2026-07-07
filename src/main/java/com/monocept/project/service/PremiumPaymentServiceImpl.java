@@ -215,7 +215,7 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
     @Transactional(readOnly = true)
     public PaginatedResponseDTO<PremiumPaymentResponseDTO> getAllPayments(
             int page, int size, String sortBy, String direction) {
-        log.info("Fetching all tracking payments logged system-wide across agents");
+        log.info("Fetching all tracking payments logged system-wide across internal staff");
 
         Pageable pageable = PaginationUtil.buildPageable(page, size, sortBy, direction);
         Page<PremiumPaymentResponseDTO> result = premiumPaymentRepository.findAll(pageable)

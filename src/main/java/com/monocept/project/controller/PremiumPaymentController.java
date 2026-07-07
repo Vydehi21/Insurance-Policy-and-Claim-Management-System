@@ -35,7 +35,7 @@ public class PremiumPaymentController {
     private final PremiumPaymentService premiumPaymentService;
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('CUSTOMER', 'AGENT', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'INTERNAL_STAFF', 'ADMIN')")
     @Operation(summary = "Record Payment", description = "Registers and submits a new premium transaction receipt structure into the system ledger")
     public ResponseEntity<PremiumPaymentResponseDTO> recordPayment(
             @Valid @RequestBody PremiumPaymentRequestDTO requestDTO,
@@ -61,7 +61,7 @@ public class PremiumPaymentController {
     }
 
     @GetMapping("/{paymentId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT', 'CUSTOMER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INTERNAL_STAFF', 'CUSTOMER')")
     @Operation(summary = "Get Payment By ID", description = "Fetches explicit transaction states matching the targeted unique ledger ID parameter")
     public ResponseEntity<PremiumPaymentResponseDTO> getPaymentById(
             @PathVariable Long paymentId,
@@ -72,7 +72,7 @@ public class PremiumPaymentController {
     }
 
     @GetMapping("/policy/{policyId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT', 'CUSTOMER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INTERNAL_STAFF', 'CUSTOMER')")
     @Operation(summary = "Get Payments By Policy ID", description = "Extracts an indexed historical timeline of payments applied to a selected client policy file")
     public ResponseEntity<PaginatedResponseDTO<PremiumPaymentResponseDTO>>
     getPaymentsByPolicy(
@@ -95,7 +95,7 @@ public class PremiumPaymentController {
     }
 
     @GetMapping("/status/{status}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INTERNAL_STAFF')")
     @Operation(summary = "Get Payments By Status", description = "Filters ledger audit instances using categorical payment states such as cleared, pending, or failed")
     public ResponseEntity<PaginatedResponseDTO<PremiumPaymentResponseDTO>>
     getPaymentsByStatus(
@@ -115,7 +115,7 @@ public class PremiumPaymentController {
     }
 
     @GetMapping("/search")
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INTERNAL_STAFF')")
     @Operation(summary = "Search Payments By Reference", description = "Runs a quick text criteria tracking search to pinpoint exact system tracking vouchers")
     public ResponseEntity<PaginatedResponseDTO<PremiumPaymentResponseDTO>>
     searchPayments(
@@ -134,14 +134,14 @@ public class PremiumPaymentController {
                         direction));
     }
     
-    @GetMapping("/agent")
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    @GetMapping("/internal-staff")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INTERNAL_STAFF')")
     @Operation(
-        summary = "Get Payments For Agent",
-        description = "Returns premium payments handled by agent"
+        summary = "Get Payments For Internal Staff",
+        description = "Returns premium payments handled by internal staff"
     )
     public ResponseEntity<PaginatedResponseDTO<PremiumPaymentResponseDTO>>
-    getAgentPayments(
+    getInternalStaffPayments(
 
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,

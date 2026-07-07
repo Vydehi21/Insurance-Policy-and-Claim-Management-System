@@ -60,7 +60,7 @@ public class Claim {
     @Column(nullable = false)
     private ClaimStatus claimStatus = ClaimStatus.SUBMITTED;
 	
-	private String agentRemarks;
+	private String internalStaffRemarks;
 
     private String adminRemarks;
     

@@ -135,38 +135,38 @@ public class ClaimServiceImpl implements ClaimService {
 
 	@Override
 	@Transactional
-	public ClaimResponseDTO getClaimDetailsForReview(Long claimId, Long agentUserId) {
-		log.info("Agent user {} is opening claim ID {} for inspection", agentUserId, claimId);
+	public ClaimResponseDTO getClaimDetailsForReview(Long claimId, Long staffUserId) {
+		log.info("Internal staff user {} is opening claim ID {} for inspection", staffUserId, claimId);
 
 		Claim claim = claimRepository.findById(claimId)
 				.orElseThrow(() -> new ResourceNotFoundException("Claim record not found"));
 
-		User currentAgent = getUser(agentUserId);
+		User currentStaff = getUser(staffUserId);
 
 		// CONCURRENCY LOCK GUARD: If already under review, verify if the active
-		// agent holds the lock
+		// staff member holds the lock
 		if (claim.getClaimStatus() == ClaimStatus.UNDER_REVIEW && claim.getReviewedBy() != null
-				&& !claim.getReviewedBy().getId().equals(agentUserId)) {
+				&& !claim.getReviewedBy().getId().equals(staffUserId)) {
 
-			log.warn("Collision prevented: Agent {} blocked from accessing claim {} locked by Agent {}", agentUserId,
+			log.warn("Collision prevented: Internal staff {} blocked from accessing claim {} locked by internal staff {}", staffUserId,
 					claimId, claim.getReviewedBy().getFullName());
 			throw new BusinessRuleException(
 					"Access Denied. This claim file is currently locked and being processed by: "
 							+ claim.getReviewedBy().getFullName());
 		}
 
-		//  LOCK ACQUISITION: If the claim is brand new, lock it to this agent
+		//  LOCK ACQUISITION: If the claim is brand new, lock it to this staff member
 		// instantly upon opening
 		if (claim.getClaimStatus() == ClaimStatus.SUBMITTED) {
 			ClaimStatus previousStatus = claim.getClaimStatus();
 			claim.setClaimStatus(ClaimStatus.UNDER_REVIEW);
-			claim.setReviewedBy(currentAgent);
+			claim.setReviewedBy(currentStaff);
 			claim = claimRepository.save(claim);
 
-			createHistory(claim, previousStatus, ClaimStatus.UNDER_REVIEW, "Claim locked for inspection by agent.",
-					currentAgent);
-			log.info("Claim {} successfully locked under active review by agent {}", claim.getClaimNumber(),
-					agentUserId);
+			createHistory(claim, previousStatus, ClaimStatus.UNDER_REVIEW, "Claim locked for inspection by internal staff.",
+					currentStaff);
+			log.info("Claim {} successfully locked under active review by internal staff {}", claim.getClaimNumber(),
+					staffUserId);
 		}
 
 		return convertToResponseDTO(claim);
@@ -255,36 +255,36 @@ public class ClaimServiceImpl implements ClaimService {
 
 	@Override
 	@Transactional
-	public ClaimResponseDTO reviewClaim(Long claimId, Long agentId, ClaimReviewRequestDTO dto) {
-		log.info("Agent user {} is attempting to process a review update for claim ID {}", agentId, claimId);
+	public ClaimResponseDTO reviewClaim(Long claimId, Long staffUserId, ClaimReviewRequestDTO dto) {
+		log.info("Internal staff user {} is attempting to process a review update for claim ID {}", staffUserId, claimId);
 
 		Claim claim = claimRepository.findById(claimId)
 				.orElseThrow(() -> new ResourceNotFoundException("Claim file reference not found"));
 
-		User agent = getUser(agentId);
+		User staffMember = getUser(staffUserId);
 
 		// --- PHASE 1: CONCURRENCY LOCK ENGINE ---
-		// If the claim is brand new, automatically assign it to this agent and set it
+		// If the claim is brand new, automatically assign it to this staff member and set it
 		// to UNDER_REVIEW
 		if (claim.getClaimStatus() == ClaimStatus.SUBMITTED) {
 			ClaimStatus previousStatus = claim.getClaimStatus();
 			claim.setClaimStatus(ClaimStatus.UNDER_REVIEW);
-			claim.setReviewedBy(agent);
+			claim.setReviewedBy(staffMember);
 			claim = claimRepository.save(claim);
 
 			createHistory(claim, previousStatus, ClaimStatus.UNDER_REVIEW,
-					"Claim assigned and locked for agent inspection.", agent);
-			log.info("Claim {} successfully locked under active review by agent {}", claim.getClaimNumber(), agentId);
+					"Claim assigned and locked for internal staff inspection.", staffMember);
+			log.info("Claim {} successfully locked under active review by internal staff {}", claim.getClaimNumber(), staffUserId);
 		}
 
-		// If the claim is already under review, verify that the current agent holds the
+		// If the claim is already under review, verify that the current staff member holds the
 		// active lock
 		else if (claim.getClaimStatus() == ClaimStatus.UNDER_REVIEW) {
-			if (claim.getReviewedBy() != null && !claim.getReviewedBy().getId().equals(agentId)) {
-				log.warn("Collision blocked: Agent {} tried to review claim {} which is locked by Agent {}", agentId,
+			if (claim.getReviewedBy() != null && !claim.getReviewedBy().getId().equals(staffUserId)) {
+				log.warn("Collision blocked: Internal staff {} tried to review claim {} which is locked by internal staff {}", staffUserId,
 						claimId, claim.getReviewedBy().getId());
 				throw new BusinessRuleException(
-						"This claim file is currently locked and being audited by another agent.");
+						"This claim file is currently locked and being audited by another internal staff member.");
 			}
 		}
 
@@ -295,26 +295,26 @@ public class ClaimServiceImpl implements ClaimService {
 		}
 
 		// --- PHASE 2: RECOMMENDATION ENGINE ---
-		// Enforce constraint that agents can only submit a recommendation status
+		// Enforce constraint that internal staff can only submit a recommendation status
 		if (dto.getRecommendedStatus() != ClaimStatus.RECOMMENDED_APPROVAL
 				&& dto.getRecommendedStatus() != ClaimStatus.RECOMMENDED_REJECTION) {
 			throw new InvalidStatusException(
-					"Agents can only submit RECOMMENDED_APPROVAL or RECOMMENDED_REJECTION statuses.");
+					"Internal staff can only submit RECOMMENDED_APPROVAL or RECOMMENDED_REJECTION statuses.");
 		}
 
 		ClaimStatus previousStatus = claim.getClaimStatus();
 
 		// Apply form values and transition the state out of the active review lock
 		claim.setClaimStatus(dto.getRecommendedStatus());
-		claim.setAgentRemarks(dto.getRemarks());
-		claim.setReviewedBy(agent); // Maintains accountability for the final recommendation
+		claim.setInternalStaffRemarks(dto.getRemarks());
+		claim.setReviewedBy(staffMember); // Maintains accountability for the final recommendation
 
 		Claim updatedClaim = claimRepository.save(claim);
 
 		// Log the final recommendation to the status history ledger
-		createHistory(updatedClaim, previousStatus, dto.getRecommendedStatus(), dto.getRemarks(), agent);
+		createHistory(updatedClaim, previousStatus, dto.getRecommendedStatus(), dto.getRemarks(), staffMember);
 
-		log.info("Agent {} successfully submitted recommendation ({}) for claim {}", agentId,
+		log.info("Internal staff {} successfully submitted recommendation ({}) for claim {}", staffUserId,
 				dto.getRecommendedStatus(), updatedClaim.getClaimNumber());
 
 		return convertToResponseDTO(updatedClaim);
@@ -514,7 +514,7 @@ public class ClaimServiceImpl implements ClaimService {
 
 		dto.setClaimStatus(claim.getClaimStatus());
 
-		dto.setAgentRemarks(claim.getAgentRemarks());
+		dto.setInternalStaffRemarks(claim.getInternalStaffRemarks());
 
 		dto.setAdminRemarks(claim.getAdminRemarks());
 
@@ -574,7 +574,7 @@ public class ClaimServiceImpl implements ClaimService {
 			dto.setPastClaimsTimeline(timeline);
 		}
 
-		// REVIEWED BY AGENT
+		// REVIEWED BY INTERNAL STAFF
 		if (claim.getReviewedBy() != null) {
 			dto.setReviewedById(claim.getReviewedBy().getId());
 			dto.setReviewedByName(claim.getReviewedBy().getFullName());
@@ -633,7 +633,7 @@ public class ClaimServiceImpl implements ClaimService {
 	}
 
 	@Override
-	public PaginatedResponseDTO<ClaimResponseDTO> getAgentClaims(int page, int size, String sortBy, String direction) {
+	public PaginatedResponseDTO<ClaimResponseDTO> getInternalStaffClaims(int page, int size, String sortBy, String direction) {
 
 		Pageable pageable = PaginationUtil.buildPageable(page, size, sortBy, direction);
 

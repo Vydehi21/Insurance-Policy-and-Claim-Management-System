@@ -1,6 +1,8 @@
 package com.monocept.project.enums;
 
 public enum PremiumType {
-	ONE_TIME,
-    ANNUAL
+	MONTHLY,
+	QUARTERLY,
+	ANNUAL,
+	ONE_TIME
 }
