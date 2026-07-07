@@ -22,6 +22,7 @@ import com.monocept.project.dto.ClaimResponseDTO;
 import com.monocept.project.dto.CustomerRequestDTO;
 import com.monocept.project.dto.CustomerResponseDTO;
 import com.monocept.project.dto.PaginatedResponseDTO;
+import com.monocept.project.repository.CustomerRepository;
 import com.monocept.project.security.CustomUserDetails;
 import com.monocept.project.service.CustomerService;
 
@@ -38,6 +39,7 @@ import lombok.RequiredArgsConstructor;
 public class CustomerController {
 
     private final CustomerService customerService;
+    private final CustomerRepository customerRepository;
 
     @PostMapping("/profile")
     @PreAuthorize("hasRole('CUSTOMER')")
@@ -191,7 +193,15 @@ public class CustomerController {
             )
         );
     }
-    
+    @GetMapping("/profile/exists")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<Boolean> profileExists(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        boolean exists = customerRepository.existsByUser_Id(userDetails.getUserId());
+
+        return ResponseEntity.ok(exists);
+    }
    
     
     

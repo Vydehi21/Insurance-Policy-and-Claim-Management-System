@@ -256,4 +256,9 @@ public class CustomerServiceImplementation implements CustomerService {
 		return dto;
 
 		}
+	
+	@Override
+	public boolean profileExists(Long userId) {
+	    return customerRepository.existsByUser_Id(userId);
+	}
 }

@@ -174,12 +174,12 @@ public class AuthServiceImplementation implements AuthService {
                         new RuntimeException(
                                 "Registration expired"));
 
-        User user =
-                modelMapper.map(
-                        pendingUser,
-                        User.class
-                );
+        User user = new User();
 
+        user.setFullName(pendingUser.getFullName());
+        user.setEmail(pendingUser.getEmail());
+        user.setPassword(pendingUser.getPassword()); // already encoded
+        user.setMobileNumber(pendingUser.getMobileNumber());
         user.setRole(Role.CUSTOMER);
         user.setActiveStatus(true);
 
