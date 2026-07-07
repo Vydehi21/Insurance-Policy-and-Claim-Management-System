@@ -1,6 +1,11 @@
 package com.monocept.project.service;
 
 import java.math.BigDecimal;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.time.LocalDate;
 
 import java.util.ArrayList;
@@ -8,6 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -64,6 +70,11 @@ public class ClaimServiceImpl implements ClaimService {
 	private final ClaimStatusHistoryRepository claimStatusHistoryRepository;
 	private final ModelMapper modelMapper;
 
+	@Value("${cloudinary.cloud-name}")
+	private String cloudinaryCloudName;
+
+	private static final String CLOUDINARY_HOST = "res.cloudinary.com";
+
 	private String generateClaimNumber() {
 		return "CLM-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
 	}
@@ -107,6 +118,72 @@ public class ClaimServiceImpl implements ClaimService {
 		}
 
 		return documents;
+	}
+
+	/**
+	 * Ensures every supporting document attached to a claim is a real,
+	 * reachable file hosted on this project's Cloudinary account, not just
+	 * an arbitrary string typed into the request body.
+	 */
+	private void validateSupportingDocuments(List<ClaimDocumentDTO> documentDTOs) {
+
+		if (documentDTOs == null || documentDTOs.isEmpty()) {
+			throw new InvalidRequestException(
+					"At least one supporting document must be submitted to raise a claim");
+		}
+
+		for (ClaimDocumentDTO documentDTO : documentDTOs) {
+			validateDocumentReference(documentDTO.getDocumentReference());
+		}
+	}
+
+	private void validateDocumentReference(String documentReference) {
+
+		URI uri;
+
+		try {
+			uri = URI.create(documentReference);
+		} catch (Exception e) {
+			throw new InvalidRequestException("Supporting document reference is not a valid URL");
+		}
+
+		// STEP 1: Domain allowlist check. Blocks made-up links, and also
+		// stops the server from being tricked into calling an arbitrary
+		// attacker-controlled host in step 2 (SSRF guard).
+		boolean isTrustedCloudinaryUrl = "https".equalsIgnoreCase(uri.getScheme()) && uri.getHost() != null
+				&& uri.getHost().equalsIgnoreCase(CLOUDINARY_HOST) && uri.getPath() != null
+				&& uri.getPath().startsWith("/" + cloudinaryCloudName + "/");
+
+		if (!isTrustedCloudinaryUrl) {
+			log.warn("Rejected claim document with untrusted or malformed reference: {}", documentReference);
+			throw new InvalidRequestException(
+					"Supporting document must be a valid file uploaded via /api/files/upload");
+		}
+
+		// STEP 2: Live reachability check. Confirms the file actually exists
+		// at Cloudinary instead of just looking like a plausible URL.
+		try {
+			HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
+
+			HttpRequest request = HttpRequest.newBuilder().uri(uri).timeout(Duration.ofSeconds(5))
+					.method("HEAD", HttpRequest.BodyPublishers.noBody()).build();
+
+			HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
+
+			if (response.statusCode() != 200) {
+				log.warn("Document verification failed. URL {} returned status {}", documentReference,
+						response.statusCode());
+				throw new InvalidRequestException(
+						"Supporting document could not be verified (file not found at the provided URL). Please re-upload and try again.");
+			}
+
+		} catch (InvalidRequestException e) {
+			throw e;
+		} catch (Exception e) {
+			log.error("Error while verifying supporting document reference {}", documentReference, e);
+			throw new InvalidRequestException(
+					"Unable to verify supporting document right now. Please check the file and try again.");
+		}
 	}
 
 	private User getUser(Long userId) {
@@ -186,6 +263,20 @@ public class ClaimServiceImpl implements ClaimService {
 			throw new AuthorizationException("You cannot claim another customer's policy");
 		}
 
+		// Checked first and explicitly: a policy must be ACTIVE (i.e. required
+		// premium already paid in full) before any claim can be raised against it.
+		// This blocks PENDING_PAYMENT, EXPIRED, and CANCELLED policies alike.
+		log.info("Policy {} current status at claim submission time: {}", policy.getPolicyNumber(),
+				policy.getPolicyStatus());
+
+		if (policy.getPolicyStatus() != PolicyStatus.ACTIVE) {
+			log.warn("Business rule violation. Claim attempted on non-active policy: {} (status: {})",
+					policy.getPolicyNumber(), policy.getPolicyStatus());
+			throw new BusinessRuleException(
+					"Claim can only be raised for active policies. This policy is currently: "
+							+ policy.getPolicyStatus());
+		}
+
 		if (policy.getEndDate().isBefore(LocalDate.now())) {
 			log.warn("Business rule violation. Claim attempted on expired policy: {}", policy.getPolicyNumber());
 			throw new BusinessRuleException("Policy has expired");
@@ -194,14 +285,6 @@ public class ClaimServiceImpl implements ClaimService {
 		if (dto.getIncidentDate().isAfter(LocalDate.now())) {
 			log.warn("Business rule violation. Future incident date submitted: {}", dto.getIncidentDate());
 			throw new BusinessRuleException("Incident date cannot be in future");
-		}
-
-		
-
-		if (policy.getPolicyStatus() != PolicyStatus.ACTIVE) {
-			log.warn("Business rule violation. Claim attempted on non-active policy: {} (status: {})",
-					policy.getPolicyNumber(), policy.getPolicyStatus());
-			throw new BusinessRuleException("Claim can only be raised for active policies");
 		}
 
 		BigDecimal approvedClaims = claimRepository.getApprovedClaimAmount(policy.getId());
@@ -228,6 +311,8 @@ public class ClaimServiceImpl implements ClaimService {
 					policy.getPolicyNumber());
 			throw new BusinessRuleException("A claim already exists for this policy");
 		}
+
+		validateSupportingDocuments(dto.getSupportingDocuments());
 
 		Claim claim = new Claim();
 		claim.setClaimNumber(generateClaimNumber());

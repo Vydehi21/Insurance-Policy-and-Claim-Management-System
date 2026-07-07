@@ -17,7 +17,6 @@ import com.monocept.project.dto.ResendRegistrationOtpDTO;
 import com.monocept.project.dto.ResetPasswordRequestDTO;
 import com.monocept.project.dto.UserResponseDTO;
 import com.monocept.project.dto.VerifyRegistrationOtpDTO;
-import com.monocept.project.security.RSAUtil;
 import com.monocept.project.service.AuthService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,12 +32,6 @@ import lombok.RequiredArgsConstructor;
 public class AuthController {
 
     private final AuthService authService;
-    private final RSAUtil rsaUtil;
-    
-    @GetMapping("/public-key")
-    public ResponseEntity<String> getPublicKey() {
-        return ResponseEntity.ok(rsaUtil.getPublicKey());
-    }
 
     @PostMapping("/register")
     @Operation(summary = "Register Customer", description = "Registers a new customer user into the system")

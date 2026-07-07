@@ -31,7 +31,6 @@ import com.monocept.project.repository.PendingUserRepository;
 import com.monocept.project.repository.PhoneOtpRepository;
 import com.monocept.project.repository.UserRepository;
 import com.monocept.project.security.JwtService;
-import com.monocept.project.security.RSAUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +47,6 @@ public class AuthServiceImplementation implements AuthService {
 
 	private final CustomerRepository customerRepository;
 	private final EmailService emailService;
-	private final RSAUtil rsaUtil;
 
 	@Value("${app.frontend.reset-url}")
 	private String resetUrl;
@@ -87,12 +85,10 @@ public class AuthServiceImplementation implements AuthService {
 		otpService.sendEmailOtp(registrationRequestDTO.getEmail());
 		otpService.sendPhoneOtp(registrationRequestDTO.getMobileNumber());
 
-		String decryptedPassword = rsaUtil.decrypt(registrationRequestDTO.getPassword());
-
 		PendingUser pendingUser = modelMapper.map(registrationRequestDTO, PendingUser.class);
 
 		pendingUser.setPassword(
-		    passwordEncoder.encode(decryptedPassword)
+		    passwordEncoder.encode(registrationRequestDTO.getPassword())
 		);
 
 		pendingUserRepository.save(pendingUser);
@@ -168,9 +164,7 @@ public class AuthServiceImplementation implements AuthService {
 		// FIXED: Safely verify hashed passwords instead of standard text equals
 		// comparisons
 				
-		String decryptedPassword = rsaUtil.decrypt(loginRequestDTO.getPassword());
-
-		if (!passwordEncoder.matches(decryptedPassword, user.getPassword())) {
+		if (!passwordEncoder.matches(loginRequestDTO.getPassword(), user.getPassword()))  {
 			log.warn("Wrong password attempt for email: {}", user.getEmail());
 		    throw new AuthenticationException("Invalid credentials");
 		}
@@ -251,11 +245,7 @@ public class AuthServiceImplementation implements AuthService {
 		}
 
 		// 4. Encrypt raw password entry and clear transient tokens
-		String decryptedPassword = rsaUtil.decrypt(request.getNewPassword());
-
-		user.setPassword(
-		    passwordEncoder.encode(decryptedPassword)
-		);
+		user.setPassword(passwordEncoder.encode(request.getNewPassword()));
 		// 5. Encrypt raw password entry using BCrypt and clear transient tokens context safely
 		user.setResetToken(null);
 		user.setResetTokenExpiry(null);

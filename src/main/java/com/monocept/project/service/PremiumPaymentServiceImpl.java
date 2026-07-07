@@ -7,9 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,10 +16,10 @@ import com.monocept.project.dto.PremiumPaymentRequestDTO;
 import com.monocept.project.dto.PremiumPaymentResponseDTO;
 import com.monocept.project.enums.PaymentStatus;
 import com.monocept.project.enums.PolicyStatus;
+import com.monocept.project.enums.PremiumType;
 import com.monocept.project.exception.AuthorizationException;
 import com.monocept.project.exception.BusinessRuleException;
 import com.monocept.project.exception.DuplicateResourceException;
-import com.monocept.project.exception.InvalidRequestException;
 import com.monocept.project.exception.ResourceNotFoundException;
 import com.monocept.project.model.Customer;
 import com.monocept.project.model.Policy;
@@ -58,11 +56,14 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
             throw new AuthorizationException("You are not authorized to record a payment for this policy");
         }
 
-        // --- BUSINESS RULE: VALIDATE ANNUAL LOCK STATUS ---
-        if (policy.getNextPremiumDueDate() != null && LocalDate.now().isBefore(policy.getNextPremiumDueDate())) {
-            log.warn("Business rule violation. Payment blocked. Annual premium already satisfied for Policy: {}. Next due date: {}", 
-                    policy.getPolicyNumber(), policy.getNextPremiumDueDate());
-            throw new BusinessRuleException("Premium for this annual cycle is already fully paid. Next payment allowed on: " + policy.getNextPremiumDueDate());
+        if (policy.getPolicyStatus() == PolicyStatus.CANCELLED) {
+            log.warn("Business rule violation. Payment attempted on cancelled policy: {}", policy.getPolicyNumber());
+            throw new BusinessRuleException("Cannot record payment for a cancelled policy");
+        }
+
+        if (policy.getPolicyStatus() == PolicyStatus.EXPIRED) {
+            log.warn("Business rule violation. Payment attempted on expired policy: {}", policy.getPolicyNumber());
+            throw new BusinessRuleException("Cannot record payment for an expired policy");
         }
 
         if (premiumPaymentRepository.existsByTransactionReference(paymentRequestDTO.getTransactionReference())) {
@@ -70,47 +71,80 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
             throw new DuplicateResourceException("Transaction reference already exists");
         }
 
-        if (policy.getPolicyStatus() == PolicyStatus.CANCELLED) {
-            log.warn("Business rule violation. Payment attempted on cancelled policy: {}", policy.getPolicyNumber());
-            throw new BusinessRuleException("Cannot record payment for cancelled policy");
+        PremiumType premiumType = policy.getPolicyPlan().getPremiumType();
+        BigDecimal requiredPremium = policy.getPolicyPlan().getPremiumAmount();
+        BigDecimal paidAmount = paymentRequestDTO.getAmount();
+
+        // --- ONE_TIME plans: exactly one payment is ever expected, covering the full policy term ---
+        if (premiumType == PremiumType.ONE_TIME && policy.getPolicyStatus() == PolicyStatus.ACTIVE) {
+            log.warn("Rejected payment attempt on already-paid ONE_TIME policy: {}", policy.getPolicyNumber());
+            throw new BusinessRuleException(
+                    "This policy has a one-time premium and has already been paid in full. No further payments are required or accepted.");
         }
 
-        BigDecimal paidAmount = paymentRequestDTO.getAmount();
-        BigDecimal requiredPremium = policy.getPolicyPlan().getPremiumAmount();
+        // --- Recurring plans (MONTHLY / QUARTERLY / ANNUAL): block payment before the next due date ---
+        if (policy.getPolicyStatus() == PolicyStatus.ACTIVE
+                && policy.getNextPremiumDueDate() != null
+                && LocalDate.now().isBefore(policy.getNextPremiumDueDate())) {
+            log.warn("Business rule violation. Payment blocked. Current premium cycle already satisfied for Policy: {}. Next due date: {}",
+                    policy.getPolicyNumber(), policy.getNextPremiumDueDate());
+            throw new BusinessRuleException(
+                    "Premium for the current cycle is already fully paid. Next payment is not due until: "
+                            + policy.getNextPremiumDueDate());
+        }
+
+        // --- Reject anything that isn't an exact match: no partial payments (PMTRUL-008), no overpayment (no refunds - OOS-011) ---
+        int comparison = paidAmount.compareTo(requiredPremium);
+        if (comparison < 0) {
+            log.warn("Rejected underpayment on policy {}. Paid: {}, required: {}",
+                    policy.getPolicyNumber(), paidAmount, requiredPremium);
+            throw new BusinessRuleException(
+                    "Payment amount is less than the required premium of " + requiredPremium
+                            + ". Partial payments are not supported; please pay the exact amount due.");
+        }
+        if (comparison > 0) {
+            log.warn("Rejected overpayment on policy {}. Paid: {}, required: {}",
+                    policy.getPolicyNumber(), paidAmount, requiredPremium);
+            throw new BusinessRuleException(
+                    "Payment amount exceeds the required premium of " + requiredPremium
+                            + ". Overpayment cannot be accepted since refunds are not supported. Please pay the exact amount due.");
+        }
 
         PremiumPayment payment = new PremiumPayment();
         payment.setPolicy(policy);
         payment.setAmount(paidAmount);
         payment.setPaymentMode(paymentRequestDTO.getPaymentMode());
         payment.setTransactionReference(paymentRequestDTO.getTransactionReference());
-        
-        // 🔒 Server hardcodes the success state unconditionally instead of relying on client inputs
         payment.setPaymentStatus(PaymentStatus.SUCCESS);
         payment.setPaymentDate(LocalDateTime.now());
 
         PremiumPayment savedPayment = premiumPaymentRepository.save(payment);
-        
+
         log.info("Payment record created successfully. Payment id: {} Transaction reference: {}",
                 savedPayment.getId(), savedPayment.getTransactionReference());
 
-        // 🛠️ FIXED: Removed 'paymentRequestDTO.getPaymentStatus()' validation to clear compile error
         if (policy.getTotalPremiumPaid() == null) {
             policy.setTotalPremiumPaid(BigDecimal.ZERO);
         }
-        
         policy.setTotalPremiumPaid(policy.getTotalPremiumPaid().add(paidAmount));
 
-        // Advance lockout window 1 year into the future
-        policy.setNextPremiumDueDate(LocalDate.now().plusYears(1));
-        log.info("Policy {} next annual due date advanced to: {}", policy.getPolicyNumber(), policy.getNextPremiumDueDate());
-
-        // Enforces PAYBR-007: first successful payment equal to or greater than required premium activates policy
-        if (policy.getPolicyStatus() == PolicyStatus.PENDING_PAYMENT && paidAmount.compareTo(requiredPremium) >= 0) {
+        // Enforces PAYBR-007: the required premium, paid in full, activates the policy.
+        if (policy.getPolicyStatus() == PolicyStatus.PENDING_PAYMENT) {
             policy.setPolicyStatus(PolicyStatus.ACTIVE);
-            log.info("Policy issued after payment. Policy number: {}", policy.getPolicyNumber());
-        } else if (policy.getPolicyStatus() == PolicyStatus.PENDING_PAYMENT) {
-            log.warn("Successful payment of {} on policy {} did not meet required premium {}. Policy remains Pending Payment.",
-                    paidAmount, policy.getPolicyNumber(), requiredPremium);
+            log.info("Policy activated after full premium payment. Policy number: {}", policy.getPolicyNumber());
+        }
+
+        // Schedule the next due date according to the plan's actual premium type.
+        // ONE_TIME plans never expect another payment.
+        switch (premiumType) {
+            case MONTHLY -> policy.setNextPremiumDueDate(LocalDate.now().plusMonths(1));
+            case QUARTERLY -> policy.setNextPremiumDueDate(LocalDate.now().plusMonths(3));
+            case ANNUAL -> policy.setNextPremiumDueDate(LocalDate.now().plusYears(1));
+            case ONE_TIME -> policy.setNextPremiumDueDate(null);
+        }
+
+        if (policy.getNextPremiumDueDate() != null) {
+            log.info("Policy {} next premium due date set to: {}", policy.getPolicyNumber(), policy.getNextPremiumDueDate());
         }
 
         policyRepository.save(policy);
@@ -150,7 +184,6 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
             Long requesterUserId, String requesterRole) {
         log.info("Fetching paginated payments for policy ID: {}", policyId);
 
-        // Enforces PAYBR-009: customers may only view payments for their own policies.
         if ("CUSTOMER".equals(requesterRole)) {
             Policy policy = policyRepository.findById(policyId)
                     .orElseThrow(() -> new ResourceNotFoundException("Policy not found"));
@@ -224,8 +257,6 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
         return PaginationUtil.createPaginatedResponse(result, sortBy, direction);
     }
 
-  
-
     private void enforcePaymentOwnership(PremiumPayment payment, Long requesterUserId, String requesterRole) {
         if ("CUSTOMER".equals(requesterRole)
                 && !payment.getPolicy().getCustomer().getUser().getId().equals(requesterUserId)) {
@@ -243,19 +274,18 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
         dto.setPaymentMode(payment.getPaymentMode());
         dto.setTransactionReference(payment.getTransactionReference());
         dto.setPaymentStatus(payment.getPaymentStatus());
-        
+
         if (payment.getPolicy() != null) {
             dto.setPolicyNumber(payment.getPolicy().getPolicyNumber());
             dto.setNextPremiumDueDate(payment.getPolicy().getNextPremiumDueDate());
-            
-            if (payment.getPolicy().getCustomer() != null && 
+
+            if (payment.getPolicy().getCustomer() != null &&
                 payment.getPolicy().getCustomer().getUser() != null) {
-                
+
                 dto.setCustomerName(payment.getPolicy().getCustomer().getUser().getFullName());
             }
         }
         return dto;
     }
-
 
 }
