@@ -72,6 +72,22 @@ public class PolicyServiceImpl implements PolicyService {
 			}
 		});
 
+		LocalDate today = LocalDate.now();
+		LocalDate requestedStartDate = purchaseDTO.getStartDate();
+
+		if (requestedStartDate.isBefore(today)) {
+			log.warn("Business rule violation. Attempt to purchase policy with backdated start date: {}",
+					requestedStartDate);
+			throw new BusinessRuleException(
+					"Policy start date cannot be in the past. Please select today or a future date.");
+		}
+
+		if (requestedStartDate.isAfter(today.plusDays(30))) {
+			log.warn("Business rule violation. Start date {} is beyond the allowed 30-day purchase window",
+					requestedStartDate);
+			throw new BusinessRuleException("Policy start date must be within 30 days of today.");
+		}
+
 		Policy policy = new Policy();
 
 		policy.setPolicyNumber("POL-" + UUID.randomUUID().toString().substring(0, 8));
@@ -79,9 +95,9 @@ public class PolicyServiceImpl implements PolicyService {
 		policy.setCustomer(customer);
 		policy.setPolicyPlan(plan);
 
-		policy.setStartDate(purchaseDTO.getStartDate());
+		policy.setStartDate(requestedStartDate);
 
-		policy.setEndDate(purchaseDTO.getStartDate().plusYears(plan.getDuration()));
+		policy.setEndDate(requestedStartDate.plusYears(plan.getDuration()));
 
 		policy.setPolicyStatus(PolicyStatus.PENDING_PAYMENT);
 
@@ -107,6 +123,15 @@ public class PolicyServiceImpl implements PolicyService {
 			
 			throw new BusinessRuleException("This plan is no longer available for purchase");
 			}
+
+		// Note: @FutureOrPresent on the DTO already blocks past start dates here;
+		// this adds the matching upper bound so agent/admin issuance follows the
+		// same 30-day window as customer self-purchase.
+		if (issueDTO.getStartDate().isAfter(LocalDate.now().plusDays(30))) {
+			log.warn("Business rule violation. Start date {} is beyond the allowed 30-day issuance window",
+					issueDTO.getStartDate());
+			throw new BusinessRuleException("Policy start date must be within 30 days of today.");
+		}
 
 		Policy policy = new Policy();
 
@@ -307,6 +332,22 @@ public class PolicyServiceImpl implements PolicyService {
 	
 	        if (!overdue.isEmpty()) {
 	            log.info("Policy expiry sweep completed. {} policies marked EXPIRED", overdue.size());
+	        }
+
+	        // NEW: policies still PENDING_PAYMENT whose start date has already passed
+	        // never got activated and can no longer accept payment (see
+	        // PremiumPaymentServiceImpl.recordPayment) — lapse them instead of leaving
+	        // them stuck in PENDING_PAYMENT forever.
+	        List<Policy> lapsed = policyRepository
+	                .findByPolicyStatusAndStartDateBefore(PolicyStatus.PENDING_PAYMENT, LocalDate.now());
+
+	        for (Policy policy : lapsed) {
+	            policy.setPolicyStatus(PolicyStatus.CANCELLED);
+	        }
+	        policyRepository.saveAll(lapsed);
+
+	        if (!lapsed.isEmpty()) {
+	            log.info("Unpaid policy lapse sweep completed. {} policies marked CANCELLED", lapsed.size());
 	        }
 	    }
 

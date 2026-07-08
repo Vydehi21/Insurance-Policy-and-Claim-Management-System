@@ -282,9 +282,28 @@ public class ClaimServiceImpl implements ClaimService {
 			throw new BusinessRuleException("Policy has expired");
 		}
 
+		// NEW: policyStatus == ACTIVE only reflects that payment has been made — it says
+		// nothing about whether the coverage window has actually opened yet. Block claims
+		// raised before the policy's own start date.
+		if (policy.getStartDate().isAfter(LocalDate.now())) {
+			log.warn("Business rule violation. Claim attempted before policy coverage start date: {} (starts: {})",
+					policy.getPolicyNumber(), policy.getStartDate());
+			throw new BusinessRuleException(
+					"This policy's coverage has not started yet. Coverage begins on: " + policy.getStartDate());
+		}
+
 		if (dto.getIncidentDate().isAfter(LocalDate.now())) {
 			log.warn("Business rule violation. Future incident date submitted: {}", dto.getIncidentDate());
 			throw new BusinessRuleException("Incident date cannot be in future");
+		}
+
+		// NEW: the incident itself must fall within the coverage window — otherwise a
+		// customer could claim for something that happened before the policy even existed.
+		if (dto.getIncidentDate().isBefore(policy.getStartDate())) {
+			log.warn("Business rule violation. Incident date {} predates policy coverage start {} for policy: {}",
+					dto.getIncidentDate(), policy.getStartDate(), policy.getPolicyNumber());
+			throw new BusinessRuleException(
+					"Incident date cannot be before the policy's coverage start date: " + policy.getStartDate());
 		}
 
 		BigDecimal approvedClaims = claimRepository.getApprovedClaimAmount(policy.getId());

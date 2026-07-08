@@ -66,6 +66,18 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
             throw new BusinessRuleException("Cannot record payment for an expired policy");
         }
 
+        // NEW: premium must be paid before the policy's own start date arrives. Once
+        // the start date has passed without payment, the policy is left to lapse
+        // (see PolicyServiceImpl.expireOverduePolicies) rather than being activated late.
+        if (policy.getPolicyStatus() == PolicyStatus.PENDING_PAYMENT
+                && !LocalDate.now().isBefore(policy.getStartDate())) {
+            log.warn("Business rule violation. Payment attempted after start date for unpaid policy: {} (start date: {})",
+                    policy.getPolicyNumber(), policy.getStartDate());
+            throw new BusinessRuleException(
+                    "The payment window for this policy has closed. Premium must be paid before the start date: "
+                            + policy.getStartDate());
+        }
+
         if (premiumPaymentRepository.existsByTransactionReference(paymentRequestDTO.getTransactionReference())) {
             log.warn("Duplicate payment transaction reference: {}", paymentRequestDTO.getTransactionReference());
             throw new DuplicateResourceException("Transaction reference already exists");
