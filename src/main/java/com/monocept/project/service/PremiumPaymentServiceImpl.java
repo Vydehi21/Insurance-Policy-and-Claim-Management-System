@@ -70,11 +70,11 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
         // the start date has passed without payment, the policy is left to lapse
         // (see PolicyServiceImpl.expireOverduePolicies) rather than being activated late.
         if (policy.getPolicyStatus() == PolicyStatus.PENDING_PAYMENT
-                && !LocalDate.now().isBefore(policy.getStartDate())) {
+                && LocalDate.now().isAfter(policy.getStartDate())) {
             log.warn("Business rule violation. Payment attempted after start date for unpaid policy: {} (start date: {})",
                     policy.getPolicyNumber(), policy.getStartDate());
             throw new BusinessRuleException(
-                    "The payment window for this policy has closed. Premium must be paid before the start date: "
+                    "The payment window for this policy has closed. Premium must be paid on or before the start date: "
                             + policy.getStartDate());
         }
 
