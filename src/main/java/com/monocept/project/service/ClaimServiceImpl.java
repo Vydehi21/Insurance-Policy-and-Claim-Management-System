@@ -322,8 +322,13 @@ public class ClaimServiceImpl implements ClaimService {
 			throw new BusinessRuleException("Claim exceeds remaining coverage amount");
 		}
 
+		// Blocks a new claim while any prior claim on this policy is still "in flight" —
+		// i.e. submitted, under agent review, or already recommended one way or the
+		// other but not yet given a final decision by admin. Only APPROVED/REJECTED
+		// (final, closed) claims don't block a new submission.
 		boolean exists = claimRepository.existsByPolicyIdAndClaimStatusIn(policy.getId(),
-				List.of(ClaimStatus.SUBMITTED, ClaimStatus.UNDER_REVIEW));
+				List.of(ClaimStatus.SUBMITTED, ClaimStatus.UNDER_REVIEW,
+						ClaimStatus.RECOMMENDED_APPROVAL, ClaimStatus.RECOMMENDED_REJECTION));
 
 		if (exists) {
 			log.warn("Business rule violation. Duplicate open claim attempted for policy: {}",
@@ -748,6 +753,32 @@ public class ClaimServiceImpl implements ClaimService {
 		Page<ClaimResponseDTO> dto = claims.map(this::convertToResponseDTO);
 
 		return PaginationUtil.createPaginatedResponse(dto, sortBy, direction);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public PaginatedResponseDTO<ClaimResponseDTO> getClaimsPendingAdminDecision(int page, int size, String sortBy, String direction) {
+
+		Pageable pageable = PaginationUtil.buildPageable(page, size, sortBy, direction);
+
+		// CLC-RUL-004 / SRS §7.1: admin's authority is the FINAL decision only, so
+		// the admin claims queue must default-exclude SUBMITTED claims that have
+		// not yet been picked up and reviewed by an internal staff member.
+		// Already-decided claims (APPROVED/REJECTED) are still included so admin
+		// has a full audit trail, but the frontend renders those read-only per
+		// CLM-BR-009 (approved/rejected claims cannot be modified again).
+		Page<Claim> claimPage = claimRepository.findByClaimStatusIn(
+				List.of(
+						ClaimStatus.UNDER_REVIEW,
+						ClaimStatus.RECOMMENDED_APPROVAL,
+						ClaimStatus.RECOMMENDED_REJECTION,
+						ClaimStatus.APPROVED,
+						ClaimStatus.REJECTED),
+				pageable);
+
+		Page<ClaimResponseDTO> dtoPage = claimPage.map(this::convertToResponseDTO);
+
+		return PaginationUtil.createPaginatedResponse(dtoPage, sortBy, direction);
 	}
 
 }

@@ -134,6 +134,27 @@ public class ClaimController {
                         direction));
     }
 
+    @GetMapping("/pending-decision")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(
+        summary = "Get Claims Pending Admin Decision",
+        description = "Returns claims that have moved past initial internal-staff review — excludes claims still sitting in SUBMITTED status — so admin only sees claims that are actually ready for a final decision (CLC-RUL-004 / SRS §7.1: admin authority is the final decision only)"
+    )
+    public ResponseEntity<PaginatedResponseDTO<ClaimResponseDTO>>
+    getClaimsPendingAdminDecision(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction) {
+
+        return ResponseEntity.ok(
+                claimService.getClaimsPendingAdminDecision(
+                        page,
+                        size,
+                        sortBy,
+                        direction));
+    }
+
     @GetMapping("/customer/{customerId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'INTERNAL_STAFF')")
     @Operation(summary = "Get Claims By Customer ID", description = "Lists out complete insurance transaction instances unique to an established customer profile reference")

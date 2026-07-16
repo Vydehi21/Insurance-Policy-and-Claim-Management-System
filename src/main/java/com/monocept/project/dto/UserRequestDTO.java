@@ -44,6 +44,8 @@ public class UserRequestDTO {
     @NotNull(message = "Role is required")
     private Role role;
 
+    private Long assignedProductId;
+
     public void setFullName(String fullName) {
         this.fullName = TextNormalizationUtil.toTitleCase(fullName);
     }

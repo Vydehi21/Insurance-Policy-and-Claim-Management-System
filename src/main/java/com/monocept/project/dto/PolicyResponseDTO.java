@@ -30,4 +30,9 @@ public class PolicyResponseDTO {
     private LocalDate endDate;
     private PolicyStatus policyStatus;
     private BigDecimal totalPremiumPaid;
+
+    // NEW: coverageAmount minus everything already APPROVED against this policy —
+    // lets a customer/agent see at a glance how much cover is left before even
+    // attempting a claim, instead of finding out via a rejection.
+    private BigDecimal remainingCoverageAmount;
 }

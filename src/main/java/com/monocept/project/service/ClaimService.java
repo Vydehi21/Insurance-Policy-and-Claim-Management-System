@@ -31,4 +31,10 @@ public interface ClaimService {
 	PaginatedResponseDTO<ClaimResponseDTO> getInternalStaffClaims(int page, int size, String sortBy, String direction);
 	ClaimResponseDTO getClaimDetailsForReview(Long claimId, Long staffUserId);
 
+	// CLC-RUL-004 / SRS §7.1: admin authority is the FINAL decision only. Admin's
+	// claims queue must default-exclude claims an internal staff member has not
+	// yet reviewed (SUBMITTED), so this returns everything from UNDER_REVIEW
+	// onward, including already-decided claims (shown read-only on the frontend).
+	PaginatedResponseDTO<ClaimResponseDTO> getClaimsPendingAdminDecision(int page, int size, String sortBy, String direction);
+
 }

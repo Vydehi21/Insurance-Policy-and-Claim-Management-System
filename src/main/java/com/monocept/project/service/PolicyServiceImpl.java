@@ -29,6 +29,7 @@ import com.monocept.project.model.PolicyPlan;
 import com.monocept.project.repository.CustomerRepository;
 import com.monocept.project.repository.PolicyPlanRepository;
 import com.monocept.project.repository.PolicyRepository;
+import com.monocept.project.repository.ClaimRepository;
 import com.monocept.project.util.PaginationUtil;
 
 import lombok.RequiredArgsConstructor;
@@ -42,6 +43,7 @@ public class PolicyServiceImpl implements PolicyService {
 	private final PolicyRepository policyRepository;
 	private final CustomerRepository customerRepository;
 	private final PolicyPlanRepository policyPlanRepository;
+	private final ClaimRepository claimRepository;
 	private final ModelMapper modelMapper;
 
 	@Override
@@ -289,6 +291,17 @@ public class PolicyServiceImpl implements PolicyService {
 		dto.setPolicyStatus(policy.getPolicyStatus());
 
 		dto.setTotalPremiumPaid(policy.getTotalPremiumPaid());
+
+		// NEW: surfaces how much coverage is left before a claim is even attempted.
+		BigDecimal approvedClaimTotal = claimRepository.getApprovedClaimAmount(policy.getId());
+		if (approvedClaimTotal == null) {
+			approvedClaimTotal = BigDecimal.ZERO;
+		}
+		BigDecimal remainingCoverage = policy.getPolicyPlan().getCoverageAmount().subtract(approvedClaimTotal);
+		if (remainingCoverage.compareTo(BigDecimal.ZERO) < 0) {
+			remainingCoverage = BigDecimal.ZERO;
+		}
+		dto.setRemainingCoverageAmount(remainingCoverage);
 
 		return dto;
 	}

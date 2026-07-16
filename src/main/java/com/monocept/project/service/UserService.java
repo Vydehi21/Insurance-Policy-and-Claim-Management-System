@@ -17,4 +17,6 @@ public interface UserService {
     PaginatedResponseDTO<UserResponseDTO> searchUsersByName(String name, int page, int size, String sortBy, String direction);
     UserResponseDTO updateUserProfile(Long userId, UserRequestDTO userRequestDTO);
     UserResponseDTO updateUserStatus(Long userId, UserStatusUpdateRequestDTO statusUpdateDTO);
+
+    UserResponseDTO assignProductToUser(Long userId, Long productId);
 }

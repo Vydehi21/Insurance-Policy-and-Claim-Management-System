@@ -70,4 +70,8 @@ public class User {
     
     @OneToMany(mappedBy = "user")
     private List<ClaimStatusHistory> claimStatusHistories;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assigned_product_id")
+    private InsuranceProduct assignedProduct;
 }

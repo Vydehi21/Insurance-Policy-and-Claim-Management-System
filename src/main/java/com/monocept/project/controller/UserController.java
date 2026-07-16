@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.monocept.project.dto.AssignProductRequestDTO;
 import com.monocept.project.dto.PaginatedResponseDTO;
 import com.monocept.project.dto.UserRequestDTO;
 import com.monocept.project.dto.UserResponseDTO;
@@ -153,6 +154,23 @@ public class UserController {
                 userService.updateUserStatus(
                         userId,
                         requestDTO)
+        );
+    }
+
+    // §4.4 — new capability outside the original SRS: admin (re)assigns which
+    // insurance product an internal-staff user is scoped to, or clears it by
+    // sending a null productId.
+    @PutMapping("/{userId}/assign-product")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Assign Product To Internal Staff", description = "Allows an administrator to scope an internal staff account to a single insurance product, or clear an existing assignment")
+    public ResponseEntity<UserResponseDTO> assignProductToUser(
+            @PathVariable Long userId,
+            @RequestBody AssignProductRequestDTO requestDTO) {
+
+        return ResponseEntity.ok(
+                userService.assignProductToUser(
+                        userId,
+                        requestDTO.getProductId())
         );
     }
 }
