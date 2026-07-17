@@ -265,6 +265,21 @@ public class ClaimController {
         );
     }
     
+	@PutMapping("/{claimId}/cancel")
+	@PreAuthorize("hasRole('CUSTOMER')")
+	@Operation(summary = "Withdraw Claim", description = "Allows a customer to cancel their own pending claim request file safely")
+	public ResponseEntity<Void> withdrawMyClaim(
+			@PathVariable("claimId") Long claimId,
+			@AuthenticationPrincipal CustomUserDetails userDetails) {
+
+		// 🛠️ FIXED: Passes BOTH matching arguments to satisfy the Service contract definitions
+		claimService.withdrawClaimByCustomer(claimId, userDetails.getUserId());
+		
+		return ResponseEntity.ok().build();
+	}
+
+
+    
     @GetMapping("/documents/{documentId}")
     @PreAuthorize("hasAnyRole('ADMIN','INTERNAL_STAFF','CUSTOMER')")
     public ResponseEntity<Void> viewDocument(

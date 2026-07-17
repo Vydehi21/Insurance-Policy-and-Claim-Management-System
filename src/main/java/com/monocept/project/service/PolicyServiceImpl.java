@@ -364,11 +364,20 @@ public class PolicyServiceImpl implements PolicyService {
 	        }
 	    }
 
-	private void enforcePolicyOwnership(Policy policy, Long requesterUserId, String requesterRole) {
-		if ("CUSTOMER".equals(requesterRole) && !policy.getCustomer().getUser().getId().equals(requesterUserId)) {
-			log.warn("Blocked attempt by user {} to access another customer's policy: {}", requesterUserId,
-					policy.getPolicyNumber());
-			throw new AuthorizationException("You are not authorized to view this policy");
-		}
-	}
+    private void enforcePolicyOwnership(Policy policy, Long requesterUserId, String requesterRole) {
+        // 🛠Normalise case and prefix variations to prevent evaluation dropouts
+        String normalizedRole = requesterRole != null ? requesterRole.toUpperCase() : "";
+
+        if (normalizedRole.contains("CUSTOMER")) {
+            if (policy.getCustomer() == null || policy.getCustomer().getUser() == null || 
+                !policy.getCustomer().getUser().getId().equals(requesterUserId)) {
+                
+                log.warn("Blocked attempt by user {} to access another customer's policy: {}", 
+                        requesterUserId, policy.getPolicyNumber());
+                throw new AuthorizationException("You are not authorized to view this policy");
+            }
+        }
+        // 🛡️ Safe: Admins and Internal Staff pass through automatically without triggering ownership errors
+    }
+
 }

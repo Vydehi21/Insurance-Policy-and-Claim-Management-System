@@ -6,5 +6,6 @@ public enum ClaimStatus {
     RECOMMENDED_APPROVAL,
     RECOMMENDED_REJECTION,
     APPROVED,
-    REJECTED
+    REJECTED,
+    CANCELLED
 }
