@@ -4074,6 +4074,69 @@
           "response": []
         },
         {
+          "name": "Purchase Policy (Customer 1 - Motor)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is successful', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 302, 204]);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('policy2Id', jsonData.policyId);",
+                  "    pm.collectionVariables.set('policy2Number', jsonData.policyNumber);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customer2Token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"planId\": \"{{planMotorCompId}}\",\n  \"startDate\": \"2026-07-10\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/policies/purchase",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "policies",
+                "purchase"
+              ]
+            },
+            "description": "Customer 2 purchases the Motor Secure Comprehensive plan."
+          },
+          "response": []
+        },
+        {
           "name": "Purchase Policy (Customer 2 - Motor)",
           "event": [
             {
@@ -4833,7 +4896,68 @@
           "response": []
         },
         {
-          "name": "Record Payment (Customer 2 - Success, activates Policy 2)",
+          "name": "Record Payment (Customer 1 - Success, activates Policy 2)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is successful', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 302, 204]);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('payment2Id', jsonData.paymentId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customer2Token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"policyId\": \"{{policy2Id}}\",\n  \"amount\": 12000,\n  \"paymentMode\": \"CARD\",\n  \"transactionReference\": \"TXN-MTR-0001\",\n  \"paymentStatus\": \"SUCCESS\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/premium-payments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "premium-payments"
+              ]
+            },
+            "description": "Customer 2 pays the required premium for their Motor Secure Comprehensive policy."
+          },
+          "response": []
+        },
+        {
+          "name": "Record Payment (Customer 2 - Success, activates Policy 2) Copy",
           "event": [
             {
               "listen": "test",
@@ -5423,6 +5547,71 @@
           "response": []
         },
         {
+          "name": "Raise Claim (Customer 1 against active Motor Policy)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is successful', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 302, 204]);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('claim1Id', jsonData.claimId);",
+                  "    pm.collectionVariables.set('claim1Number', jsonData.claimNumber);",
+                  "    if (jsonData.documents && jsonData.documents.length > 0) {",
+                  "        pm.collectionVariables.set('claimDocument1Id', jsonData.documents[0].documentId);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customer1Token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"policyId\": \"{{policy1Id}}\",\n  \"claimAmount\": 150000,\n  \"claimReason\": \"Hospitalized for 5 days due to acute appendicitis and underwent emergency surgery at Apollo Hospital, Mumbai.\",\n  \"incidentDate\": \"2026-07-15\",\n  \"supportingDocuments\": [\n    {\n      \"documentName\": \"Hospital Discharge Summary\",\n      \"documentType\": \"PDF\",\n      \"documentReference\": \"https://res.cloudinary.com/demo/insurance-docs/priya_discharge_summary.pdf\"\n    },\n    {\n      \"documentName\": \"Medical Bills\",\n      \"documentType\": \"PDF\",\n      \"documentReference\": \"https://res.cloudinary.com/demo/insurance-docs/priya_medical_bills.pdf\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/claims",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "claims"
+              ]
+            },
+            "description": "Customer raises a claim against their own ACTIVE policy (CLM-BR-001/006, FR-CLM-001). Run this only AFTER 'Record Payment (Customer 1 - Success...)' has activated Policy 1. Claim amount must not exceed the plan's coverage amount (CLM-BR-004)."
+          },
+          "response": []
+        },
+        {
           "name": "Review Claim (Internal Staff recommends approval)",
           "event": [
             {
@@ -5486,12 +5675,14 @@
             {
               "listen": "test",
               "script": {
-                "type": "text/javascript",
                 "exec": [
                   "pm.test('Status code is successful', function () {",
                   "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 302, 204]);",
                   "});"
-                ]
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
