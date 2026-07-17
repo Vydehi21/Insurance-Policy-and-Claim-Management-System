@@ -18,8 +18,6 @@ import io.jsonwebtoken.security.Keys;
 @Service
 public class JwtService {
 
-	// CLEANED: Removed dead commented-out variables block cleanly
-
 	// Use constructor injection or property configuration to guarantee values are loaded early
 	@Value("${jwt.secret}")
 	private String secretKey;

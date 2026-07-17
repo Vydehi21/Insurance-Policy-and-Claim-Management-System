@@ -645,5 +645,43 @@ public class ClaimServiceImpl implements ClaimService {
 
 		return PaginationUtil.createPaginatedResponse(dto, sortBy, direction);
 	}
+	
+    @Override
+    @Transactional
+    public void withdrawClaimByCustomer(Long claimId, Long authenticatedUserId) {
+        log.info("Customer user ID {} is attempting to withdraw claim ID {}", authenticatedUserId, claimId);
+
+        // 1. Locate the claim ensuring the customer actually owns the parent policy file
+        Claim claim = claimRepository.findByIdAndPolicy_Customer_User_Id(claimId, authenticatedUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("Claim file reference not found or access denied"));
+
+        // 2. Enforce the state constraint rule: Cannot withdraw once advanced beyond review
+        if (claim.getClaimStatus() != ClaimStatus.SUBMITTED && claim.getClaimStatus() != ClaimStatus.UNDER_REVIEW) {
+            log.warn("Withdrawal blocked: Claim {} is already in status {}", claimId, claim.getClaimStatus());
+            throw new BusinessRuleException("Cannot withdraw this claim because it has already been processed.");
+        }
+
+        ClaimStatus previousStatus = claim.getClaimStatus();
+        User customerUser = claim.getPolicy().getCustomer().getUser();
+
+        // 3. Clear the status and release any active agent locks
+        claim.setClaimStatus(ClaimStatus.CANCELLED); // or ClaimStatus.WITHDRAWN based on your exact enum
+        claim.setReviewedBy(null); // Safely releases any active agent concurrency locks
+        claim.setAgentRemarks("Withdrawn by customer.");
+
+        Claim savedClaim = claimRepository.save(claim);
+
+        // 4. Log the action to your status tracking history ledger
+        createHistory(
+            savedClaim,
+            previousStatus,
+            ClaimStatus.CANCELLED,
+            "Claim voluntarily withdrawn by customer.",
+            customerUser
+        );
+
+        log.info("Claim {} successfully withdrawn and cancelled by customer {}", savedClaim.getClaimNumber(), authenticatedUserId);
+    }
+
 
 }

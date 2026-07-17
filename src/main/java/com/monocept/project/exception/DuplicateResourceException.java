@@ -8,6 +8,4 @@ public class DuplicateResourceException extends RuntimeException {
 
 }
 
-//	EXC-002 Duplicate email
-//	EXC-003 Duplicate product name
-//	EXC-004 Duplicate transaction reference
+

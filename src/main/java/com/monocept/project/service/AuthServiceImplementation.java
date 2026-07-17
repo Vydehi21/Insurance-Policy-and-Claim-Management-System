@@ -205,7 +205,8 @@ public class AuthServiceImplementation implements AuthService {
 	        userRepository.save(user);
 
 	        // 3. Construct a direct link matching your React application routes
-	        String fullResetUrl = resetUrl + rawToken;
+	        String fullResetUrl = resetUrl + "/" +rawToken;
+	       
 	        log.info("Password reset token generated for user id: {}", user.getId());
 
 	        try {

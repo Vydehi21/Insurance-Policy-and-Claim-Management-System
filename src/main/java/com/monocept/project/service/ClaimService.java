@@ -30,5 +30,7 @@ public interface ClaimService {
     );
 	PaginatedResponseDTO<ClaimResponseDTO> getAgentClaims(int page, int size, String sortBy, String direction);
 	ClaimResponseDTO getClaimDetailsForReview(Long claimId, Long agentUserId);
+	void withdrawClaimByCustomer(Long claimId, Long authenticatedUserId);
+
 
 }

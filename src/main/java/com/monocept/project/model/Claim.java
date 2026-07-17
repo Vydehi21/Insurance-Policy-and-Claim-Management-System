@@ -57,7 +57,7 @@ public class Claim {
     private LocalDate incidentDate;
 	
 	@Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false,length = 50)
     private ClaimStatus claimStatus = ClaimStatus.SUBMITTED;
 	
 	private String agentRemarks;

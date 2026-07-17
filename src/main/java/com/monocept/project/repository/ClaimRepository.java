@@ -52,5 +52,5 @@ public interface ClaimRepository extends JpaRepository<Claim, Long> {
             List<ClaimStatus> statuses,
             Pageable pageable
     );
-    
+    Optional<Claim> findByIdAndPolicy_Customer_User_Id(Long claimId, Long userId);
 }
