@@ -14,7 +14,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.monocept.project.dto.AgentPolicyIssueRequestDTO;
+import com.monocept.project.dto.InternalStaffPolicyIssueRequestDTO;
 import com.monocept.project.dto.CustomerPolicyPurchaseRequestDTO;
 import com.monocept.project.dto.PaginatedResponseDTO;
 import com.monocept.project.dto.PolicyResponseDTO;
@@ -29,6 +29,7 @@ import com.monocept.project.model.PolicyPlan;
 import com.monocept.project.repository.CustomerRepository;
 import com.monocept.project.repository.PolicyPlanRepository;
 import com.monocept.project.repository.PolicyRepository;
+import com.monocept.project.repository.ClaimRepository;
 import com.monocept.project.util.PaginationUtil;
 
 import lombok.RequiredArgsConstructor;
@@ -42,6 +43,7 @@ public class PolicyServiceImpl implements PolicyService {
 	private final PolicyRepository policyRepository;
 	private final CustomerRepository customerRepository;
 	private final PolicyPlanRepository policyPlanRepository;
+	private final ClaimRepository claimRepository;
 	private final ModelMapper modelMapper;
 
 	@Override
@@ -72,6 +74,22 @@ public class PolicyServiceImpl implements PolicyService {
 			}
 		});
 
+		LocalDate today = LocalDate.now();
+		LocalDate requestedStartDate = purchaseDTO.getStartDate();
+
+		if (requestedStartDate.isBefore(today)) {
+			log.warn("Business rule violation. Attempt to purchase policy with backdated start date: {}",
+					requestedStartDate);
+			throw new BusinessRuleException(
+					"Policy start date cannot be in the past. Please select today or a future date.");
+		}
+
+		if (requestedStartDate.isAfter(today.plusDays(30))) {
+			log.warn("Business rule violation. Start date {} is beyond the allowed 30-day purchase window",
+					requestedStartDate);
+			throw new BusinessRuleException("Policy start date must be within 30 days of today.");
+		}
+
 		Policy policy = new Policy();
 
 		policy.setPolicyNumber("POL-" + UUID.randomUUID().toString().substring(0, 8));
@@ -79,9 +97,9 @@ public class PolicyServiceImpl implements PolicyService {
 		policy.setCustomer(customer);
 		policy.setPolicyPlan(plan);
 
-		policy.setStartDate(purchaseDTO.getStartDate());
+		policy.setStartDate(requestedStartDate);
 
-		policy.setEndDate(purchaseDTO.getStartDate().plusYears(plan.getDuration()));
+		policy.setEndDate(requestedStartDate.plusYears(plan.getDuration()));
 
 		policy.setPolicyStatus(PolicyStatus.PENDING_PAYMENT);
 
@@ -94,7 +112,7 @@ public class PolicyServiceImpl implements PolicyService {
 
 	@Override
 	@Transactional
-	public PolicyResponseDTO issuePolicy(AgentPolicyIssueRequestDTO issueDTO) {
+	public PolicyResponseDTO issuePolicy(InternalStaffPolicyIssueRequestDTO issueDTO) {
 
 		Customer customer = customerRepository.findById(issueDTO.getCustomerId())
 				.orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
@@ -107,6 +125,15 @@ public class PolicyServiceImpl implements PolicyService {
 			
 			throw new BusinessRuleException("This plan is no longer available for purchase");
 			}
+
+		// Note: @FutureOrPresent on the DTO already blocks past start dates here;
+		// this adds the matching upper bound so agent/admin issuance follows the
+		// same 30-day window as customer self-purchase.
+		if (issueDTO.getStartDate().isAfter(LocalDate.now().plusDays(30))) {
+			log.warn("Business rule violation. Start date {} is beyond the allowed 30-day issuance window",
+					issueDTO.getStartDate());
+			throw new BusinessRuleException("Policy start date must be within 30 days of today.");
+		}
 
 		Policy policy = new Policy();
 
@@ -265,6 +292,17 @@ public class PolicyServiceImpl implements PolicyService {
 
 		dto.setTotalPremiumPaid(policy.getTotalPremiumPaid());
 
+		// NEW: surfaces how much coverage is left before a claim is even attempted.
+		BigDecimal approvedClaimTotal = claimRepository.getApprovedClaimAmount(policy.getId());
+		if (approvedClaimTotal == null) {
+			approvedClaimTotal = BigDecimal.ZERO;
+		}
+		BigDecimal remainingCoverage = policy.getPolicyPlan().getCoverageAmount().subtract(approvedClaimTotal);
+		if (remainingCoverage.compareTo(BigDecimal.ZERO) < 0) {
+			remainingCoverage = BigDecimal.ZERO;
+		}
+		dto.setRemainingCoverageAmount(remainingCoverage);
+
 		return dto;
 	}
 
@@ -281,7 +319,7 @@ public class PolicyServiceImpl implements PolicyService {
 	}
 
 	@Override
-	public PaginatedResponseDTO<PolicyResponseDTO> getAgentPolicies(int page, int size, String sortBy,
+	public PaginatedResponseDTO<PolicyResponseDTO> getInternalStaffPolicies(int page, int size, String sortBy,
 			String direction) {
 
 		Sort sort = direction.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
@@ -308,13 +346,38 @@ public class PolicyServiceImpl implements PolicyService {
 	        if (!overdue.isEmpty()) {
 	            log.info("Policy expiry sweep completed. {} policies marked EXPIRED", overdue.size());
 	        }
+
+	        // NEW: policies still PENDING_PAYMENT whose start date has already passed
+	        // never got activated and can no longer accept payment (see
+	        // PremiumPaymentServiceImpl.recordPayment) — lapse them instead of leaving
+	        // them stuck in PENDING_PAYMENT forever.
+	        List<Policy> lapsed = policyRepository
+	                .findByPolicyStatusAndStartDateBefore(PolicyStatus.PENDING_PAYMENT, LocalDate.now());
+
+	        for (Policy policy : lapsed) {
+	            policy.setPolicyStatus(PolicyStatus.CANCELLED);
+	        }
+	        policyRepository.saveAll(lapsed);
+
+	        if (!lapsed.isEmpty()) {
+	            log.info("Unpaid policy lapse sweep completed. {} policies marked CANCELLED", lapsed.size());
+	        }
 	    }
 
-	private void enforcePolicyOwnership(Policy policy, Long requesterUserId, String requesterRole) {
-		if ("CUSTOMER".equals(requesterRole) && !policy.getCustomer().getUser().getId().equals(requesterUserId)) {
-			log.warn("Blocked attempt by user {} to access another customer's policy: {}", requesterUserId,
-					policy.getPolicyNumber());
-			throw new AuthorizationException("You are not authorized to view this policy");
-		}
-	}
+    private void enforcePolicyOwnership(Policy policy, Long requesterUserId, String requesterRole) {
+        // 🛠Normalise case and prefix variations to prevent evaluation dropouts
+        String normalizedRole = requesterRole != null ? requesterRole.toUpperCase() : "";
+
+        if (normalizedRole.contains("CUSTOMER")) {
+            if (policy.getCustomer() == null || policy.getCustomer().getUser() == null || 
+                !policy.getCustomer().getUser().getId().equals(requesterUserId)) {
+                
+                log.warn("Blocked attempt by user {} to access another customer's policy: {}", 
+                        requesterUserId, policy.getPolicyNumber());
+                throw new AuthorizationException("You are not authorized to view this policy");
+            }
+        }
+        // 🛡️ Safe: Admins and Internal Staff pass through automatically without triggering ownership errors
+    }
+
 }

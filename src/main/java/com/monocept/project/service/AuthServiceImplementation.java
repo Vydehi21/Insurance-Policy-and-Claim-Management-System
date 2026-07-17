@@ -1,6 +1,5 @@
 package com.monocept.project.service;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -87,7 +86,10 @@ public class AuthServiceImplementation implements AuthService {
 		otpService.sendPhoneOtp(registrationRequestDTO.getMobileNumber());
 
 		PendingUser pendingUser = modelMapper.map(registrationRequestDTO, PendingUser.class);
-		pendingUser.setPassword(passwordEncoder.encode(registrationRequestDTO.getPassword()));
+
+		pendingUser.setPassword(
+		    passwordEncoder.encode(registrationRequestDTO.getPassword())
+		);
 
 		pendingUserRepository.save(pendingUser);
 
@@ -97,40 +99,43 @@ public class AuthServiceImplementation implements AuthService {
 	@Override
 	@Transactional
 	public UserResponseDTO verifyRegister(VerifyRegistrationOtpDTO dto) {
-		log.info("Verifying registration OTP challenge for email: {}", dto.getEmail());
+	    log.info("Verifying registration OTP challenge for email: {}", dto.getEmail());
 
-		// 1. Validate Email & Phone OTP records via your core services
-		boolean emailVerified = otpService.verifyEmailOtp(dto.getEmail(), dto.getEmailOtp());
-		if (!emailVerified) {
-			log.warn("Registration verification failed. Invalid or expired email OTP: {}", dto.getEmail());
-			throw new InvalidRequestException("Invalid or expired email OTP");
-		}
+	    boolean emailVerified = otpService.verifyEmailOtp(dto.getEmail(), dto.getEmailOtp());
+	    if (!emailVerified) {
+	        log.warn("Registration verification failed. Invalid or expired email OTP: {}", dto.getEmail());
+	        throw new InvalidRequestException("Invalid or expired email OTP");
+	    }
 
-		boolean phoneVerified = otpService.verifyPhoneOtp(dto.getMobileNumber(), dto.getPhoneOtp());
-		if (!phoneVerified) {
-			log.warn("Registration verification failed. Invalid phone OTP: {}", dto.getMobileNumber());
-			throw new InvalidRequestException("Invalid Phone OTP");
-		}
+	    boolean phoneVerified = otpService.verifyPhoneOtp(dto.getMobileNumber(), dto.getPhoneOtp());
+	    if (!phoneVerified) {
+	        log.warn("Registration verification failed. Invalid phone OTP: {}", dto.getMobileNumber());
+	        throw new InvalidRequestException("Invalid Phone OTP");
+	    }
 
-		// 2. FIXED SEQUENCE: Fetch pendingUser record BEFORE attempting variable references
-		PendingUser pendingUser = pendingUserRepository.findByEmail(dto.getEmail())
-				.orElseThrow(() -> new ResourceNotFoundException("Registration expired. Please register again"));
+	    PendingUser pendingUser = pendingUserRepository.findByEmail(dto.getEmail())
+	            .orElseThrow(() -> new ResourceNotFoundException("Registration expired. Please register again"));
 
-		// 3. FIXED DUPLICATION: Unify initialization structure using ModelMapper cleanly
-		User user = modelMapper.map(pendingUser, User.class);
-		user.setRole(Role.CUSTOMER);
-		user.setActiveStatus(true);
+	    User user = modelMapper.map(pendingUser, User.class);
 
-		User savedUser = userRepository.save(user);
+	    // CRITICAL: PendingUser's own primary key must never leak into the new User's primary key.
+	    // ModelMapper copies same-named/same-typed fields by default, and both entities happen to
+	    // have a "Long id" field — without this reset, save() treats the new user as an UPDATE
+	    // to whatever existing row shares that id (e.g. the very first user row: your admin).
+	    user.setId(null);
 
-		// 4. CLEAN UP SYSTEM STORAGE DATA
-		emailOtpRepository.findByEmail(dto.getEmail()).ifPresent(emailOtpRepository::delete);
-		phoneOtpRepository.findByPhone(dto.getMobileNumber()).ifPresent(phoneOtpRepository::delete);
-		pendingUserRepository.delete(pendingUser);
+	    user.setRole(Role.CUSTOMER);
+	    user.setActiveStatus(true);
 
-		log.info("Customer registration completed successfully. User id: {}", savedUser.getId());
+	    User savedUser = userRepository.save(user);
 
-		return modelMapper.map(savedUser, UserResponseDTO.class);
+	    emailOtpRepository.findByEmail(dto.getEmail()).ifPresent(emailOtpRepository::delete);
+	    phoneOtpRepository.findByPhone(dto.getMobileNumber()).ifPresent(phoneOtpRepository::delete);
+	    pendingUserRepository.delete(pendingUser);
+
+	    log.info("Customer registration completed successfully. User id: {}", savedUser.getId());
+
+	    return modelMapper.map(savedUser, UserResponseDTO.class);
 	}
 	
 	@Override
@@ -161,9 +166,10 @@ public class AuthServiceImplementation implements AuthService {
 
 		// FIXED: Safely verify hashed passwords instead of standard text equals
 		// comparisons
-		if (!passwordEncoder.matches(loginRequestDTO.getPassword(), user.getPassword())) {
+				
+		if (!passwordEncoder.matches(loginRequestDTO.getPassword(), user.getPassword()))  {
 			log.warn("Wrong password attempt for email: {}", user.getEmail());
-			throw new AuthenticationException("Invalid credentials");
+		    throw new AuthenticationException("Invalid credentials");
 		}
 
 		if (!user.getActiveStatus()) {
@@ -242,8 +248,9 @@ public class AuthServiceImplementation implements AuthService {
 			throw new AuthenticationException("This reset link has expired. Please request a new one.");
 		}
 
-		// 5. Encrypt raw password entry using BCrypt and clear transient tokens context safely
+		// 4. Encrypt raw password entry and clear transient tokens
 		user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+		// 5. Encrypt raw password entry using BCrypt and clear transient tokens context safely
 		user.setResetToken(null);
 		user.setResetTokenExpiry(null);
 

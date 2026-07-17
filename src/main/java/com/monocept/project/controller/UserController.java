@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.monocept.project.dto.AssignProductRequestDTO;
 import com.monocept.project.dto.PaginatedResponseDTO;
 import com.monocept.project.dto.UserRequestDTO;
 import com.monocept.project.dto.UserResponseDTO;
@@ -35,21 +36,21 @@ public class UserController {
 
     private final UserService userService;
 
-    // Admin creates agent
-    @PostMapping("/agents")
+    // Admin creates internal staff
+    @PostMapping("/internal-staff")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Create Agent Account", description = "Allows an administrator to safely provision and onboard a new active insurance field agent profile")
-    public ResponseEntity<UserResponseDTO> createAgent(
+    @Operation(summary = "Create Internal Staff Account", description = "Allows an administrator to safely provision and onboard a new active insurance field internal staff profile")
+    public ResponseEntity<UserResponseDTO> createInternalStaff(
             @Valid @RequestBody UserRequestDTO userRequestDTO) {
 
         UserResponseDTO response =
-                userService.createAgent(userRequestDTO);
+                userService.createInternalStaff(userRequestDTO);
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @GetMapping("/{userId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT', 'CUSTOMER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INTERNAL_STAFF', 'CUSTOMER')")
     @Operation(summary = "Get User By ID", description = "Retrieves base descriptive account credentials and attributes matching a primary identifier mapping")
     public ResponseEntity<UserResponseDTO> getUserById(
             @PathVariable Long userId) {
@@ -60,7 +61,7 @@ public class UserController {
     }
 
     @GetMapping("/email/{email}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INTERNAL_STAFF')")
     @Operation(summary = "Get User By Email", description = "Runs a precise database lookup to track down a unique user account profile using an email registration address string")
     public ResponseEntity<UserResponseDTO> getUserByEmail(
             @PathVariable String email) {
@@ -90,7 +91,7 @@ public class UserController {
 
     @GetMapping("/role/{role}")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Get Users By Role Typology", description = "Filters structural profiles cleanly by standard access groups such as Admin, Agent, or Customer")
+    @Operation(summary = "Get Users By Role Typology", description = "Filters structural profiles cleanly by standard access groups such as Admin, Internal Staff, or Customer")
     public ResponseEntity<PaginatedResponseDTO<UserResponseDTO>> getUsersByRole(
             @PathVariable Role role,
             @RequestParam(defaultValue = "0") int page,
@@ -129,7 +130,7 @@ public class UserController {
     }
 
     @PutMapping("/{userId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT', 'CUSTOMER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INTERNAL_STAFF', 'CUSTOMER')")
     @Operation(summary = "Update User Profile", description = "Modifies generic core text parameters inside an established profile record layout body")
     public ResponseEntity<UserResponseDTO> updateUser(
             @PathVariable Long userId,
@@ -153,6 +154,23 @@ public class UserController {
                 userService.updateUserStatus(
                         userId,
                         requestDTO)
+        );
+    }
+
+    // §4.4 — new capability outside the original SRS: admin (re)assigns which
+    // insurance product an internal-staff user is scoped to, or clears it by
+    // sending a null productId.
+    @PutMapping("/{userId}/assign-product")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Assign Product To Internal Staff", description = "Allows an administrator to scope an internal staff account to a single insurance product, or clear an existing assignment")
+    public ResponseEntity<UserResponseDTO> assignProductToUser(
+            @PathVariable Long userId,
+            @RequestBody AssignProductRequestDTO requestDTO) {
+
+        return ResponseEntity.ok(
+                userService.assignProductToUser(
+                        userId,
+                        requestDTO.getProductId())
         );
     }
 }

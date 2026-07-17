@@ -62,8 +62,8 @@ public class ClaimController {
 	}
 
 	@PutMapping("/{claimId}/review")
-	@PreAuthorize("hasRole('AGENT')")
-	@Operation(summary = "Review Claim", description = "Allows an internal agent to review a pending insurance claim")
+	@PreAuthorize("hasRole('INTERNAL_STAFF')")
+	@Operation(summary = "Review Claim", description = "Allows an internal staff member to review a pending insurance claim")
 	public ResponseEntity<ClaimResponseDTO> reviewClaim(
 			@PathVariable Long claimId,
 			@AuthenticationPrincipal CustomUserDetails userDetails,
@@ -95,15 +95,15 @@ public class ClaimController {
 	}
 
     @GetMapping("/{claimId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT', 'CUSTOMER')")
-    @Operation(summary = "Get Claim By ID", description = "Fetches complete properties of a claim and applies concurrency locks if accessed by an internal agent")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INTERNAL_STAFF', 'CUSTOMER')")
+    @Operation(summary = "Get Claim By ID", description = "Fetches complete properties of a claim and applies concurrency locks if accessed by an internal staff member")
     public ResponseEntity<ClaimResponseDTO> getClaimById(
             @PathVariable Long claimId,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        // 🔐 If an agent requests this claim, route it through the lock acquisition engine
+        // 🔐 If an internal staff requests this claim, route it through the lock acquisition engine
         if (userDetails != null && userDetails.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_AGENT"))) {
+                .anyMatch(a -> a.getAuthority().equals("ROLE_INTERNAL_STAFF"))) {
             
             return ResponseEntity.ok(
                     claimService.getClaimDetailsForReview(claimId, userDetails.getUserId())
@@ -134,8 +134,29 @@ public class ClaimController {
                         direction));
     }
 
+    @GetMapping("/pending-decision")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(
+        summary = "Get Claims Pending Admin Decision",
+        description = "Returns claims that have moved past initial internal-staff review — excludes claims still sitting in SUBMITTED status — so admin only sees claims that are actually ready for a final decision (CLC-RUL-004 / SRS §7.1: admin authority is the final decision only)"
+    )
+    public ResponseEntity<PaginatedResponseDTO<ClaimResponseDTO>>
+    getClaimsPendingAdminDecision(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction) {
+
+        return ResponseEntity.ok(
+                claimService.getClaimsPendingAdminDecision(
+                        page,
+                        size,
+                        sortBy,
+                        direction));
+    }
+
     @GetMapping("/customer/{customerId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INTERNAL_STAFF')")
     @Operation(summary = "Get Claims By Customer ID", description = "Lists out complete insurance transaction instances unique to an established customer profile reference")
     public ResponseEntity<PaginatedResponseDTO<ClaimResponseDTO>>
     getClaimsByCustomer(
@@ -155,7 +176,7 @@ public class ClaimController {
     }
 
     @GetMapping("/status/{status}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INTERNAL_STAFF')")
     @Operation(summary = "Get Claims By Status", description = "Filters target records by standard state workflow values like pending, approved, or denied")
     public ResponseEntity<PaginatedResponseDTO<ClaimResponseDTO>>
     getClaimsByStatus(
@@ -175,7 +196,7 @@ public class ClaimController {
     }
 
     @GetMapping("/search")
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INTERNAL_STAFF')")
     @Operation(summary = "Search Claims By Reference Number", description = "Provides targeted text string scanning to locate explicit item structures quickly")
     public ResponseEntity<PaginatedResponseDTO<ClaimResponseDTO>>
     searchClaims(
@@ -194,14 +215,14 @@ public class ClaimController {
                         direction));
     }
     
-    @GetMapping("/agent")
-    @PreAuthorize("hasRole('AGENT')")
+    @GetMapping("/internal-staff")
+    @PreAuthorize("hasRole('INTERNAL_STAFF')")
     @Operation(
-        summary = "Get Claims For Agent",
-        description = "Returns claims assigned for agent review"
+        summary = "Get Claims For Internal Staff",
+        description = "Returns claims assigned for internal staff review"
     )
     public ResponseEntity<PaginatedResponseDTO<ClaimResponseDTO>>
-    getAgentClaims(
+    getInternalStaffClaims(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sortBy,
@@ -209,7 +230,7 @@ public class ClaimController {
     ) {
 
         return ResponseEntity.ok(
-        		 claimService.getAgentClaims(
+        		 claimService.getInternalStaffClaims(
         	                page,
         	                size,
         	                sortBy,
@@ -260,7 +281,7 @@ public class ClaimController {
 
     
     @GetMapping("/documents/{documentId}")
-    @PreAuthorize("hasAnyRole('ADMIN','AGENT','CUSTOMER')")
+    @PreAuthorize("hasAnyRole('ADMIN','INTERNAL_STAFF','CUSTOMER')")
     public ResponseEntity<Void> viewDocument(
             @PathVariable Long documentId,
             @AuthenticationPrincipal CustomUserDetails userDetails

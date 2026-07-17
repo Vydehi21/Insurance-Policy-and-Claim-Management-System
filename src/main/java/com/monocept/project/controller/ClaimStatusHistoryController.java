@@ -24,7 +24,7 @@ public class ClaimStatusHistoryController {
     private final ClaimStatusHistoryService claimStatusHistoryService;
 
     @GetMapping("/claim/{claimId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT', 'CUSTOMER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INTERNAL_STAFF', 'CUSTOMER')")
     @Operation(summary = "Get History By Claim ID", description = "Retrieves a paginated chronological log of all status transitions for a specific claim record")
     public ResponseEntity<PaginatedResponseDTO<ClaimStatusHistoryResponseDTO>>
     getHistoryByClaim(
@@ -47,7 +47,7 @@ public class ClaimStatusHistoryController {
     }
 
     @GetMapping("/user/{userId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INTERNAL_STAFF')")
     @Operation(summary = "Get History By User ID", description = "Retrieves workflow execution audits indicating changes initiated by an internal user account mapping")
     public ResponseEntity<PaginatedResponseDTO<ClaimStatusHistoryResponseDTO>>
     getHistoryByUser(
@@ -67,7 +67,7 @@ public class ClaimStatusHistoryController {
     }
 
     @GetMapping("/status/{status}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INTERNAL_STAFF')")
     @Operation(summary = "Get History By Claim Status", description = "Filters target lifecycle logs containing matched transactional states")
     public ResponseEntity<PaginatedResponseDTO<ClaimStatusHistoryResponseDTO>>
     getHistoryByStatus(
@@ -87,7 +87,7 @@ public class ClaimStatusHistoryController {
     }
 
     @GetMapping("/filter")
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INTERNAL_STAFF')")
     @Operation(summary = "Filter History By Multiple Matrix Coordinates", description = "Runs explicit correlation lookups matching a target profile identifier, case context, and structural tracking state")
     public ResponseEntity<PaginatedResponseDTO<ClaimStatusHistoryResponseDTO>>
     getHistoryByClaimUserAndStatus(

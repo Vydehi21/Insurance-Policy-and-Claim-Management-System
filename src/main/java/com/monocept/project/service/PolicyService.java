@@ -4,14 +4,14 @@ import com.monocept.project.dto.CustomerPolicyPurchaseRequestDTO;
 
 import org.jspecify.annotations.Nullable;
 
-import com.monocept.project.dto.AgentPolicyIssueRequestDTO;
+import com.monocept.project.dto.InternalStaffPolicyIssueRequestDTO;
 import com.monocept.project.dto.PolicyResponseDTO;
 import com.monocept.project.dto.PaginatedResponseDTO;
 import com.monocept.project.enums.PolicyStatus;
 
 public interface PolicyService {
     PolicyResponseDTO purchasePolicy(Long authenticatedUserId, CustomerPolicyPurchaseRequestDTO purchaseDTO);
-    PolicyResponseDTO issuePolicy(AgentPolicyIssueRequestDTO issueDTO);
+    PolicyResponseDTO issuePolicy(InternalStaffPolicyIssueRequestDTO issueDTO);
     PolicyResponseDTO getPolicyById(Long policyId, Long requesterUserId, String requesterRole);
     PolicyResponseDTO getPolicyByNumber(String policyNumber, Long requesterUserId, String requesterRole);
     PaginatedResponseDTO<PolicyResponseDTO> getAllPolicies(int page, int size, String sortBy, String direction);
@@ -27,7 +27,7 @@ public interface PolicyService {
             String direction
     );
     void cancelPolicy(Long policyId);
-    PaginatedResponseDTO<PolicyResponseDTO> getAgentPolicies(
+    PaginatedResponseDTO<PolicyResponseDTO> getInternalStaffPolicies(
             int page,
             int size,
             String sortBy,

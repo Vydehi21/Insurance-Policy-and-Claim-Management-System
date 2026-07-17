@@ -1,6 +1,11 @@
 package com.monocept.project.service;
 
 import java.math.BigDecimal;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.time.LocalDate;
 
 import java.util.ArrayList;
@@ -8,6 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -64,6 +70,11 @@ public class ClaimServiceImpl implements ClaimService {
 	private final ClaimStatusHistoryRepository claimStatusHistoryRepository;
 	private final ModelMapper modelMapper;
 
+	@Value("${cloudinary.cloud-name}")
+	private String cloudinaryCloudName;
+
+	private static final String CLOUDINARY_HOST = "res.cloudinary.com";
+
 	private String generateClaimNumber() {
 		return "CLM-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
 	}
@@ -109,6 +120,72 @@ public class ClaimServiceImpl implements ClaimService {
 		return documents;
 	}
 
+	/**
+	 * Ensures every supporting document attached to a claim is a real,
+	 * reachable file hosted on this project's Cloudinary account, not just
+	 * an arbitrary string typed into the request body.
+	 */
+	private void validateSupportingDocuments(List<ClaimDocumentDTO> documentDTOs) {
+
+		if (documentDTOs == null || documentDTOs.isEmpty()) {
+			throw new InvalidRequestException(
+					"At least one supporting document must be submitted to raise a claim");
+		}
+
+		for (ClaimDocumentDTO documentDTO : documentDTOs) {
+			validateDocumentReference(documentDTO.getDocumentReference());
+		}
+	}
+
+	private void validateDocumentReference(String documentReference) {
+
+		URI uri;
+
+		try {
+			uri = URI.create(documentReference);
+		} catch (Exception e) {
+			throw new InvalidRequestException("Supporting document reference is not a valid URL");
+		}
+
+		// STEP 1: Domain allowlist check. Blocks made-up links, and also
+		// stops the server from being tricked into calling an arbitrary
+		// attacker-controlled host in step 2 (SSRF guard).
+		boolean isTrustedCloudinaryUrl = "https".equalsIgnoreCase(uri.getScheme()) && uri.getHost() != null
+				&& uri.getHost().equalsIgnoreCase(CLOUDINARY_HOST) && uri.getPath() != null
+				&& uri.getPath().startsWith("/" + cloudinaryCloudName + "/");
+
+		if (!isTrustedCloudinaryUrl) {
+			log.warn("Rejected claim document with untrusted or malformed reference: {}", documentReference);
+			throw new InvalidRequestException(
+					"Supporting document must be a valid file uploaded via /api/files/upload");
+		}
+
+		// STEP 2: Live reachability check. Confirms the file actually exists
+		// at Cloudinary instead of just looking like a plausible URL.
+		try {
+			HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
+
+			HttpRequest request = HttpRequest.newBuilder().uri(uri).timeout(Duration.ofSeconds(5))
+					.method("HEAD", HttpRequest.BodyPublishers.noBody()).build();
+
+			HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
+
+			if (response.statusCode() != 200) {
+				log.warn("Document verification failed. URL {} returned status {}", documentReference,
+						response.statusCode());
+				throw new InvalidRequestException(
+						"Supporting document could not be verified (file not found at the provided URL). Please re-upload and try again.");
+			}
+
+		} catch (InvalidRequestException e) {
+			throw e;
+		} catch (Exception e) {
+			log.error("Error while verifying supporting document reference {}", documentReference, e);
+			throw new InvalidRequestException(
+					"Unable to verify supporting document right now. Please check the file and try again.");
+		}
+	}
+
 	private User getUser(Long userId) {
 
 		return userRepository.findById(userId)
@@ -135,38 +212,38 @@ public class ClaimServiceImpl implements ClaimService {
 
 	@Override
 	@Transactional
-	public ClaimResponseDTO getClaimDetailsForReview(Long claimId, Long agentUserId) {
-		log.info("Agent user {} is opening claim ID {} for inspection", agentUserId, claimId);
+	public ClaimResponseDTO getClaimDetailsForReview(Long claimId, Long staffUserId) {
+		log.info("Internal staff user {} is opening claim ID {} for inspection", staffUserId, claimId);
 
 		Claim claim = claimRepository.findById(claimId)
 				.orElseThrow(() -> new ResourceNotFoundException("Claim record not found"));
 
-		User currentAgent = getUser(agentUserId);
+		User currentStaff = getUser(staffUserId);
 
 		// CONCURRENCY LOCK GUARD: If already under review, verify if the active
-		// agent holds the lock
+		// staff member holds the lock
 		if (claim.getClaimStatus() == ClaimStatus.UNDER_REVIEW && claim.getReviewedBy() != null
-				&& !claim.getReviewedBy().getId().equals(agentUserId)) {
+				&& !claim.getReviewedBy().getId().equals(staffUserId)) {
 
-			log.warn("Collision prevented: Agent {} blocked from accessing claim {} locked by Agent {}", agentUserId,
+			log.warn("Collision prevented: Internal staff {} blocked from accessing claim {} locked by internal staff {}", staffUserId,
 					claimId, claim.getReviewedBy().getFullName());
 			throw new BusinessRuleException(
 					"Access Denied. This claim file is currently locked and being processed by: "
 							+ claim.getReviewedBy().getFullName());
 		}
 
-		//  LOCK ACQUISITION: If the claim is brand new, lock it to this agent
+		//  LOCK ACQUISITION: If the claim is brand new, lock it to this staff member
 		// instantly upon opening
 		if (claim.getClaimStatus() == ClaimStatus.SUBMITTED) {
 			ClaimStatus previousStatus = claim.getClaimStatus();
 			claim.setClaimStatus(ClaimStatus.UNDER_REVIEW);
-			claim.setReviewedBy(currentAgent);
+			claim.setReviewedBy(currentStaff);
 			claim = claimRepository.save(claim);
 
-			createHistory(claim, previousStatus, ClaimStatus.UNDER_REVIEW, "Claim locked for inspection by agent.",
-					currentAgent);
-			log.info("Claim {} successfully locked under active review by agent {}", claim.getClaimNumber(),
-					agentUserId);
+			createHistory(claim, previousStatus, ClaimStatus.UNDER_REVIEW, "Claim locked for inspection by internal staff.",
+					currentStaff);
+			log.info("Claim {} successfully locked under active review by internal staff {}", claim.getClaimNumber(),
+					staffUserId);
 		}
 
 		return convertToResponseDTO(claim);
@@ -186,9 +263,33 @@ public class ClaimServiceImpl implements ClaimService {
 			throw new AuthorizationException("You cannot claim another customer's policy");
 		}
 
+		// Checked first and explicitly: a policy must be ACTIVE (i.e. required
+		// premium already paid in full) before any claim can be raised against it.
+		// This blocks PENDING_PAYMENT, EXPIRED, and CANCELLED policies alike.
+		log.info("Policy {} current status at claim submission time: {}", policy.getPolicyNumber(),
+				policy.getPolicyStatus());
+
+		if (policy.getPolicyStatus() != PolicyStatus.ACTIVE) {
+			log.warn("Business rule violation. Claim attempted on non-active policy: {} (status: {})",
+					policy.getPolicyNumber(), policy.getPolicyStatus());
+			throw new BusinessRuleException(
+					"Claim can only be raised for active policies. This policy is currently: "
+							+ policy.getPolicyStatus());
+		}
+
 		if (policy.getEndDate().isBefore(LocalDate.now())) {
 			log.warn("Business rule violation. Claim attempted on expired policy: {}", policy.getPolicyNumber());
 			throw new BusinessRuleException("Policy has expired");
+		}
+
+		// NEW: policyStatus == ACTIVE only reflects that payment has been made — it says
+		// nothing about whether the coverage window has actually opened yet. Block claims
+		// raised before the policy's own start date.
+		if (policy.getStartDate().isAfter(LocalDate.now())) {
+			log.warn("Business rule violation. Claim attempted before policy coverage start date: {} (starts: {})",
+					policy.getPolicyNumber(), policy.getStartDate());
+			throw new BusinessRuleException(
+					"This policy's coverage has not started yet. Coverage begins on: " + policy.getStartDate());
 		}
 
 		if (dto.getIncidentDate().isAfter(LocalDate.now())) {
@@ -196,12 +297,13 @@ public class ClaimServiceImpl implements ClaimService {
 			throw new BusinessRuleException("Incident date cannot be in future");
 		}
 
-		
-
-		if (policy.getPolicyStatus() != PolicyStatus.ACTIVE) {
-			log.warn("Business rule violation. Claim attempted on non-active policy: {} (status: {})",
-					policy.getPolicyNumber(), policy.getPolicyStatus());
-			throw new BusinessRuleException("Claim can only be raised for active policies");
+		// NEW: the incident itself must fall within the coverage window — otherwise a
+		// customer could claim for something that happened before the policy even existed.
+		if (dto.getIncidentDate().isBefore(policy.getStartDate())) {
+			log.warn("Business rule violation. Incident date {} predates policy coverage start {} for policy: {}",
+					dto.getIncidentDate(), policy.getStartDate(), policy.getPolicyNumber());
+			throw new BusinessRuleException(
+					"Incident date cannot be before the policy's coverage start date: " + policy.getStartDate());
 		}
 
 		BigDecimal approvedClaims = claimRepository.getApprovedClaimAmount(policy.getId());
@@ -220,14 +322,21 @@ public class ClaimServiceImpl implements ClaimService {
 			throw new BusinessRuleException("Claim exceeds remaining coverage amount");
 		}
 
+		// Blocks a new claim while any prior claim on this policy is still "in flight" —
+		// i.e. submitted, under agent review, or already recommended one way or the
+		// other but not yet given a final decision by admin. Only APPROVED/REJECTED
+		// (final, closed) claims don't block a new submission.
 		boolean exists = claimRepository.existsByPolicyIdAndClaimStatusIn(policy.getId(),
-				List.of(ClaimStatus.SUBMITTED, ClaimStatus.UNDER_REVIEW));
+				List.of(ClaimStatus.SUBMITTED, ClaimStatus.UNDER_REVIEW,
+						ClaimStatus.RECOMMENDED_APPROVAL, ClaimStatus.RECOMMENDED_REJECTION));
 
 		if (exists) {
 			log.warn("Business rule violation. Duplicate open claim attempted for policy: {}",
 					policy.getPolicyNumber());
 			throw new BusinessRuleException("A claim already exists for this policy");
 		}
+
+		validateSupportingDocuments(dto.getSupportingDocuments());
 
 		Claim claim = new Claim();
 		claim.setClaimNumber(generateClaimNumber());
@@ -255,36 +364,36 @@ public class ClaimServiceImpl implements ClaimService {
 
 	@Override
 	@Transactional
-	public ClaimResponseDTO reviewClaim(Long claimId, Long agentId, ClaimReviewRequestDTO dto) {
-		log.info("Agent user {} is attempting to process a review update for claim ID {}", agentId, claimId);
+	public ClaimResponseDTO reviewClaim(Long claimId, Long staffUserId, ClaimReviewRequestDTO dto) {
+		log.info("Internal staff user {} is attempting to process a review update for claim ID {}", staffUserId, claimId);
 
 		Claim claim = claimRepository.findById(claimId)
 				.orElseThrow(() -> new ResourceNotFoundException("Claim file reference not found"));
 
-		User agent = getUser(agentId);
+		User staffMember = getUser(staffUserId);
 
 		// --- PHASE 1: CONCURRENCY LOCK ENGINE ---
-		// If the claim is brand new, automatically assign it to this agent and set it
+		// If the claim is brand new, automatically assign it to this staff member and set it
 		// to UNDER_REVIEW
 		if (claim.getClaimStatus() == ClaimStatus.SUBMITTED) {
 			ClaimStatus previousStatus = claim.getClaimStatus();
 			claim.setClaimStatus(ClaimStatus.UNDER_REVIEW);
-			claim.setReviewedBy(agent);
+			claim.setReviewedBy(staffMember);
 			claim = claimRepository.save(claim);
 
 			createHistory(claim, previousStatus, ClaimStatus.UNDER_REVIEW,
-					"Claim assigned and locked for agent inspection.", agent);
-			log.info("Claim {} successfully locked under active review by agent {}", claim.getClaimNumber(), agentId);
+					"Claim assigned and locked for internal staff inspection.", staffMember);
+			log.info("Claim {} successfully locked under active review by internal staff {}", claim.getClaimNumber(), staffUserId);
 		}
 
-		// If the claim is already under review, verify that the current agent holds the
+		// If the claim is already under review, verify that the current staff member holds the
 		// active lock
 		else if (claim.getClaimStatus() == ClaimStatus.UNDER_REVIEW) {
-			if (claim.getReviewedBy() != null && !claim.getReviewedBy().getId().equals(agentId)) {
-				log.warn("Collision blocked: Agent {} tried to review claim {} which is locked by Agent {}", agentId,
+			if (claim.getReviewedBy() != null && !claim.getReviewedBy().getId().equals(staffUserId)) {
+				log.warn("Collision blocked: Internal staff {} tried to review claim {} which is locked by internal staff {}", staffUserId,
 						claimId, claim.getReviewedBy().getId());
 				throw new BusinessRuleException(
-						"This claim file is currently locked and being audited by another agent.");
+						"This claim file is currently locked and being audited by another internal staff member.");
 			}
 		}
 
@@ -295,26 +404,26 @@ public class ClaimServiceImpl implements ClaimService {
 		}
 
 		// --- PHASE 2: RECOMMENDATION ENGINE ---
-		// Enforce constraint that agents can only submit a recommendation status
+		// Enforce constraint that internal staff can only submit a recommendation status
 		if (dto.getRecommendedStatus() != ClaimStatus.RECOMMENDED_APPROVAL
 				&& dto.getRecommendedStatus() != ClaimStatus.RECOMMENDED_REJECTION) {
 			throw new InvalidStatusException(
-					"Agents can only submit RECOMMENDED_APPROVAL or RECOMMENDED_REJECTION statuses.");
+					"Internal staff can only submit RECOMMENDED_APPROVAL or RECOMMENDED_REJECTION statuses.");
 		}
 
 		ClaimStatus previousStatus = claim.getClaimStatus();
 
 		// Apply form values and transition the state out of the active review lock
 		claim.setClaimStatus(dto.getRecommendedStatus());
-		claim.setAgentRemarks(dto.getRemarks());
-		claim.setReviewedBy(agent); // Maintains accountability for the final recommendation
+		claim.setInternalStaffRemarks(dto.getRemarks());
+		claim.setReviewedBy(staffMember); // Maintains accountability for the final recommendation
 
 		Claim updatedClaim = claimRepository.save(claim);
 
 		// Log the final recommendation to the status history ledger
-		createHistory(updatedClaim, previousStatus, dto.getRecommendedStatus(), dto.getRemarks(), agent);
+		createHistory(updatedClaim, previousStatus, dto.getRecommendedStatus(), dto.getRemarks(), staffMember);
 
-		log.info("Agent {} successfully submitted recommendation ({}) for claim {}", agentId,
+		log.info("Internal staff {} successfully submitted recommendation ({}) for claim {}", staffUserId,
 				dto.getRecommendedStatus(), updatedClaim.getClaimNumber());
 
 		return convertToResponseDTO(updatedClaim);
@@ -514,7 +623,7 @@ public class ClaimServiceImpl implements ClaimService {
 
 		dto.setClaimStatus(claim.getClaimStatus());
 
-		dto.setAgentRemarks(claim.getAgentRemarks());
+		dto.setInternalStaffRemarks(claim.getInternalStaffRemarks());
 
 		dto.setAdminRemarks(claim.getAdminRemarks());
 
@@ -574,7 +683,7 @@ public class ClaimServiceImpl implements ClaimService {
 			dto.setPastClaimsTimeline(timeline);
 		}
 
-		// REVIEWED BY AGENT
+		// REVIEWED BY INTERNAL STAFF
 		if (claim.getReviewedBy() != null) {
 			dto.setReviewedById(claim.getReviewedBy().getId());
 			dto.setReviewedByName(claim.getReviewedBy().getFullName());
@@ -633,7 +742,7 @@ public class ClaimServiceImpl implements ClaimService {
 	}
 
 	@Override
-	public PaginatedResponseDTO<ClaimResponseDTO> getAgentClaims(int page, int size, String sortBy, String direction) {
+	public PaginatedResponseDTO<ClaimResponseDTO> getInternalStaffClaims(int page, int size, String sortBy, String direction) {
 
 		Pageable pageable = PaginationUtil.buildPageable(page, size, sortBy, direction);
 
@@ -667,7 +776,7 @@ public class ClaimServiceImpl implements ClaimService {
         // 3. Clear the status and release any active agent locks
         claim.setClaimStatus(ClaimStatus.CANCELLED); // or ClaimStatus.WITHDRAWN based on your exact enum
         claim.setReviewedBy(null); // Safely releases any active agent concurrency locks
-        claim.setAgentRemarks("Withdrawn by customer.");
+        claim.setInternalStaffRemarks("Withdrawn by customer.");
 
         Claim savedClaim = claimRepository.save(claim);
 
@@ -683,5 +792,31 @@ public class ClaimServiceImpl implements ClaimService {
         log.info("Claim {} successfully withdrawn and cancelled by customer {}", savedClaim.getClaimNumber(), authenticatedUserId);
     }
 
+
+	@Override
+	@Transactional(readOnly = true)
+	public PaginatedResponseDTO<ClaimResponseDTO> getClaimsPendingAdminDecision(int page, int size, String sortBy, String direction) {
+
+		Pageable pageable = PaginationUtil.buildPageable(page, size, sortBy, direction);
+
+		// CLC-RUL-004 / SRS §7.1: admin's authority is the FINAL decision only, so
+		// the admin claims queue must default-exclude SUBMITTED claims that have
+		// not yet been picked up and reviewed by an internal staff member.
+		// Already-decided claims (APPROVED/REJECTED) are still included so admin
+		// has a full audit trail, but the frontend renders those read-only per
+		// CLM-BR-009 (approved/rejected claims cannot be modified again).
+		Page<Claim> claimPage = claimRepository.findByClaimStatusIn(
+				List.of(
+						ClaimStatus.UNDER_REVIEW,
+						ClaimStatus.RECOMMENDED_APPROVAL,
+						ClaimStatus.RECOMMENDED_REJECTION,
+						ClaimStatus.APPROVED,
+						ClaimStatus.REJECTED),
+				pageable);
+
+		Page<ClaimResponseDTO> dtoPage = claimPage.map(this::convertToResponseDTO);
+
+		return PaginationUtil.createPaginatedResponse(dtoPage, sortBy, direction);
+	}
 
 }

@@ -12,9 +12,12 @@ import com.monocept.project.dto.UserRequestDTO;
 import com.monocept.project.dto.UserResponseDTO;
 import com.monocept.project.dto.UserStatusUpdateRequestDTO;
 import com.monocept.project.enums.Role;
+import com.monocept.project.exception.BusinessRuleException;
 import com.monocept.project.exception.DuplicateResourceException;
 import com.monocept.project.exception.ResourceNotFoundException;
+import com.monocept.project.model.InsuranceProduct;
 import com.monocept.project.model.User;
+import com.monocept.project.repository.InsuranceProductRepository;
 import com.monocept.project.repository.UserRepository;
 import com.monocept.project.util.PaginationUtil;
 
@@ -27,16 +30,17 @@ import lombok.extern.slf4j.Slf4j;
 public class UserServiceImplementation implements UserService {
 
 	private final UserRepository userRepository;
+	private final InsuranceProductRepository insuranceProductRepository;
 	private final ModelMapper modelMapper;
 	private final PasswordEncoder passwordEncoder;
 
 	@Override
 	@Transactional
-	public UserResponseDTO createAgent(UserRequestDTO userRequestDTO) {
-	    log.info("Creating agent with email: {}", userRequestDTO.getEmail());
+	public UserResponseDTO createInternalStaff(UserRequestDTO userRequestDTO) {
+	    log.info("Creating internal staff with email: {}", userRequestDTO.getEmail());
 
 	    if (userRepository.existsByEmail(userRequestDTO.getEmail())) {
-	        log.warn("Agent creation failed. Duplicate email: {}", userRequestDTO.getEmail());
+	        log.warn("Internal Staff creation failed. Duplicate email: {}", userRequestDTO.getEmail());
 	        throw new DuplicateResourceException("Email already exists: " + userRequestDTO.getEmail());
 	    }
 
@@ -44,14 +48,20 @@ public class UserServiceImplementation implements UserService {
 
 	    user.setPassword(passwordEncoder.encode(userRequestDTO.getPassword()));
 
-	    user.setRole(Role.AGENT);
+	    user.setRole(Role.INTERNAL_STAFF);
 	    user.setActiveStatus(true);
+
+	    // §4.4 — optionally scope this internal-staff user to a product at
+	    // creation time (PRD-BR-002: only active products are usable).
+	    if (userRequestDTO.getAssignedProductId() != null) {
+	        user.setAssignedProduct(findActiveProductOrThrow(userRequestDTO.getAssignedProductId()));
+	    }
 
 	    User savedUser = userRepository.save(user);
 
-	    log.info("Agent created successfully with id: {}", savedUser.getId());
+	    log.info("Internal Staff created successfully with id: {}", savedUser.getId());
 
-	    return modelMapper.map(savedUser, UserResponseDTO.class);
+	    return toUserResponseDTO(savedUser);
 	}
 
 	@Override
@@ -61,7 +71,7 @@ public class UserServiceImplementation implements UserService {
 
 		User user = findUserById(userId);
 
-		return modelMapper.map(user, UserResponseDTO.class);
+		return toUserResponseDTO(user);
 	}
 
 	@Override
@@ -74,7 +84,7 @@ public class UserServiceImplementation implements UserService {
 			return new ResourceNotFoundException("User not found with email: " + email);
 		});
 
-		return modelMapper.map(user, UserResponseDTO.class);
+		return toUserResponseDTO(user);
 	}
 
 	@Override
@@ -86,7 +96,7 @@ public class UserServiceImplementation implements UserService {
 
 		Page<User> users = userRepository.findAll(pageable);
 
-		Page<UserResponseDTO> responsePage = users.map(user -> modelMapper.map(user, UserResponseDTO.class));
+		Page<UserResponseDTO> responsePage = users.map(this::toUserResponseDTO);
 
 		return PaginationUtil.createPaginatedResponse(responsePage, sortBy, direction);
 	}
@@ -101,7 +111,7 @@ public class UserServiceImplementation implements UserService {
 
 		Page<User> users = userRepository.findByRole(role, pageable);
 
-		Page<UserResponseDTO> responsePage = users.map(user -> modelMapper.map(user, UserResponseDTO.class));
+		Page<UserResponseDTO> responsePage = users.map(this::toUserResponseDTO);
 
 		return PaginationUtil.createPaginatedResponse(responsePage, sortBy, direction);
 	}
@@ -116,7 +126,7 @@ public class UserServiceImplementation implements UserService {
 
 		Page<User> users = userRepository.findByActiveStatus(activeStatus, pageable);
 
-		Page<UserResponseDTO> responsePage = users.map(user -> modelMapper.map(user, UserResponseDTO.class));
+		Page<UserResponseDTO> responsePage = users.map(this::toUserResponseDTO);
 
 		return PaginationUtil.createPaginatedResponse(responsePage, sortBy, direction);
 	}
@@ -131,7 +141,7 @@ public class UserServiceImplementation implements UserService {
 
 		Page<User> users = userRepository.findByRoleAndActiveStatus(role, activeStatus, pageable);
 
-		Page<UserResponseDTO> responsePage = users.map(user -> modelMapper.map(user, UserResponseDTO.class));
+		Page<UserResponseDTO> responsePage = users.map(this::toUserResponseDTO);
 
 		return PaginationUtil.createPaginatedResponse(responsePage, sortBy, direction);
 	}
@@ -146,7 +156,7 @@ public class UserServiceImplementation implements UserService {
 
 		Page<User> users = userRepository.findByFullNameContainingIgnoreCase(name, pageable);
 
-		Page<UserResponseDTO> responsePage = users.map(user -> modelMapper.map(user, UserResponseDTO.class));
+		Page<UserResponseDTO> responsePage = users.map(this::toUserResponseDTO);
 
 		return PaginationUtil.createPaginatedResponse(responsePage, sortBy, direction);
 	}
@@ -172,7 +182,7 @@ public class UserServiceImplementation implements UserService {
 
 		log.info("User updated successfully id: {}", updatedUser.getId());
 
-		return modelMapper.map(updatedUser, UserResponseDTO.class);
+		return toUserResponseDTO(updatedUser);
 	}
 
 	@Override
@@ -187,9 +197,61 @@ public class UserServiceImplementation implements UserService {
 		User updatedUser = userRepository.save(user);
 		
 		log.info("User status updated successfully. id: {}, activeStatus: {}, remarks: {}",
-				               updatedUser.getId(), updatedUser.getActiveStatus(), statusUpdateDTO.getRemarks());
+			               updatedUser.getId(), updatedUser.getActiveStatus(), statusUpdateDTO.getRemarks());
 
-		return modelMapper.map(updatedUser, UserResponseDTO.class);
+		return toUserResponseDTO(updatedUser);
+	}
+
+	@Override
+	@Transactional
+	public UserResponseDTO assignProductToUser(Long userId, Long productId) {
+		log.info("Assigning product {} to user id: {}", productId, userId);
+
+		User user = findUserById(userId);
+
+		if (user.getRole() != Role.INTERNAL_STAFF) {
+			log.warn("Attempted product assignment on non internal-staff user id: {}", userId);
+			throw new BusinessRuleException("Only internal staff users can be assigned to a product");
+		}
+
+		if (productId == null) {
+			user.setAssignedProduct(null);
+		} else {
+			user.setAssignedProduct(findActiveProductOrThrow(productId));
+		}
+
+		User updatedUser = userRepository.save(user);
+
+		log.info("Product assignment updated for user id: {}, productId: {}", userId, productId);
+
+		return toUserResponseDTO(updatedUser);
+	}
+
+	private InsuranceProduct findActiveProductOrThrow(Long productId) {
+		InsuranceProduct product = insuranceProductRepository.findById(productId)
+				.orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId));
+
+		// PRD-BR-002: only active products should be usable for new assignments.
+		if (!Boolean.TRUE.equals(product.getActiveStatus())) {
+			throw new BusinessRuleException("Cannot assign an inactive product: " + product.getProductName());
+		}
+
+		return product;
+	}
+
+	// Central conversion point for User -> UserResponseDTO so every list/detail
+	// endpoint consistently surfaces the assigned-product fields (§4.4) instead
+	// of each call site needing to remember to do it.
+	private UserResponseDTO toUserResponseDTO(User user) {
+		UserResponseDTO dto = modelMapper.map(user, UserResponseDTO.class);
+
+		InsuranceProduct product = user.getAssignedProduct();
+		if (product != null) {
+			dto.setAssignedProductId(product.getId());
+			dto.setAssignedProductName(product.getProductName());
+		}
+
+		return dto;
 	}
 
 	private User findUserById(Long id) {

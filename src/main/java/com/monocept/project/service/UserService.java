@@ -7,7 +7,7 @@ import com.monocept.project.dto.PaginatedResponseDTO;
 import com.monocept.project.enums.Role;
 
 public interface UserService {
-    UserResponseDTO createAgent(UserRequestDTO userRequestDTO);
+    UserResponseDTO createInternalStaff(UserRequestDTO userRequestDTO);
     UserResponseDTO getUserById(Long userId);
     UserResponseDTO getUserByEmail(String email);
     PaginatedResponseDTO<UserResponseDTO> getAllUsers(int page, int size, String sortBy, String direction);
@@ -17,4 +17,6 @@ public interface UserService {
     PaginatedResponseDTO<UserResponseDTO> searchUsersByName(String name, int page, int size, String sortBy, String direction);
     UserResponseDTO updateUserProfile(Long userId, UserRequestDTO userRequestDTO);
     UserResponseDTO updateUserStatus(Long userId, UserStatusUpdateRequestDTO statusUpdateDTO);
+
+    UserResponseDTO assignProductToUser(Long userId, Long productId);
 }

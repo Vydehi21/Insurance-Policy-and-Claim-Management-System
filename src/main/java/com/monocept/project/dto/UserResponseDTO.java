@@ -20,4 +20,7 @@ public class UserResponseDTO {
     private Role role;
     private Boolean activeStatus;
     private LocalDateTime createdDate;
+
+    private Long assignedProductId;
+    private String assignedProductName;
 }

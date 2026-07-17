@@ -26,7 +26,7 @@ public class ClaimResponseDTO {
     private String claimReason;
     private LocalDate incidentDate;
     private ClaimStatus claimStatus;
-    private String agentRemarks;
+    private String internalStaffRemarks;
     private String adminRemarks;
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;

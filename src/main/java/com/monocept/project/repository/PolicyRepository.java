@@ -1,4 +1,4 @@
-    package com.monocept.project.repository;
+package com.monocept.project.repository;
 
     import com.monocept.project.model.Policy;
     import com.monocept.project.enums.PolicyStatus;
@@ -33,4 +33,8 @@
                 @Param("planId") Long planId);
         
         java.util.List<Policy> findByPolicyStatusAndEndDateBefore(PolicyStatus policyStatus, java.time.LocalDate date);
+
+        // NEW: supports the sweep that lapses policies whose start date passed
+        // without ever being paid (see PolicyServiceImpl.expireOverduePolicies)
+        java.util.List<Policy> findByPolicyStatusAndStartDateBefore(PolicyStatus policyStatus, java.time.LocalDate date);
     }
