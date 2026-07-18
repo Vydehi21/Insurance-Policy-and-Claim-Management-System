@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.monocept.project.dto.PaginatedResponseDTO;
+import com.monocept.project.dto.UpdateStaffRequestDTO;
 import com.monocept.project.dto.UserRequestDTO;
 import com.monocept.project.dto.UserResponseDTO;
 import com.monocept.project.dto.UserStatusUpdateRequestDTO;
@@ -161,29 +162,34 @@ public class UserServiceImplementation implements UserService {
 		return PaginationUtil.createPaginatedResponse(responsePage, sortBy, direction);
 	}
 
-	@Override
 	@Transactional
-	public UserResponseDTO updateUserProfile(Long userId, UserRequestDTO userRequestDTO) {
-		log.info("Updating user profile id: {}", userId);
+	public UserResponseDTO updateInternalStaffProfile(Long userId, UpdateStaffRequestDTO requestDTO) {
+		log.info("Processing internal staff profile modifications for target User ID: {}", userId);
 
+		// 1. Locate target user entity database record row
 		User user = findUserById(userId);
 
-		if (!user.getEmail().equals(userRequestDTO.getEmail())
-				&& userRepository.existsByEmail(userRequestDTO.getEmail())) {
-			log.warn("Duplicate email during update: {}", userRequestDTO.getEmail());
-			throw new DuplicateResourceException("Email already exists");
+		// 2. Prevent database collision overlaps on email changes
+		if (!user.getEmail().equalsIgnoreCase(requestDTO.getEmail().trim())
+				&& userRepository.existsByEmail(requestDTO.getEmail().trim())) {
+			log.warn("Duplicate resource collision blocked during update: {}", requestDTO.getEmail());
+			throw new DuplicateResourceException("This email address is already registered to an active profile.");
 		}
 
-		user.setFullName(userRequestDTO.getFullName());
-		user.setEmail(userRequestDTO.getEmail());
-		user.setMobileNumber(userRequestDTO.getMobileNumber());
+		// 3. Safely apply sanitized data mutations
+		user.setFullName(requestDTO.getFullName().trim());
+		user.setEmail(requestDTO.getEmail().trim().toLowerCase());
+		
+		// 🛠️ FIX: Strips down country formatting safely matching your 10-digit database constraint column
+		String cleanPhoneNumber = requestDTO.getMobileNumber().replace("+91", "").replaceAll("\\D", "").trim();
+		user.setMobileNumber(cleanPhoneNumber);
 
 		User updatedUser = userRepository.save(user);
-
-		log.info("User updated successfully id: {}", updatedUser.getId());
+		log.info("User database configurations updated successfully for ID: {}", updatedUser.getId());
 
 		return toUserResponseDTO(updatedUser);
 	}
+
 
 	@Override
 	@Transactional

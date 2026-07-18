@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.monocept.project.dto.AssignProductRequestDTO;
 import com.monocept.project.dto.PaginatedResponseDTO;
+import com.monocept.project.dto.UpdateStaffRequestDTO;
 import com.monocept.project.dto.UserRequestDTO;
 import com.monocept.project.dto.UserResponseDTO;
 import com.monocept.project.dto.UserStatusUpdateRequestDTO;
@@ -130,18 +131,16 @@ public class UserController {
     }
 
     @PutMapping("/{userId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'INTERNAL_STAFF', 'CUSTOMER')")
-    @Operation(summary = "Update User Profile", description = "Modifies generic core text parameters inside an established profile record layout body")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Update Agent Profile", description = "Modifies agent demographic parameters securely using a dedicated payload model wrapper")
     public ResponseEntity<UserResponseDTO> updateUser(
-            @PathVariable Long userId,
-            @Valid @RequestBody UserRequestDTO userRequestDTO) {
+            @PathVariable("userId") Long userId,
+            @Valid @RequestBody UpdateStaffRequestDTO updateStaffRequestDTO) {
 
-        return ResponseEntity.ok(
-                userService.updateUserProfile(
-                        userId,
-                        userRequestDTO)
-        );
+        // 🛠️ Routes directly to your cleaner, password-free profile update method
+        return ResponseEntity.ok(userService.updateInternalStaffProfile(userId, updateStaffRequestDTO));
     }
+
 
     @PatchMapping("/{userId}/status")
     @PreAuthorize("hasRole('ADMIN')")

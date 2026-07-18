@@ -4,6 +4,7 @@ import com.monocept.project.dto.UserRequestDTO;
 import com.monocept.project.dto.UserResponseDTO;
 import com.monocept.project.dto.UserStatusUpdateRequestDTO;
 import com.monocept.project.dto.PaginatedResponseDTO;
+import com.monocept.project.dto.UpdateStaffRequestDTO;
 import com.monocept.project.enums.Role;
 
 public interface UserService {
@@ -15,7 +16,7 @@ public interface UserService {
     PaginatedResponseDTO<UserResponseDTO> getUsersByStatus(Boolean activeStatus, int page, int size, String sortBy, String direction);
     PaginatedResponseDTO<UserResponseDTO> getUsersByRoleAndStatus(Role role, Boolean activeStatus, int page, int size, String sortBy, String direction);
     PaginatedResponseDTO<UserResponseDTO> searchUsersByName(String name, int page, int size, String sortBy, String direction);
-    UserResponseDTO updateUserProfile(Long userId, UserRequestDTO userRequestDTO);
+    UserResponseDTO updateInternalStaffProfile(Long userId, UpdateStaffRequestDTO requestDTO);
     UserResponseDTO updateUserStatus(Long userId, UserStatusUpdateRequestDTO statusUpdateDTO);
 
     UserResponseDTO assignProductToUser(Long userId, Long productId);
