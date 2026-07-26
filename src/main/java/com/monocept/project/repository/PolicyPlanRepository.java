@@ -18,6 +18,7 @@ public interface PolicyPlanRepository extends JpaRepository<PolicyPlan, Long> {
     Page<PolicyPlan> findByInsuranceProductIdAndActiveStatus(Long productId, Boolean activeStatus, Pageable pageable);
 
     Page<PolicyPlan> findByPlanNameContainingIgnoreCase(String planName, Pageable pageable);
+    Page<PolicyPlan> findByActiveStatusAndPlanNameContainingIgnoreCase(Boolean activeStatus, String planName, Pageable pageable);
 
     Optional<PolicyPlan> findByInsuranceProduct_IdAndPlanNameIgnoreCase(Long productId, String planName);
 

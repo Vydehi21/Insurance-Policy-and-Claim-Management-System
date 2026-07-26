@@ -52,21 +52,30 @@ public class PolicyPlanController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'INTERNAL_STAFF', 'CUSTOMER')")
-    @Operation(summary = "Get All Plans", description = "Returns a paginated list tracking every active and structural plan variant system-wide")
+    @Operation(summary = "Get All Plans", description = "Returns a paginated list tracking every active and structural plan variant system-wide, optionally filtered by name search and/or active status")
     public ResponseEntity<PaginatedResponseDTO<PolicyPlanResponseDTO>> getAllPlans(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Boolean status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdDate") String sortBy,
             @RequestParam(defaultValue = "desc") String direction) {
 
-        return ResponseEntity.ok(
-                planService.getAllPlans(
-                        page,
-                        size,
-                        sortBy,
-                        direction
-                )
-        );
+        PaginatedResponseDTO<PolicyPlanResponseDTO> response;
+
+        boolean hasSearch = search != null && !search.isBlank();
+
+        if (hasSearch && status != null) {
+            response = planService.searchPlansByNameAndStatus(search, status, page, size, sortBy, direction);
+        } else if (hasSearch) {
+            response = planService.searchPlansByName(search, page, size, sortBy, direction);
+        } else if (status != null) {
+            response = planService.getPlansByStatus(status, page, size, sortBy, direction);
+        } else {
+            response = planService.getAllPlans(page, size, sortBy, direction);
+        }
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/product/{productId}")

@@ -168,6 +168,23 @@ public class PolicyPlanServiceImplementation implements PolicyPlanService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public PaginatedResponseDTO<PolicyPlanResponseDTO> searchPlansByNameAndStatus(String name, Boolean activeStatus,
+            int page, int size, String sortBy, String direction) {
+        log.info("Searching plans by name: {} and status: {}", name, activeStatus);
+
+        Pageable pageable = PaginationUtil.createPageable(page, size, sortBy, direction);
+
+        Page<PolicyPlan> plans = policyPlanRepository
+                .findByActiveStatusAndPlanNameContainingIgnoreCase(activeStatus, name, pageable);
+
+        Page<PolicyPlanResponseDTO> responsePage = plans
+                .map(plan -> modelMapper.map(plan, PolicyPlanResponseDTO.class));
+
+        return PaginationUtil.createPaginatedResponse(responsePage, sortBy, direction);
+    }
+
+    @Override
     @Transactional
     public PolicyPlanResponseDTO updatePlan(Long planId, PolicyPlanRequestDTO planRequestDTO) {
         log.info("Updating policy plan with id: {}", planId);
