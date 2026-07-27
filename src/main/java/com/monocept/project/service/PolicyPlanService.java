@@ -12,6 +12,7 @@ public interface PolicyPlanService {
     PaginatedResponseDTO<PolicyPlanResponseDTO> getPlansByProductId(Long productId, int page, int size, String sortBy, String direction);
     PaginatedResponseDTO<PolicyPlanResponseDTO> getPlansByProductIdAndStatus(Long productId, Boolean activeStatus, int page, int size, String sortBy, String direction);
     PaginatedResponseDTO<PolicyPlanResponseDTO> searchPlansByName(String name, int page, int size, String sortBy, String direction);
+    PaginatedResponseDTO<PolicyPlanResponseDTO> searchPlansByNameAndStatus(String name, Boolean activeStatus, int page, int size, String sortBy, String direction);
     PolicyPlanResponseDTO updatePlan(Long planId, PolicyPlanRequestDTO planRequestDTO);
     void deactivatePlan(Long planId);
     void activatePlan(Long planId);

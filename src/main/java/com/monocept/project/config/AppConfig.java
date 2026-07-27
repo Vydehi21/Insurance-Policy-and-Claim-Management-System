@@ -8,6 +8,8 @@ import com.monocept.project.model.Claim;
 import com.monocept.project.dto.ClaimResponseDTO;
 import com.monocept.project.dto.CustomerResponseDTO;
 import com.monocept.project.model.Customer;
+import com.monocept.project.model.PolicyPlan;
+import com.monocept.project.dto.PolicyPlanResponseDTO;
 
 @Configuration
 public class AppConfig {
@@ -64,6 +66,19 @@ public class AppConfig {
                             .getPolicyNumber(),
 
                     ClaimResponseDTO::setPolicyNumber
+            );
+        });
+
+        // Needed so the frontend can round-trip productId on plan edits —
+        // PolicyPlanResponseDTO previously only exposed productName/productType,
+        // so the edit form had no way to resend the required productId.
+        mapper.typeMap(PolicyPlan.class, PolicyPlanResponseDTO.class)
+        .addMappings(m -> {
+
+            m.map(
+                    src -> src.getInsuranceProduct().getId(),
+
+                    PolicyPlanResponseDTO::setProductId
             );
         });
 
