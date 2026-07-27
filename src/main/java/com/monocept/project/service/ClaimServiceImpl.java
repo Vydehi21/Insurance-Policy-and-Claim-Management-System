@@ -69,6 +69,7 @@ public class ClaimServiceImpl implements ClaimService {
 	private final ClaimDocumentRepository claimDocumentRepository;
 	private final ClaimStatusHistoryRepository claimStatusHistoryRepository;
 	private final ModelMapper modelMapper;
+	private final EmailService emailService;
 
 	@Value("${cloudinary.cloud-name}")
 	private String cloudinaryCloudName;
@@ -356,6 +357,11 @@ public class ClaimServiceImpl implements ClaimService {
 		User customer = getUser(authenticatedUserId);
 
 		createHistory(savedClaim, ClaimStatus.SUBMITTED, ClaimStatus.SUBMITTED, "Claim submitted", customer);
+		
+		log.info("Customer email: {}", customer.getEmail());
+		log.info("Customer name: {}", customer.getFullName());
+		emailService.sendClaimSubmittedEmail(customer.getEmail(), customer.getFullName(),
+				savedClaim.getClaimNumber(), savedClaim.getClaimAmount());
 
 		log.info("Claim {} submitted successfully", savedClaim.getClaimNumber());
 
@@ -423,6 +429,10 @@ public class ClaimServiceImpl implements ClaimService {
 		// Log the final recommendation to the status history ledger
 		createHistory(updatedClaim, previousStatus, dto.getRecommendedStatus(), dto.getRemarks(), staffMember);
 
+		User claimCustomer = updatedClaim.getPolicy().getCustomer().getUser();
+		emailService.sendClaimReviewedEmail(claimCustomer.getEmail(), claimCustomer.getFullName(),
+				updatedClaim.getClaimNumber(), dto.getRecommendedStatus().name(), dto.getRemarks());
+
 		log.info("Internal staff {} successfully submitted recommendation ({}) for claim {}", staffUserId,
 				dto.getRecommendedStatus(), updatedClaim.getClaimNumber());
 
@@ -477,6 +487,10 @@ public class ClaimServiceImpl implements ClaimService {
 
 		createHistory(updatedClaim, previousStatus, decisionDTO.getFinalDecisionStatus(), decisionDTO.getRemarks(),
 				admin);
+
+		User decisionCustomer = updatedClaim.getPolicy().getCustomer().getUser();
+		emailService.sendClaimDecisionEmail(decisionCustomer.getEmail(), decisionCustomer.getFullName(),
+				updatedClaim.getClaimNumber(), decisionDTO.getFinalDecisionStatus().name(), decisionDTO.getRemarks());
 
 		if (updatedClaim.getClaimStatus() == ClaimStatus.REJECTED) {
 
@@ -788,6 +802,9 @@ public class ClaimServiceImpl implements ClaimService {
             "Claim voluntarily withdrawn by customer.",
             customerUser
         );
+
+        emailService.sendClaimWithdrawnEmail(customerUser.getEmail(), customerUser.getFullName(),
+                savedClaim.getClaimNumber());
 
         log.info("Claim {} successfully withdrawn and cancelled by customer {}", savedClaim.getClaimNumber(), authenticatedUserId);
     }

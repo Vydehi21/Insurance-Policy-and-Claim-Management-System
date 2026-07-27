@@ -45,7 +45,8 @@ public class PolicyServiceImpl implements PolicyService {
 	private final PolicyPlanRepository policyPlanRepository;
 	private final ClaimRepository claimRepository;
 	private final ModelMapper modelMapper;
-
+	private final EmailService emailService;
+	
 	@Override
 	@Transactional
 	public PolicyResponseDTO purchasePolicy(Long authenticatedUserId, CustomerPolicyPurchaseRequestDTO purchaseDTO) {
@@ -104,6 +105,13 @@ public class PolicyServiceImpl implements PolicyService {
 		policy.setPolicyStatus(PolicyStatus.PENDING_PAYMENT);
 
 		Policy savedPolicy = policyRepository.save(policy);
+		emailService.sendPolicyPurchaseEmail(
+		        savedPolicy.getCustomer().getUser().getEmail(),
+		        savedPolicy.getCustomer().getUser().getFullName(),
+		        savedPolicy.getPolicyNumber(),
+		        savedPolicy.getPolicyPlan().getPlanName(),
+		        savedPolicy.getPolicyPlan().getCoverageAmount()
+		);
 
 		log.info("LOG-006 Policy purchased. Policy number: {}", policy.getPolicyNumber());
 

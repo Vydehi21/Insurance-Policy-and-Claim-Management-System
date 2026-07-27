@@ -1,6 +1,7 @@
 package com.monocept.project.service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
@@ -47,6 +48,45 @@ public class PolicyPlanServiceImplementation implements PolicyPlanService {
             throw new BusinessRuleException("Cannot create a plan under an inactive insurance product");
         }
 
+        // 🧮 AUTOMATED PREMIUM CALCULATION ALGORITHM
+        BigDecimal coverage = planRequestDTO.getCoverageAmount();
+        int years = planRequestDTO.getDuration();
+        
+        if (coverage == null || coverage.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BusinessRuleException("Coverage amount must be a positive value greater than zero");
+        }
+        if (coverage.remainder(BigDecimal.valueOf(50000)).compareTo(BigDecimal.ZERO) != 0) {
+            throw new BusinessRuleException("Coverage amount must be in multiples of 50,000");
+        }
+        if (years <= 0) {
+            throw new BusinessRuleException("Plan duration term must be at least 1 year");
+        }
+
+        // Risk-rate compounding adjustments based on duration parameters
+        double baselineRate = 0.05; // 5% base factor for short terms
+        if (years >= 5) baselineRate = 0.042; // 4.2% factor for mid-length terms
+        if (years >= 10) baselineRate = 0.035; // 3.5% factor for long-term investments
+
+        // Formula: Premium = (Coverage / Years) * (1 + Baseline Rate)
+        double annualBase = coverage.doubleValue() / years;
+        double calculatedAnnualPremium = annualBase * (1.0 + baselineRate);
+
+        // Adjust for Quarterly or Monthly payment intervals if requested in payload enums
+        if (planRequestDTO.getPremiumType() == PremiumType.QUARTERLY) {
+            calculatedAnnualPremium = calculatedAnnualPremium / 4.0;
+        } else if (planRequestDTO.getPremiumType() == PremiumType.MONTHLY) {
+            calculatedAnnualPremium = calculatedAnnualPremium / 12.0;
+        }
+
+        // Round cleanly to 2 decimal places matching financial account currencies
+        BigDecimal automatedPremium = BigDecimal.valueOf(calculatedAnnualPremium)
+                .divide(BigDecimal.valueOf(50000), 0, RoundingMode.HALF_UP)
+                .multiply(BigDecimal.valueOf(50000));
+
+        // 🔒 Server overrides the field request values to prevent data tampering
+        planRequestDTO.setPremiumAmount(automatedPremium);
+
+        // Execute your multi-layered duplicate boundary check validations with the computed amount
         validateCoverageGreaterThanPremium(planRequestDTO.getCoverageAmount(), planRequestDTO.getPremiumAmount());
 
         checkDuplicatePlanName(product.getId(), planRequestDTO.getPlanName(), null);
@@ -55,10 +95,9 @@ public class PolicyPlanServiceImplementation implements PolicyPlanService {
                 planRequestDTO.getDuration(), null);
 
         PolicyPlan plan = new PolicyPlan();
-
         plan.setPlanName(planRequestDTO.getPlanName());
         plan.setCoverageAmount(planRequestDTO.getCoverageAmount());
-        plan.setPremiumAmount(planRequestDTO.getPremiumAmount());
+        plan.setPremiumAmount(planRequestDTO.getPremiumAmount()); // Injects automated premium
         plan.setPremiumType(planRequestDTO.getPremiumType());
         plan.setDuration(planRequestDTO.getDuration());
         plan.setTermsAndConditions(planRequestDTO.getTermsAndConditions());
@@ -66,11 +105,11 @@ public class PolicyPlanServiceImplementation implements PolicyPlanService {
         plan.setInsuranceProduct(product);
 
         PolicyPlan savedPlan = policyPlanRepository.save(plan);
-
         log.info("Policy plan created successfully id: {}", savedPlan.getId());
 
         return modelMapper.map(savedPlan, PolicyPlanResponseDTO.class);
     }
+
 
     @Override
     @Transactional(readOnly = true)
@@ -170,6 +209,7 @@ public class PolicyPlanServiceImplementation implements PolicyPlanService {
     @Override
     @Transactional
     public PolicyPlanResponseDTO updatePlan(Long planId, PolicyPlanRequestDTO planRequestDTO) {
+
         log.info("Updating policy plan with id: {}", planId);
 
         PolicyPlan plan = findPlanById(planId);
@@ -181,12 +221,58 @@ public class PolicyPlanServiceImplementation implements PolicyPlanService {
             throw new BusinessRuleException("Cannot assign a plan to an inactive insurance product");
         }
 
-        validateCoverageGreaterThanPremium(planRequestDTO.getCoverageAmount(), planRequestDTO.getPremiumAmount());
+        // 🧮 Recalculate premium automatically
+        BigDecimal coverage = planRequestDTO.getCoverageAmount();
+        int years = planRequestDTO.getDuration();
+
+        if (coverage == null || coverage.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BusinessRuleException("Coverage amount must be a positive value greater than zero");
+        }
+        
+        if (coverage.remainder(BigDecimal.valueOf(50000)).compareTo(BigDecimal.ZERO) != 0) {
+            throw new BusinessRuleException("Coverage amount must be in multiples of 50,000");
+        }
+
+        if (years <= 0) {
+            throw new BusinessRuleException("Plan duration term must be at least 1 year");
+        }
+
+        double baselineRate = 0.05;
+
+        if (years >= 5)
+            baselineRate = 0.042;
+
+        if (years >= 10)
+            baselineRate = 0.035;
+
+        double annualBase = coverage.doubleValue() / years;
+        double calculatedAnnualPremium = annualBase * (1.0 + baselineRate);
+
+        if (planRequestDTO.getPremiumType() == PremiumType.QUARTERLY) {
+            calculatedAnnualPremium /= 4.0;
+        } else if (planRequestDTO.getPremiumType() == PremiumType.MONTHLY) {
+            calculatedAnnualPremium /= 12.0;
+        }
+
+        BigDecimal automatedPremium = BigDecimal.valueOf(calculatedAnnualPremium)
+                .divide(BigDecimal.valueOf(50000), 0, RoundingMode.HALF_UP)
+                .multiply(BigDecimal.valueOf(50000));
+        // Ignore premium sent from frontend
+        planRequestDTO.setPremiumAmount(automatedPremium);
+
+        validateCoverageGreaterThanPremium(
+                planRequestDTO.getCoverageAmount(),
+                planRequestDTO.getPremiumAmount());
 
         checkDuplicatePlanName(product.getId(), planRequestDTO.getPlanName(), planId);
-        checkDuplicatePlanTerms(product.getId(), planRequestDTO.getCoverageAmount(),
-                planRequestDTO.getPremiumAmount(), planRequestDTO.getPremiumType(),
-                planRequestDTO.getDuration(), planId);
+
+        checkDuplicatePlanTerms(
+                product.getId(),
+                planRequestDTO.getCoverageAmount(),
+                planRequestDTO.getPremiumAmount(),
+                planRequestDTO.getPremiumType(),
+                planRequestDTO.getDuration(),
+                planId);
 
         plan.setPlanName(planRequestDTO.getPlanName());
         plan.setCoverageAmount(planRequestDTO.getCoverageAmount());

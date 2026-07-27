@@ -40,6 +40,7 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
     private final PremiumPaymentRepository premiumPaymentRepository;
     private final PolicyRepository policyRepository;
     private final CustomerRepository customerRepository;
+    private final EmailService emailService;
 
     @Override
     @Transactional
@@ -160,6 +161,13 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
         }
 
         policyRepository.save(policy);
+        
+        emailService.sendPremiumPaymentEmail(
+                policy.getCustomer().getUser().getEmail(),
+                policy.getCustomer().getUser().getFullName(),
+                policy.getPolicyNumber(),
+                paidAmount
+        );
 
         return mapToResponse(savedPayment);
     }

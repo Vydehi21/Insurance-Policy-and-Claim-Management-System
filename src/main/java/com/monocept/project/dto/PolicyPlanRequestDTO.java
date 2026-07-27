@@ -7,6 +7,7 @@ import com.monocept.project.util.TextNormalizationUtil;
 
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -34,11 +35,13 @@ public class PolicyPlanRequestDTO {
     @NotNull(message = "Coverage amount is required")
     @DecimalMin(value = "1.0", message = "Coverage amount must be greater than zero")
     @DecimalMax(value = "999999999.99", message = "Coverage amount is unrealistically high")
+    @Digits(integer = 10, fraction = 0, message = "Coverage amount must be a whole number (no decimals)")
     private BigDecimal coverageAmount;
 
     @NotNull(message = "Premium amount is required")
     @DecimalMin(value = "1.0", message = "Premium amount must be greater than zero")
     @DecimalMax(value = "999999999.99", message = "Premium amount is unrealistically high")
+    @Digits(integer = 10, fraction = 0, message = "Premium amount must be a whole number (no decimals)")
     private BigDecimal premiumAmount;
 
     @NotNull(message = "Premium type is required")

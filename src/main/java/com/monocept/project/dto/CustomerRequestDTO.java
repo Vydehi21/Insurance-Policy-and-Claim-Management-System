@@ -13,17 +13,17 @@ import lombok.*;
 @AllArgsConstructor
 public class CustomerRequestDTO {
 
-    @NotBlank(message = "Full name is required")
+ //   @NotBlank(message = "Full name is required")
     @Size(min = 3, max = 100, message = "Name must be between 3 and 100 characters")
     @Pattern(regexp = "^[A-Za-z ]+$", message = "Name should contain only alphabets")
     private String fullName;
 
     @Email(message = "Invalid email format")
-    @NotBlank(message = "Email is required")
+ //   @NotBlank(message = "Email is required")
     @Size(max = 100, message = "Email must not exceed 100 characters")
     private String email;
 
-    @NotBlank(message = "Mobile number is required")
+ //   @NotBlank(message = "Mobile number is required")
     @Pattern(regexp = "^[6-9][0-9]{9}$", message = "Mobile number must be a valid 10 digit Indian number")
     private String mobileNumber;
 

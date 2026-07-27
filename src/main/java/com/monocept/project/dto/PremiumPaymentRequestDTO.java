@@ -6,6 +6,7 @@ import com.monocept.project.enums.PaymentMode;
 import com.monocept.project.enums.PaymentStatus;
 
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -26,6 +27,7 @@ public class PremiumPaymentRequestDTO {
 
     @NotNull(message = "Amount is required")
     @DecimalMin(value = "1.0")
+    @Digits(integer = 10, fraction = 0, message = "Amount must be a whole number (no decimals)")
     private BigDecimal amount;
 
     @NotNull(message = "Payment mode is required")

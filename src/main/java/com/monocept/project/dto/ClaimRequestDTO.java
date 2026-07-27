@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
@@ -27,6 +28,7 @@ public class ClaimRequestDTO {
 
     @NotNull(message = "Claim amount is required")
     @DecimalMin(value = "1.0", message = "Claim amount must be greater than zero")
+    @Digits(integer = 10, fraction = 0, message = "Claim amount must be a whole number (no decimals)")
     private BigDecimal claimAmount;
 
     @NotBlank(message = "Claim reason is required")
