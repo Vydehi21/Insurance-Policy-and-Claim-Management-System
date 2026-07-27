@@ -17,6 +17,7 @@ import lombok.Setter;
 public class PolicyPlanResponseDTO {
 
     private Long planId;
+    private Long productId;
     private String productName;
     private ProductType productType;
     private String planName;
