@@ -25,11 +25,16 @@ public interface PolicyPlanRepository extends JpaRepository<PolicyPlan, Long> {
     Optional<PolicyPlan> findByInsuranceProduct_IdAndPlanNameIgnoreCaseAndIdNot(
             Long productId, String planName, Long id);
 
-    Optional<PolicyPlan> findByInsuranceProduct_IdAndCoverageAmountAndPremiumAmountAndPremiumTypeAndDuration(
-            Long productId, BigDecimal coverageAmount, BigDecimal premiumAmount,
+    // Duplicate-terms check: two plans under the same product with an
+    // identical coverage range, rate, discounts, frequency, and duration
+    // are effectively the same plan.
+    Optional<PolicyPlan> findByInsuranceProduct_IdAndMinCoverageAmountAndMaxCoverageAmountAndRatePerUnitAndAnnualDiscountPercentAndOneTimeDiscountPercentAndPremiumTypeAndDuration(
+            Long productId, BigDecimal minCoverageAmount, BigDecimal maxCoverageAmount, BigDecimal ratePerUnit,
+            BigDecimal annualDiscountPercent, BigDecimal oneTimeDiscountPercent,
             PremiumType premiumType, Integer duration);
 
-    Optional<PolicyPlan> findByInsuranceProduct_IdAndCoverageAmountAndPremiumAmountAndPremiumTypeAndDurationAndIdNot(
-            Long productId, BigDecimal coverageAmount, BigDecimal premiumAmount,
+    Optional<PolicyPlan> findByInsuranceProduct_IdAndMinCoverageAmountAndMaxCoverageAmountAndRatePerUnitAndAnnualDiscountPercentAndOneTimeDiscountPercentAndPremiumTypeAndDurationAndIdNot(
+            Long productId, BigDecimal minCoverageAmount, BigDecimal maxCoverageAmount, BigDecimal ratePerUnit,
+            BigDecimal annualDiscountPercent, BigDecimal oneTimeDiscountPercent,
             PremiumType premiumType, Integer duration, Long id);
 }

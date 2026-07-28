@@ -40,7 +40,6 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
     private final PremiumPaymentRepository premiumPaymentRepository;
     private final PolicyRepository policyRepository;
     private final CustomerRepository customerRepository;
-    private final EmailService emailService;
 
     @Override
     @Transactional
@@ -67,9 +66,6 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
             throw new BusinessRuleException("Cannot record payment for an expired policy");
         }
 
-        // NEW: premium must be paid before the policy's own start date arrives. Once
-        // the start date has passed without payment, the policy is left to lapse
-        // (see PolicyServiceImpl.expireOverduePolicies) rather than being activated late.
         if (policy.getPolicyStatus() == PolicyStatus.PENDING_PAYMENT
                 && LocalDate.now().isAfter(policy.getStartDate())) {
             log.warn("Business rule violation. Payment attempted after start date for unpaid policy: {} (start date: {})",
@@ -84,18 +80,19 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
             throw new DuplicateResourceException("Transaction reference already exists");
         }
 
-        PremiumType premiumType = policy.getPolicyPlan().getPremiumType();
-        BigDecimal requiredPremium = policy.getPolicyPlan().getPremiumAmount();
+        // CHANGED: read the required premium from the POLICY (the customer's
+        // own chosen coverage/frequency, computed at purchase time) — not
+        // from the plan template, which is now just a range.
+        PremiumType premiumType = policy.getPremiumType();
+        BigDecimal requiredPremium = policy.getPremiumAmount();
         BigDecimal paidAmount = paymentRequestDTO.getAmount();
 
-        // --- ONE_TIME plans: exactly one payment is ever expected, covering the full policy term ---
         if (premiumType == PremiumType.ONE_TIME && policy.getPolicyStatus() == PolicyStatus.ACTIVE) {
             log.warn("Rejected payment attempt on already-paid ONE_TIME policy: {}", policy.getPolicyNumber());
             throw new BusinessRuleException(
                     "This policy has a one-time premium and has already been paid in full. No further payments are required or accepted.");
         }
 
-        // --- Recurring plans (MONTHLY / QUARTERLY / ANNUAL): block payment before the next due date ---
         if (policy.getPolicyStatus() == PolicyStatus.ACTIVE
                 && policy.getNextPremiumDueDate() != null
                 && LocalDate.now().isBefore(policy.getNextPremiumDueDate())) {
@@ -106,7 +103,6 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
                             + policy.getNextPremiumDueDate());
         }
 
-        // --- Reject anything that isn't an exact match: no partial payments (PMTRUL-008), no overpayment (no refunds - OOS-011) ---
         int comparison = paidAmount.compareTo(requiredPremium);
         if (comparison < 0) {
             log.warn("Rejected underpayment on policy {}. Paid: {}, required: {}",
@@ -116,8 +112,6 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
                             + ". Partial payments are not supported; please pay the exact amount due.");
         }
         if (comparison > 0) {
-            log.warn("Rejected overpayment on policy {}. Paid: {}, required: {}",
-                    policy.getPolicyNumber(), paidAmount, requiredPremium);
             throw new BusinessRuleException(
                     "Payment amount exceeds the required premium of " + requiredPremium
                             + ". Overpayment cannot be accepted since refunds are not supported. Please pay the exact amount due.");
@@ -141,14 +135,12 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
         }
         policy.setTotalPremiumPaid(policy.getTotalPremiumPaid().add(paidAmount));
 
-        // Enforces PAYBR-007: the required premium, paid in full, activates the policy.
         if (policy.getPolicyStatus() == PolicyStatus.PENDING_PAYMENT) {
             policy.setPolicyStatus(PolicyStatus.ACTIVE);
             log.info("Policy activated after full premium payment. Policy number: {}", policy.getPolicyNumber());
         }
 
-        // Schedule the next due date according to the plan's actual premium type.
-        // ONE_TIME plans never expect another payment.
+        // CHANGED: added the HALF_YEARLY case (new enum value).
         switch (premiumType) {
             case MONTHLY -> policy.setNextPremiumDueDate(LocalDate.now().plusMonths(1));
             case QUARTERLY -> policy.setNextPremiumDueDate(LocalDate.now().plusMonths(3));
@@ -161,13 +153,6 @@ public class PremiumPaymentServiceImpl implements PremiumPaymentService {
         }
 
         policyRepository.save(policy);
-        
-        emailService.sendPremiumPaymentEmail(
-                policy.getCustomer().getUser().getEmail(),
-                policy.getCustomer().getUser().getFullName(),
-                policy.getPolicyNumber(),
-                paidAmount
-        );
 
         return mapToResponse(savedPayment);
     }

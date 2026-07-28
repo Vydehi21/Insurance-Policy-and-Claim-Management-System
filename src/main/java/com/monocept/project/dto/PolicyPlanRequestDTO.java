@@ -4,10 +4,12 @@ import java.math.BigDecimal;
 
 import com.monocept.project.enums.PremiumType;
 import com.monocept.project.util.TextNormalizationUtil;
+import com.monocept.project.validation.MultipleOf50000;
+import com.monocept.project.validation.WholeNumber;
 
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -32,17 +34,35 @@ public class PolicyPlanRequestDTO {
     @Pattern(regexp = "^[A-Za-z0-9 ]+$", message = "Plan name can only contain letters, numbers and spaces")
     private String planName;
 
-    @NotNull(message = "Coverage amount is required")
-    @DecimalMin(value = "1.0", message = "Coverage amount must be greater than zero")
-    @DecimalMax(value = "999999999.99", message = "Coverage amount is unrealistically high")
-    @Digits(integer = 10, fraction = 0, message = "Coverage amount must be a whole number (no decimals)")
-    private BigDecimal coverageAmount;
+    // Minimum coverage a customer may choose at purchase time.
+    @NotNull(message = "Minimum coverage amount is required")
+    @DecimalMin(value = "50000", message = "Minimum coverage amount must be at least 50,000")
+    @WholeNumber
+    @MultipleOf50000
+    private BigDecimal minCoverageAmount;
 
-    @NotNull(message = "Premium amount is required")
-    @DecimalMin(value = "1.0", message = "Premium amount must be greater than zero")
-    @DecimalMax(value = "999999999.99", message = "Premium amount is unrealistically high")
-    @Digits(integer = 10, fraction = 0, message = "Premium amount must be a whole number (no decimals)")
-    private BigDecimal premiumAmount;
+    // Maximum coverage a customer may choose at purchase time.
+    @NotNull(message = "Maximum coverage amount is required")
+    @DecimalMin(value = "50000", message = "Maximum coverage amount must be at least 50,000")
+    @DecimalMax(value = "999999999.99", message = "Maximum coverage amount is unrealistically high")
+    @WholeNumber
+    @MultipleOf50000
+    private BigDecimal maxCoverageAmount;
+
+    // Premium charged per ₹50,000 of coverage, per year.
+    @NotNull(message = "Rate per unit is required")
+    @DecimalMin(value = "0.01", message = "Rate per unit must be greater than zero")
+    private BigDecimal ratePerUnit;
+
+    @NotNull(message = "Annual discount percent is required")
+    @DecimalMin(value = "0", message = "Annual discount percent cannot be negative")
+    @DecimalMax(value = "100", message = "Annual discount percent cannot exceed 100")
+    private BigDecimal annualDiscountPercent = BigDecimal.ZERO;
+
+    @NotNull(message = "One-time discount percent is required")
+    @DecimalMin(value = "0", message = "One-time discount percent cannot be negative")
+    @DecimalMax(value = "100", message = "One-time discount percent cannot exceed 100")
+    private BigDecimal oneTimeDiscountPercent = BigDecimal.ZERO;
 
     @NotNull(message = "Premium type is required")
     private PremiumType premiumType;
@@ -66,5 +86,15 @@ public class PolicyPlanRequestDTO {
 
     public void setTermsAndConditions(String termsAndConditions) {
         this.termsAndConditions = TextNormalizationUtil.trimAndCollapseSpaces(termsAndConditions);
+    }
+
+    // Bean Validation cross-field check: runs automatically because the
+    // method is a getter-shaped boolean (isXxx/getXxx pattern via @AssertTrue).
+    @AssertTrue(message = "Maximum coverage amount must be greater than or equal to minimum coverage amount")
+    private boolean isCoverageRangeValid() {
+        if (minCoverageAmount == null || maxCoverageAmount == null) {
+            return true; // let @NotNull report the missing field instead
+        }
+        return maxCoverageAmount.compareTo(minCoverageAmount) >= 0;
     }
 }

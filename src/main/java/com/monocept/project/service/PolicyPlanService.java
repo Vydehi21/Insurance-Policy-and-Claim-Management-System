@@ -3,6 +3,8 @@ package com.monocept.project.service;
 import com.monocept.project.dto.PolicyPlanRequestDTO;
 import com.monocept.project.dto.PolicyPlanResponseDTO;
 import com.monocept.project.dto.PaginatedResponseDTO;
+import com.monocept.project.dto.PremiumQuoteRequestDTO;
+import com.monocept.project.dto.PremiumQuoteResponseDTO;
 
 public interface PolicyPlanService {
     PolicyPlanResponseDTO createPlan(PolicyPlanRequestDTO planRequestDTO);
@@ -16,4 +18,5 @@ public interface PolicyPlanService {
     PolicyPlanResponseDTO updatePlan(Long planId, PolicyPlanRequestDTO planRequestDTO);
     void deactivatePlan(Long planId);
     void activatePlan(Long planId);
+    PremiumQuoteResponseDTO getPremiumQuote(Long planId, PremiumQuoteRequestDTO quoteRequestDTO);
 }

@@ -316,9 +316,9 @@ public class ClaimServiceImpl implements ClaimService {
 
 		BigDecimal totalClaimAmount = approvedClaims.add(dto.getClaimAmount());
 
-		if (totalClaimAmount.compareTo(policy.getPolicyPlan().getCoverageAmount()) > 0) {
+		if (totalClaimAmount.compareTo(policy.getCoverageAmount()) > 0) {
 			log.warn("Business rule violation. Claim amount {} (cumulative {}) exceeds coverage {} for policy {}",
-					dto.getClaimAmount(), totalClaimAmount, policy.getPolicyPlan().getCoverageAmount(),
+					dto.getClaimAmount(), totalClaimAmount, policy.getCoverageAmount(),
 					policy.getPolicyNumber());
 			throw new BusinessRuleException("Claim exceeds remaining coverage amount");
 		}
@@ -658,7 +658,7 @@ public class ClaimServiceImpl implements ClaimService {
 			}
 
 			// COVERAGE
-			BigDecimal coverage = policy.getPolicyPlan().getCoverageAmount();
+			BigDecimal coverage = policy.getCoverageAmount();
 
 			dto.setPolicyCoverageAmount(coverage);
 

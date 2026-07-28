@@ -31,13 +31,33 @@ public class PolicyPlan {
 	
 	@Column(nullable = false)
     private String planName;
-	
+
+	// Minimum coverage a customer may choose at purchase time.
 	@Column(nullable = false)
-    private BigDecimal coverageAmount;
-	
+	private BigDecimal minCoverageAmount;
+
+	// Maximum coverage a customer may choose at purchase time.
 	@Column(nullable = false)
-    private BigDecimal premiumAmount;
-	
+	private BigDecimal maxCoverageAmount;
+
+	// Premium charged per ₹50,000 of coverage, per year. This is the
+	// admin-controlled pricing knob — the actual premium a customer pays is
+	// always computed server-side from this rate + their chosen coverage,
+	// never entered directly.
+	@Column(nullable = false)
+	private BigDecimal ratePerUnit;
+
+	// Discount applied when a customer pays ANNUAL (0-100).
+	@Column(nullable = false)
+	private BigDecimal annualDiscountPercent = BigDecimal.ZERO;
+
+	// Discount applied when a customer pays ONE_TIME (0-100).
+	@Column(nullable = false)
+	private BigDecimal oneTimeDiscountPercent = BigDecimal.ZERO;
+
+	// Default/display payment frequency for this plan. No longer
+	// authoritative for pricing — Policy.premiumType (chosen by the
+	// customer) is what actually determines how their premium is computed.
 	@Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PremiumType premiumType;

@@ -21,8 +21,11 @@ public class PolicyPlanResponseDTO {
     private String productName;
     private ProductType productType;
     private String planName;
-    private BigDecimal coverageAmount;
-    private BigDecimal premiumAmount;
+    private BigDecimal minCoverageAmount;
+    private BigDecimal maxCoverageAmount;
+    private BigDecimal ratePerUnit;
+    private BigDecimal annualDiscountPercent;
+    private BigDecimal oneTimeDiscountPercent;
     private PremiumType premiumType;
     private Integer duration;
     private String termsAndConditions;

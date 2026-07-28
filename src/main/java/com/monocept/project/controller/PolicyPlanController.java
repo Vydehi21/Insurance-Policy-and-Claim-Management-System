@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import com.monocept.project.dto.PaginatedResponseDTO;
 import com.monocept.project.dto.PolicyPlanRequestDTO;
 import com.monocept.project.dto.PolicyPlanResponseDTO;
+import com.monocept.project.dto.PremiumQuoteRequestDTO;
+import com.monocept.project.dto.PremiumQuoteResponseDTO;
 import com.monocept.project.service.PolicyPlanService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -136,5 +138,17 @@ public class PolicyPlanController {
         planService.activatePlan(planId);
 
         return ResponseEntity.ok("Policy plan activated successfully");
+    }
+
+    @PostMapping("/{planId}/quote")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INTERNAL_STAFF', 'CUSTOMER')")
+    @Operation(summary = "Quote Premium", description = "Read-only preview of the premium for a given coverage amount and payment frequency under this plan. Server-computed, no side effects.")
+    public ResponseEntity<PremiumQuoteResponseDTO> getPremiumQuote(
+            @PathVariable Long planId,
+            @Valid @RequestBody PremiumQuoteRequestDTO quoteRequestDTO) {
+
+        return ResponseEntity.ok(
+                planService.getPremiumQuote(planId, quoteRequestDTO)
+        );
     }
 }

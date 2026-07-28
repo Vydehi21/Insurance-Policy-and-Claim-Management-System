@@ -19,6 +19,7 @@ import com.monocept.project.dto.CustomerPolicyPurchaseRequestDTO;
 import com.monocept.project.dto.PaginatedResponseDTO;
 import com.monocept.project.dto.PolicyResponseDTO;
 import com.monocept.project.enums.PolicyStatus;
+import com.monocept.project.enums.PremiumType;
 import com.monocept.project.exception.AuthorizationException;
 import com.monocept.project.exception.BusinessRuleException;
 import com.monocept.project.exception.InvalidRequestException;
@@ -44,9 +45,9 @@ public class PolicyServiceImpl implements PolicyService {
 	private final CustomerRepository customerRepository;
 	private final PolicyPlanRepository policyPlanRepository;
 	private final ClaimRepository claimRepository;
+	private final PremiumCalculationService premiumCalculationService;
 	private final ModelMapper modelMapper;
-	private final EmailService emailService;
-	
+
 	@Override
 	@Transactional
 	public PolicyResponseDTO purchasePolicy(Long authenticatedUserId, CustomerPolicyPurchaseRequestDTO purchaseDTO) {
@@ -91,12 +92,22 @@ public class PolicyServiceImpl implements PolicyService {
 			throw new BusinessRuleException("Policy start date must be within 30 days of today.");
 		}
 
+		BigDecimal coverageAmount = purchaseDTO.getCoverageAmount();
+		PremiumType premiumType = purchaseDTO.getPremiumType();
+		validateCoverageWithinPlanBounds(plan, coverageAmount);
+
+		BigDecimal premiumAmount = premiumCalculationService.calculatePremium(plan, coverageAmount, premiumType);
+
 		Policy policy = new Policy();
 
 		policy.setPolicyNumber("POL-" + UUID.randomUUID().toString().substring(0, 8));
 
 		policy.setCustomer(customer);
 		policy.setPolicyPlan(plan);
+
+		policy.setCoverageAmount(coverageAmount);
+		policy.setPremiumType(premiumType);
+		policy.setPremiumAmount(premiumAmount);
 
 		policy.setStartDate(requestedStartDate);
 
@@ -105,13 +116,6 @@ public class PolicyServiceImpl implements PolicyService {
 		policy.setPolicyStatus(PolicyStatus.PENDING_PAYMENT);
 
 		Policy savedPolicy = policyRepository.save(policy);
-		emailService.sendPolicyPurchaseEmail(
-		        savedPolicy.getCustomer().getUser().getEmail(),
-		        savedPolicy.getCustomer().getUser().getFullName(),
-		        savedPolicy.getPolicyNumber(),
-		        savedPolicy.getPolicyPlan().getPlanName(),
-		        savedPolicy.getPolicyPlan().getCoverageAmount()
-		);
 
 		log.info("LOG-006 Policy purchased. Policy number: {}", policy.getPolicyNumber());
 
@@ -134,14 +138,24 @@ public class PolicyServiceImpl implements PolicyService {
 			throw new BusinessRuleException("This plan is no longer available for purchase");
 			}
 
-		// Note: @FutureOrPresent on the DTO already blocks past start dates here;
-		// this adds the matching upper bound so agent/admin issuance follows the
-		// same 30-day window as customer self-purchase.
 		if (issueDTO.getStartDate().isAfter(LocalDate.now().plusDays(30))) {
 			log.warn("Business rule violation. Start date {} is beyond the allowed 30-day issuance window",
 					issueDTO.getStartDate());
 			throw new BusinessRuleException("Policy start date must be within 30 days of today.");
 		}
+
+		// Internal staff may omit coverage/frequency — default to the plan's
+		// max coverage and the plan's own reference premiumType.
+		BigDecimal coverageAmount = issueDTO.getCoverageAmount() != null
+				? issueDTO.getCoverageAmount()
+				: plan.getMaxCoverageAmount();
+		PremiumType premiumType = issueDTO.getPremiumType() != null
+				? issueDTO.getPremiumType()
+				: plan.getPremiumType();
+
+		validateCoverageWithinPlanBounds(plan, coverageAmount);
+
+		BigDecimal premiumAmount = premiumCalculationService.calculatePremium(plan, coverageAmount, premiumType);
 
 		Policy policy = new Policy();
 
@@ -150,6 +164,10 @@ public class PolicyServiceImpl implements PolicyService {
 		policy.setCustomer(customer);
 
 		policy.setPolicyPlan(plan);
+
+		policy.setCoverageAmount(coverageAmount);
+		policy.setPremiumType(premiumType);
+		policy.setPremiumAmount(premiumAmount);
 
 		policy.setStartDate(issueDTO.getStartDate());
 
@@ -272,7 +290,23 @@ public class PolicyServiceImpl implements PolicyService {
 		log.info("Policy cancelled successfully. Policy number: {}", policy.getPolicyNumber());
 	}
 
+	private void validateCoverageWithinPlanBounds(PolicyPlan plan, BigDecimal coverageAmount) {
+		if (coverageAmount == null) {
+			throw new BusinessRuleException("Coverage amount is required");
+		}
 
+		// minCoverageAmount is now a required field on the plan, so no
+		// default-value fallback is needed here anymore.
+		BigDecimal minCoverage = plan.getMinCoverageAmount();
+		BigDecimal maxCoverage = plan.getMaxCoverageAmount();
+
+		if (coverageAmount.compareTo(minCoverage) < 0 || coverageAmount.compareTo(maxCoverage) > 0) {
+			log.warn("Rejected purchase: coverage amount {} outside plan bounds [{}, {}]",
+					coverageAmount, minCoverage, maxCoverage);
+			throw new BusinessRuleException(
+					"Coverage amount must be between " + minCoverage + " and " + maxCoverage + " for this plan");
+		}
+	}
 
 	private PolicyResponseDTO mapToResponse(Policy policy) {
 
@@ -287,11 +321,13 @@ public class PolicyServiceImpl implements PolicyService {
 
 		dto.setProductType(policy.getPolicyPlan().getInsuranceProduct().getProductType());
 
-		dto.setCoverageAmount(policy.getPolicyPlan().getCoverageAmount());
+		// CHANGED: these three now come from the policy (the customer's own
+		// choices at purchase time), not the plan template.
+		dto.setCoverageAmount(policy.getCoverageAmount());
 
-		dto.setPremiumAmount(policy.getPolicyPlan().getPremiumAmount());
+		dto.setPremiumAmount(policy.getPremiumAmount());
 
-		dto.setPremiumType(policy.getPolicyPlan().getPremiumType());
+		dto.setPremiumType(policy.getPremiumType());
 
 		dto.setStartDate(policy.getStartDate());
 		dto.setEndDate(policy.getEndDate());
@@ -300,12 +336,11 @@ public class PolicyServiceImpl implements PolicyService {
 
 		dto.setTotalPremiumPaid(policy.getTotalPremiumPaid());
 
-		// NEW: surfaces how much coverage is left before a claim is even attempted.
 		BigDecimal approvedClaimTotal = claimRepository.getApprovedClaimAmount(policy.getId());
 		if (approvedClaimTotal == null) {
 			approvedClaimTotal = BigDecimal.ZERO;
 		}
-		BigDecimal remainingCoverage = policy.getPolicyPlan().getCoverageAmount().subtract(approvedClaimTotal);
+		BigDecimal remainingCoverage = policy.getCoverageAmount().subtract(approvedClaimTotal);
 		if (remainingCoverage.compareTo(BigDecimal.ZERO) < 0) {
 			remainingCoverage = BigDecimal.ZERO;
 		}
@@ -355,10 +390,6 @@ public class PolicyServiceImpl implements PolicyService {
 	            log.info("Policy expiry sweep completed. {} policies marked EXPIRED", overdue.size());
 	        }
 
-	        // NEW: policies still PENDING_PAYMENT whose start date has already passed
-	        // never got activated and can no longer accept payment (see
-	        // PremiumPaymentServiceImpl.recordPayment) — lapse them instead of leaving
-	        // them stuck in PENDING_PAYMENT forever.
 	        List<Policy> lapsed = policyRepository
 	                .findByPolicyStatusAndStartDateBefore(PolicyStatus.PENDING_PAYMENT, LocalDate.now());
 
@@ -373,7 +404,6 @@ public class PolicyServiceImpl implements PolicyService {
 	    }
 
     private void enforcePolicyOwnership(Policy policy, Long requesterUserId, String requesterRole) {
-        // 🛠Normalise case and prefix variations to prevent evaluation dropouts
         String normalizedRole = requesterRole != null ? requesterRole.toUpperCase() : "";
 
         if (normalizedRole.contains("CUSTOMER")) {
@@ -385,7 +415,6 @@ public class PolicyServiceImpl implements PolicyService {
                 throw new AuthorizationException("You are not authorized to view this policy");
             }
         }
-        // 🛡️ Safe: Admins and Internal Staff pass through automatically without triggering ownership errors
     }
 
 }

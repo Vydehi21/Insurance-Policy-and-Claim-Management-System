@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.monocept.project.enums.PolicyStatus;
+import com.monocept.project.enums.PremiumType;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -36,6 +37,19 @@ public class Policy {
 	@ManyToOne
 	@JoinColumn(name = "plan_id", nullable = false)
 	private PolicyPlan policyPlan;
+
+	// NEW: the customer's own choices at purchase time, and the premium
+	// computed from them. This — not policyPlan.coverageAmount /
+	// policyPlan.premiumAmount — is authoritative for this specific policy.
+	@Column(nullable = false)
+	private BigDecimal coverageAmount;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private PremiumType premiumType;
+
+	@Column(nullable = false)
+	private BigDecimal premiumAmount;
 	
 	@OneToMany(mappedBy = "policy",
 			   cascade = {CascadeType.PERSIST, CascadeType.MERGE})
@@ -58,7 +72,6 @@ public class Policy {
     @Column(nullable = false)
     private BigDecimal totalPremiumPaid = BigDecimal.ZERO;
     
-    // --- ADD THIS NEW FIELD FOR ANNUAL LOCK TRACKING ---
     @Column(name = "next_premium_due_date")
     private LocalDate nextPremiumDueDate;
     

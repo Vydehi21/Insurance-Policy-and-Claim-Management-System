@@ -1,7 +1,6 @@
 package com.monocept.project.dto;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 import com.monocept.project.enums.PremiumType;
 import com.monocept.project.validation.MultipleOf50000;
@@ -13,23 +12,21 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Request body for the read-only premium quote endpoint. planId comes from
+ * the path, so it isn't repeated here — see PolicyPlanController.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CustomerPolicyPurchaseRequestDTO {
-
-    @NotNull(message = "Plan reference is required")
-    private Long planId;
-    
-    @NotNull(message = "Start date is required")
-    private LocalDate startDate;
+public class PremiumQuoteRequestDTO {
 
     @NotNull(message = "Coverage amount is required")
     @WholeNumber
     @MultipleOf50000
     private BigDecimal coverageAmount;
 
-    @NotNull(message = "Payment frequency is required")
+    @NotNull(message = "Premium type is required")
     private PremiumType premiumType;
 }

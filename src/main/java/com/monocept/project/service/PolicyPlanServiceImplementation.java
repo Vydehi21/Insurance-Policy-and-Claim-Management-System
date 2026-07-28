@@ -1,7 +1,6 @@
 package com.monocept.project.service;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
@@ -13,7 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.monocept.project.dto.PaginatedResponseDTO;
 import com.monocept.project.dto.PolicyPlanRequestDTO;
 import com.monocept.project.dto.PolicyPlanResponseDTO;
-import com.monocept.project.enums.PremiumType;
+import com.monocept.project.dto.PremiumQuoteRequestDTO;
+import com.monocept.project.dto.PremiumQuoteResponseDTO;
 import com.monocept.project.exception.BusinessRuleException;
 import com.monocept.project.exception.DuplicateResourceException;
 import com.monocept.project.exception.ResourceNotFoundException;
@@ -33,6 +33,7 @@ public class PolicyPlanServiceImplementation implements PolicyPlanService {
 
     private final PolicyPlanRepository policyPlanRepository;
     private final InsuranceProductRepository productRepository;
+    private final PremiumCalculationService premiumCalculationService;
     private final ModelMapper modelMapper;
 
     @Override
@@ -48,56 +49,23 @@ public class PolicyPlanServiceImplementation implements PolicyPlanService {
             throw new BusinessRuleException("Cannot create a plan under an inactive insurance product");
         }
 
-        // 🧮 AUTOMATED PREMIUM CALCULATION ALGORITHM
-        BigDecimal coverage = planRequestDTO.getCoverageAmount();
-        int years = planRequestDTO.getDuration();
-        
-        if (coverage == null || coverage.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new BusinessRuleException("Coverage amount must be a positive value greater than zero");
-        }
-        if (coverage.remainder(BigDecimal.valueOf(50000)).compareTo(BigDecimal.ZERO) != 0) {
-            throw new BusinessRuleException("Coverage amount must be in multiples of 50,000");
-        }
-        if (years <= 0) {
-            throw new BusinessRuleException("Plan duration term must be at least 1 year");
-        }
-
-        // Risk-rate compounding adjustments based on duration parameters
-        double baselineRate = 0.05; // 5% base factor for short terms
-        if (years >= 5) baselineRate = 0.042; // 4.2% factor for mid-length terms
-        if (years >= 10) baselineRate = 0.035; // 3.5% factor for long-term investments
-
-        // Formula: Premium = (Coverage / Years) * (1 + Baseline Rate)
-        double annualBase = coverage.doubleValue() / years;
-        double calculatedAnnualPremium = annualBase * (1.0 + baselineRate);
-
-        // Adjust for Quarterly or Monthly payment intervals if requested in payload enums
-        if (planRequestDTO.getPremiumType() == PremiumType.QUARTERLY) {
-            calculatedAnnualPremium = calculatedAnnualPremium / 4.0;
-        } else if (planRequestDTO.getPremiumType() == PremiumType.MONTHLY) {
-            calculatedAnnualPremium = calculatedAnnualPremium / 12.0;
-        }
-
-        // Round cleanly to 2 decimal places matching financial account currencies
-        BigDecimal automatedPremium = BigDecimal.valueOf(calculatedAnnualPremium)
-                .divide(BigDecimal.valueOf(50000), 0, RoundingMode.HALF_UP)
-                .multiply(BigDecimal.valueOf(50000));
-
-        // 🔒 Server overrides the field request values to prevent data tampering
-        planRequestDTO.setPremiumAmount(automatedPremium);
-
-        // Execute your multi-layered duplicate boundary check validations with the computed amount
-        validateCoverageGreaterThanPremium(planRequestDTO.getCoverageAmount(), planRequestDTO.getPremiumAmount());
+        // Bean Validation (@AssertTrue on the DTO) already checked
+        // max >= min, but a service-layer check costs nothing and guards
+        // against this method ever being called with a hand-built DTO that
+        // skipped validation.
+        validateCoverageBounds(planRequestDTO.getMinCoverageAmount(), planRequestDTO.getMaxCoverageAmount());
 
         checkDuplicatePlanName(product.getId(), planRequestDTO.getPlanName(), null);
-        checkDuplicatePlanTerms(product.getId(), planRequestDTO.getCoverageAmount(),
-                planRequestDTO.getPremiumAmount(), planRequestDTO.getPremiumType(),
-                planRequestDTO.getDuration(), null);
+        checkDuplicatePlanTerms(product.getId(), planRequestDTO, null);
 
         PolicyPlan plan = new PolicyPlan();
+
         plan.setPlanName(planRequestDTO.getPlanName());
-        plan.setCoverageAmount(planRequestDTO.getCoverageAmount());
-        plan.setPremiumAmount(planRequestDTO.getPremiumAmount()); // Injects automated premium
+        plan.setMinCoverageAmount(planRequestDTO.getMinCoverageAmount());
+        plan.setMaxCoverageAmount(planRequestDTO.getMaxCoverageAmount());
+        plan.setRatePerUnit(planRequestDTO.getRatePerUnit());
+        plan.setAnnualDiscountPercent(planRequestDTO.getAnnualDiscountPercent());
+        plan.setOneTimeDiscountPercent(planRequestDTO.getOneTimeDiscountPercent());
         plan.setPremiumType(planRequestDTO.getPremiumType());
         plan.setDuration(planRequestDTO.getDuration());
         plan.setTermsAndConditions(planRequestDTO.getTermsAndConditions());
@@ -105,11 +73,11 @@ public class PolicyPlanServiceImplementation implements PolicyPlanService {
         plan.setInsuranceProduct(product);
 
         PolicyPlan savedPlan = policyPlanRepository.save(plan);
+
         log.info("Policy plan created successfully id: {}", savedPlan.getId());
 
         return modelMapper.map(savedPlan, PolicyPlanResponseDTO.class);
     }
-
 
     @Override
     @Transactional(readOnly = true)
@@ -226,7 +194,6 @@ public class PolicyPlanServiceImplementation implements PolicyPlanService {
     @Override
     @Transactional
     public PolicyPlanResponseDTO updatePlan(Long planId, PolicyPlanRequestDTO planRequestDTO) {
-
         log.info("Updating policy plan with id: {}", planId);
 
         PolicyPlan plan = findPlanById(planId);
@@ -238,62 +205,17 @@ public class PolicyPlanServiceImplementation implements PolicyPlanService {
             throw new BusinessRuleException("Cannot assign a plan to an inactive insurance product");
         }
 
-        // 🧮 Recalculate premium automatically
-        BigDecimal coverage = planRequestDTO.getCoverageAmount();
-        int years = planRequestDTO.getDuration();
-
-        if (coverage == null || coverage.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new BusinessRuleException("Coverage amount must be a positive value greater than zero");
-        }
-        
-        if (coverage.remainder(BigDecimal.valueOf(50000)).compareTo(BigDecimal.ZERO) != 0) {
-            throw new BusinessRuleException("Coverage amount must be in multiples of 50,000");
-        }
-
-        if (years <= 0) {
-            throw new BusinessRuleException("Plan duration term must be at least 1 year");
-        }
-
-        double baselineRate = 0.05;
-
-        if (years >= 5)
-            baselineRate = 0.042;
-
-        if (years >= 10)
-            baselineRate = 0.035;
-
-        double annualBase = coverage.doubleValue() / years;
-        double calculatedAnnualPremium = annualBase * (1.0 + baselineRate);
-
-        if (planRequestDTO.getPremiumType() == PremiumType.QUARTERLY) {
-            calculatedAnnualPremium /= 4.0;
-        } else if (planRequestDTO.getPremiumType() == PremiumType.MONTHLY) {
-            calculatedAnnualPremium /= 12.0;
-        }
-
-        BigDecimal automatedPremium = BigDecimal.valueOf(calculatedAnnualPremium)
-                .divide(BigDecimal.valueOf(50000), 0, RoundingMode.HALF_UP)
-                .multiply(BigDecimal.valueOf(50000));
-        // Ignore premium sent from frontend
-        planRequestDTO.setPremiumAmount(automatedPremium);
-
-        validateCoverageGreaterThanPremium(
-                planRequestDTO.getCoverageAmount(),
-                planRequestDTO.getPremiumAmount());
+        validateCoverageBounds(planRequestDTO.getMinCoverageAmount(), planRequestDTO.getMaxCoverageAmount());
 
         checkDuplicatePlanName(product.getId(), planRequestDTO.getPlanName(), planId);
-
-        checkDuplicatePlanTerms(
-                product.getId(),
-                planRequestDTO.getCoverageAmount(),
-                planRequestDTO.getPremiumAmount(),
-                planRequestDTO.getPremiumType(),
-                planRequestDTO.getDuration(),
-                planId);
+        checkDuplicatePlanTerms(product.getId(), planRequestDTO, planId);
 
         plan.setPlanName(planRequestDTO.getPlanName());
-        plan.setCoverageAmount(planRequestDTO.getCoverageAmount());
-        plan.setPremiumAmount(planRequestDTO.getPremiumAmount());
+        plan.setMinCoverageAmount(planRequestDTO.getMinCoverageAmount());
+        plan.setMaxCoverageAmount(planRequestDTO.getMaxCoverageAmount());
+        plan.setRatePerUnit(planRequestDTO.getRatePerUnit());
+        plan.setAnnualDiscountPercent(planRequestDTO.getAnnualDiscountPercent());
+        plan.setOneTimeDiscountPercent(planRequestDTO.getOneTimeDiscountPercent());
         plan.setPremiumType(planRequestDTO.getPremiumType());
         plan.setDuration(planRequestDTO.getDuration());
         plan.setTermsAndConditions(planRequestDTO.getTermsAndConditions());
@@ -335,6 +257,28 @@ public class PolicyPlanServiceImplementation implements PolicyPlanService {
 
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public PremiumQuoteResponseDTO getPremiumQuote(Long planId, PremiumQuoteRequestDTO quoteRequestDTO) {
+        log.info("Quoting premium for plan id: {}, coverage: {}, type: {}", planId,
+                quoteRequestDTO.getCoverageAmount(), quoteRequestDTO.getPremiumType());
+
+        PolicyPlan plan = findPlanById(planId);
+
+        if (Boolean.FALSE.equals(plan.getActiveStatus())) {
+            throw new BusinessRuleException("This plan is no longer available for purchase");
+        }
+
+        PremiumCalculationService.PremiumQuote quote = premiumCalculationService.calculateQuote(
+                plan, quoteRequestDTO.getCoverageAmount(), quoteRequestDTO.getPremiumType());
+
+        return new PremiumQuoteResponseDTO(
+                quote.annualPremium(),
+                quote.discountPercent(),
+                quote.discountAmount(),
+                quote.finalPremium());
+    }
+
     private PolicyPlan findPlanById(Long id) {
         return policyPlanRepository.findById(id).orElseThrow(() -> {
             log.warn("Policy plan not found with id: {}", id);
@@ -342,19 +286,14 @@ public class PolicyPlanServiceImplementation implements PolicyPlanService {
         });
     }
 
-    private void validateCoverageGreaterThanPremium(BigDecimal coverageAmount, BigDecimal premiumAmount) {
-        if (coverageAmount.compareTo(premiumAmount) <= 0) {
-            log.warn("Rejected plan: coverage amount {} is not greater than premium amount {}",
-                    coverageAmount, premiumAmount);
-            throw new BusinessRuleException("Coverage amount must be greater than premium amount");
+    private void validateCoverageBounds(BigDecimal minCoverage, BigDecimal maxCoverage) {
+        if (minCoverage.compareTo(maxCoverage) > 0) {
+            log.warn("Rejected plan: minCoverage {} is greater than maxCoverage {}", minCoverage, maxCoverage);
+            throw new BusinessRuleException(
+                    "Minimum coverage amount must be less than or equal to the maximum coverage amount");
         }
     }
 
-    /**
-     * Enforces that a plan name is unique within its product (case-insensitive).
-     * excludePlanId is null on create, and set to the plan's own id on update
-     * (so a plan isn't flagged as a duplicate of itself).
-     */
     private void checkDuplicatePlanName(Long productId, String planName, Long excludePlanId) {
         Optional<PolicyPlan> existing = (excludePlanId == null)
                 ? policyPlanRepository.findByInsuranceProduct_IdAndPlanNameIgnoreCase(productId, planName)
@@ -370,27 +309,25 @@ public class PolicyPlanServiceImplementation implements PolicyPlanService {
         });
     }
 
-    /**
-     * Enforces that coverage amount, premium amount, premium type, and duration
-     * together aren't identical to another plan under the same product. A change
-     * in premium type (e.g. one-time vs annual) is treated as a genuinely
-     * different plan, not a duplicate.
-     */
-    private void checkDuplicatePlanTerms(Long productId, BigDecimal coverageAmount, BigDecimal premiumAmount,
-            PremiumType premiumType, Integer duration, Long excludePlanId) {
+    private void checkDuplicatePlanTerms(Long productId, PolicyPlanRequestDTO dto, Long excludePlanId) {
 
         Optional<PolicyPlan> existing = (excludePlanId == null)
-                ? policyPlanRepository.findByInsuranceProduct_IdAndCoverageAmountAndPremiumAmountAndPremiumTypeAndDuration(
-                        productId, coverageAmount, premiumAmount, premiumType, duration)
+                ? policyPlanRepository
+                        .findByInsuranceProduct_IdAndMinCoverageAmountAndMaxCoverageAmountAndRatePerUnitAndAnnualDiscountPercentAndOneTimeDiscountPercentAndPremiumTypeAndDuration(
+                                productId, dto.getMinCoverageAmount(), dto.getMaxCoverageAmount(),
+                                dto.getRatePerUnit(), dto.getAnnualDiscountPercent(), dto.getOneTimeDiscountPercent(),
+                                dto.getPremiumType(), dto.getDuration())
                 : policyPlanRepository
-                        .findByInsuranceProduct_IdAndCoverageAmountAndPremiumAmountAndPremiumTypeAndDurationAndIdNot(
-                                productId, coverageAmount, premiumAmount, premiumType, duration, excludePlanId);
+                        .findByInsuranceProduct_IdAndMinCoverageAmountAndMaxCoverageAmountAndRatePerUnitAndAnnualDiscountPercentAndOneTimeDiscountPercentAndPremiumTypeAndDurationAndIdNot(
+                                productId, dto.getMinCoverageAmount(), dto.getMaxCoverageAmount(),
+                                dto.getRatePerUnit(), dto.getAnnualDiscountPercent(), dto.getOneTimeDiscountPercent(),
+                                dto.getPremiumType(), dto.getDuration(), excludePlanId);
 
         existing.ifPresent(plan -> {
             log.warn("Rejected plan: identical terms to existing plan id {} under product id {}", plan.getId(),
                     productId);
             String message = String.format(
-                    "An identical plan (same coverage amount, premium amount, premium type, and duration) already exists under this product: '%s' (Plan ID: %d). Please update that plan instead of creating a duplicate.",
+                    "An identical plan (same coverage range, rate, discounts, premium type, and duration) already exists under this product: '%s' (Plan ID: %d). Please update that plan instead of creating a duplicate.",
                     plan.getPlanName(), plan.getId());
             throw new DuplicateResourceException(message);
         });
