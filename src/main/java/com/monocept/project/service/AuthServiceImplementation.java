@@ -201,13 +201,11 @@ public class AuthServiceImplementation implements AuthService {
 	    userRepository.findByEmail(request.getEmail()).ifPresent(user -> {
 
 	        // 1. Generate a secure, unique UUID string token
-	    	 String rawToken = UUID.randomUUID().toString();
-	    	  String hashedToken = DigestUtils.sha256Hex(rawToken); // or use passwordEncoder.encode + a lookup strategy
-	    	  user.setResetToken(hashedToken);
+	    	String rawToken = UUID.randomUUID().toString();
+	    	String hashedToken = DigestUtils.sha256Hex(rawToken);
 
-	        // 2. Persist token with a 15-minute validity window
-	        user.setResetToken(rawToken);
-	        user.setResetTokenExpiry(LocalDateTime.now().plusMinutes(15));
+	    	user.setResetToken(hashedToken);
+	    	user.setResetTokenExpiry(LocalDateTime.now().plusMinutes(15));
 	        userRepository.save(user);
 
 	        // 3. Construct a direct link matching your React application routes
