@@ -1,0 +1,1043 @@
+2026-09-17 11:41:28 WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=13h7m12s470ms342µs900ns).
+2026-09-17 13:03:23 WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=10m53s141ms2µs500ns).
+2026-09-17 13:38:11 WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=2m46s907ms274µs100ns).
+2026-09-17 13:39:42 INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-09-17 13:39:42 INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-09-17 13:39:42 INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 31 ms
+2026-09-17 13:39:43 INFO  c.m.p.s.AuthServiceImplementation - Login attempt for ad***@gmail.com
+2026-09-17 13:39:44 INFO  c.m.p.s.AuthServiceImplementation - LOG-002 Login successful for user id: 1
+2026-09-17 13:39:44 INFO  c.m.p.s.CustomerServiceImplementation - Fetching all customers
+2026-09-17 13:39:44 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 13:39:44 INFO  c.m.p.s.PolicyPlanServiceImplementation - Fetching all policy plans
+2026-09-17 13:39:45 INFO  c.m.p.s.CustomerServiceImplementation - Fetching all customers
+2026-09-17 13:39:45 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 13:39:45 INFO  c.m.p.s.PolicyPlanServiceImplementation - Fetching all policy plans
+2026-09-17 13:40:03 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 13:40:03 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 13:40:20 INFO  c.m.p.s.InsuranceProductServiceImplementation - Creating insurance product: Health Insurance
+2026-09-17 13:40:20 INFO  c.m.p.s.InsuranceProductServiceImplementation - Insurance product created successfully with id: 1
+2026-09-17 13:40:20 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 13:40:34 INFO  c.m.p.s.InsuranceProductServiceImplementation - Deactivating product with id: 1
+2026-09-17 13:40:34 INFO  c.m.p.s.InsuranceProductServiceImplementation - Product deactivated successfully with id: 1
+2026-09-17 13:40:35 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 13:40:38 INFO  c.m.p.s.InsuranceProductServiceImplementation - Product activated successfully with id: 1
+2026-09-17 13:40:38 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 13:41:02 INFO  c.m.p.s.InsuranceProductServiceImplementation - Creating insurance product: Motor Insurance
+2026-09-17 13:41:02 INFO  c.m.p.s.InsuranceProductServiceImplementation - Insurance product created successfully with id: 2
+2026-09-17 13:41:02 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 13:41:30 INFO  c.m.p.s.InsuranceProductServiceImplementation - Creating insurance product: Life Insurance
+2026-09-17 13:41:30 INFO  c.m.p.s.InsuranceProductServiceImplementation - Insurance product created successfully with id: 3
+2026-09-17 13:41:30 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 13:41:55 INFO  c.m.p.s.InsuranceProductServiceImplementation - Creating insurance product: Travel Insurance
+2026-09-17 13:41:55 INFO  c.m.p.s.InsuranceProductServiceImplementation - Insurance product created successfully with id: 4
+2026-09-17 13:41:55 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 13:44:07 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 13:44:08 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 13:45:07 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 13:45:07 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 13:46:07 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 13:46:07 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 13:47:07 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 13:47:07 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 13:48:07 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 13:48:07 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 13:49:07 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 13:49:07 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 13:50:07 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 13:50:07 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 13:51:07 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 13:51:07 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 13:51:28 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 13:51:28 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 13:51:45 INFO  c.m.p.s.PolicyPlanServiceImplementation - Fetching all policy plans
+2026-09-17 13:51:45 INFO  c.m.p.s.PolicyPlanServiceImplementation - Fetching all policy plans
+2026-09-17 13:51:45 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 13:51:45 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 14:03:26 INFO  c.m.p.s.PolicyPlanServiceImplementation - Creating policy plan: Family Health Shield
+2026-09-17 14:03:26 INFO  c.m.p.s.PolicyPlanServiceImplementation - Policy plan created successfully id: 1
+2026-09-17 14:03:26 INFO  c.m.p.s.PolicyPlanServiceImplementation - Fetching all policy plans
+2026-09-17 14:03:26 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 14:03:26 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 14:04:33 INFO  c.m.p.s.PolicyPlanServiceImplementation - Creating policy plan: Senior Citizen Health Plan
+2026-09-17 14:04:33 INFO  c.m.p.s.PolicyPlanServiceImplementation - Policy plan created successfully id: 2
+2026-09-17 14:04:33 INFO  c.m.p.s.PolicyPlanServiceImplementation - Fetching all policy plans
+2026-09-17 14:04:33 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 14:04:33 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 14:06:15 INFO  c.m.p.s.PolicyPlanServiceImplementation - Creating policy plan: Comprehensive Car Cover
+2026-09-17 14:06:15 INFO  c.m.p.s.PolicyPlanServiceImplementation - Policy plan created successfully id: 3
+2026-09-17 14:06:15 INFO  c.m.p.s.PolicyPlanServiceImplementation - Fetching all policy plans
+2026-09-17 14:06:15 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 14:06:15 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 14:08:38 INFO  c.m.p.s.PolicyPlanServiceImplementation - Creating policy plan: Secure Life Term Plan
+2026-09-17 14:08:38 INFO  c.m.p.s.PolicyPlanServiceImplementation - Policy plan created successfully id: 4
+2026-09-17 14:08:38 INFO  c.m.p.s.PolicyPlanServiceImplementation - Fetching all policy plans
+2026-09-17 14:08:38 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 14:08:38 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 14:09:45 INFO  c.m.p.s.PolicyPlanServiceImplementation - Creating policy plan: International Travel Guard
+2026-09-17 14:09:45 INFO  c.m.p.s.PolicyPlanServiceImplementation - Policy plan created successfully id: 5
+2026-09-17 14:09:45 INFO  c.m.p.s.PolicyPlanServiceImplementation - Fetching all policy plans
+2026-09-17 14:09:45 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 14:09:45 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 15:09:01 WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=44m19s116ms981µs100ns).
+2026-09-17 15:11:02 INFO  c.m.p.s.PolicyPlanServiceImplementation - Fetching all policy plans
+2026-09-17 15:11:02 INFO  c.m.p.s.PolicyPlanServiceImplementation - Fetching all policy plans
+2026-09-17 15:11:02 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 15:11:02 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 15:11:15 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching products with status: true
+2026-09-17 15:11:15 INFO  c.m.p.s.UserServiceImplementation - Fetching users with role: INTERNAL_STAFF
+2026-09-17 15:11:15 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching products with status: true
+2026-09-17 15:11:15 INFO  c.m.p.s.UserServiceImplementation - Fetching users with role: INTERNAL_STAFF
+2026-09-17 15:12:17 INFO  c.m.p.s.UserServiceImplementation - Creating internal staff with email: ka***@gmail.com
+2026-09-17 15:12:17 INFO  c.m.p.s.UserServiceImplementation - Internal Staff created successfully with id: 1
+2026-09-17 15:12:17 WARN  c.m.p.s.JwtAuthenticationFilter - LOG-014 Security failure. Token subject no longer matches an account
+2026-09-17 15:12:17 WARN  c.m.p.s.JwtAuthenticationFilter - LOG-014 Security failure. Token subject no longer matches an account
+2026-09-17 15:12:17 WARN  c.m.p.e.GlobalExceptionHandler - Invalid JWT token: Your session is no longer valid. Please sign in again.
+2026-09-17 15:12:17 WARN  c.m.p.e.GlobalExceptionHandler - Invalid JWT token: Your session is no longer valid. Please sign in again.
+2026-09-17 15:12:17 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [com.monocept.project.exception.InvalidJwtTokenException: Your session is no longer valid. Please sign in again.]
+2026-09-17 15:12:17 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [com.monocept.project.exception.InvalidJwtTokenException: Your session is no longer valid. Please sign in again.]
+2026-09-17 15:12:45 INFO  c.m.p.s.AuthServiceImplementation - Login attempt for ad***@gmail.com
+2026-09-17 15:12:45 WARN  c.m.p.s.AuthServiceImplementation - LOG-003 Login failed. No account for ad***@gmail.com
+2026-09-17 15:12:45 WARN  c.m.p.e.GlobalExceptionHandler - Authentication failed: Invalid credentials
+2026-09-17 15:12:45 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [com.monocept.project.exception.AuthenticationException: Invalid credentials]
+2026-09-17 15:12:49 INFO  c.m.p.s.AuthServiceImplementation - Login attempt for ad***@gmail.com
+2026-09-17 15:12:49 WARN  c.m.p.s.AuthServiceImplementation - LOG-003 Login failed. No account for ad***@gmail.com
+2026-09-17 15:12:49 WARN  c.m.p.e.GlobalExceptionHandler - Authentication failed: Invalid credentials
+2026-09-17 15:12:49 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [com.monocept.project.exception.AuthenticationException: Invalid credentials]
+2026-09-17 15:13:02 INFO  c.m.p.s.AuthServiceImplementation - Login attempt for ad***@gmail.com
+2026-09-17 15:13:02 WARN  c.m.p.s.AuthServiceImplementation - LOG-003 Login failed. No account for ad***@gmail.com
+2026-09-17 15:13:02 WARN  c.m.p.e.GlobalExceptionHandler - Authentication failed: Invalid credentials
+2026-09-17 15:13:02 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [com.monocept.project.exception.AuthenticationException: Invalid credentials]
+2026-09-17 15:15:00 INFO  c.m.p.s.AuthServiceImplementation - Login attempt for ad***@gmail.com
+2026-09-17 15:15:00 WARN  c.m.p.s.AuthServiceImplementation - LOG-003 Login failed. No account for ad***@gmail.com
+2026-09-17 15:15:00 WARN  c.m.p.e.GlobalExceptionHandler - Authentication failed: Invalid credentials
+2026-09-17 15:15:00 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [com.monocept.project.exception.AuthenticationException: Invalid credentials]
+2026-09-17 15:15:07 INFO  c.m.p.s.AuthServiceImplementation - Login attempt for ad***@gmail.com
+2026-09-17 15:15:07 WARN  c.m.p.s.AuthServiceImplementation - LOG-003 Login failed. No account for ad***@gmail.com
+2026-09-17 15:15:07 WARN  c.m.p.e.GlobalExceptionHandler - Authentication failed: Invalid credentials
+2026-09-17 15:15:07 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [com.monocept.project.exception.AuthenticationException: Invalid credentials]
+2026-09-17 15:15:19 INFO  c.m.p.s.AuthServiceImplementation - Login attempt for ka***@gmail.com
+2026-09-17 15:15:19 INFO  c.m.p.s.AuthServiceImplementation - LOG-002 Login successful for user id: 1
+2026-09-17 15:15:22 INFO  c.m.p.s.PremiumPaymentServiceImpl - Fetching all tracking payments logged system-wide across internal staff
+2026-09-17 15:15:22 INFO  c.m.p.s.PremiumPaymentServiceImpl - Fetching all tracking payments logged system-wide across internal staff
+2026-09-17 15:15:23 INFO  c.m.p.s.CustomerServiceImplementation - Fetching all customers
+2026-09-17 15:15:23 INFO  c.m.p.s.CustomerServiceImplementation - Fetching all customers
+2026-09-17 15:15:24 INFO  c.m.p.s.CustomerServiceImplementation - Fetching all customers
+2026-09-17 15:15:24 INFO  c.m.p.s.PolicyPlanServiceImplementation - Fetching all policy plans
+2026-09-17 15:15:24 INFO  c.m.p.s.CustomerServiceImplementation - Fetching all customers
+2026-09-17 15:15:24 INFO  c.m.p.s.PolicyPlanServiceImplementation - Fetching all policy plans
+2026-09-17 15:15:44 INFO  c.m.p.s.AuthServiceImplementation - Login attempt for ni***@gmail.com
+2026-09-17 15:15:44 WARN  c.m.p.s.AuthServiceImplementation - LOG-003 Login failed. No account for ni***@gmail.com
+2026-09-17 15:15:44 WARN  c.m.p.e.GlobalExceptionHandler - Authentication failed: Invalid credentials
+2026-09-17 15:15:44 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [com.monocept.project.exception.AuthenticationException: Invalid credentials]
+2026-09-17 15:15:47 INFO  c.m.p.s.AuthServiceImplementation - Login attempt for ad***@gmail.com
+2026-09-17 15:15:48 WARN  c.m.p.s.AuthServiceImplementation - LOG-003 Login failed. No account for ad***@gmail.com
+2026-09-17 15:15:48 WARN  c.m.p.e.GlobalExceptionHandler - Authentication failed: Invalid credentials
+2026-09-17 15:15:48 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [com.monocept.project.exception.AuthenticationException: Invalid credentials]
+2026-09-17 15:18:28 INFO  c.m.p.s.AuthServiceImplementation - Login attempt for ad***@gmail.com
+2026-09-17 15:18:29 WARN  c.m.p.s.AuthServiceImplementation - LOG-003 Login failed. No account for ad***@gmail.com
+2026-09-17 15:18:29 WARN  c.m.p.e.GlobalExceptionHandler - Authentication failed: Invalid credentials
+2026-09-17 15:18:29 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [com.monocept.project.exception.AuthenticationException: Invalid credentials]
+2026-09-17 15:18:39 INFO  c.m.p.s.AuthServiceImplementation - Login attempt for ad***@gmail.com
+2026-09-17 15:18:40 WARN  c.m.p.s.AuthServiceImplementation - LOG-003 Login failed. No account for ad***@gmail.com
+2026-09-17 15:18:40 WARN  c.m.p.e.GlobalExceptionHandler - Authentication failed: Invalid credentials
+2026-09-17 15:18:40 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [com.monocept.project.exception.AuthenticationException: Invalid credentials]
+2026-09-17 15:19:00 INFO  c.m.p.s.AuthServiceImplementation - Login attempt for ad***@gmail.com
+2026-09-17 15:19:01 WARN  c.m.p.s.AuthServiceImplementation - LOG-003 Login failed. No account for ad***@gmail.com
+2026-09-17 15:19:01 WARN  c.m.p.e.GlobalExceptionHandler - Authentication failed: Invalid credentials
+2026-09-17 15:19:01 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [com.monocept.project.exception.AuthenticationException: Invalid credentials]
+2026-09-17 15:19:12 INFO  c.m.p.s.AuthServiceImplementation - Login attempt for ad***@gmail.com
+2026-09-17 15:19:12 WARN  c.m.p.s.AuthServiceImplementation - LOG-003 Login failed. No account for ad***@gmail.com
+2026-09-17 15:19:12 WARN  c.m.p.e.GlobalExceptionHandler - Authentication failed: Invalid credentials
+2026-09-17 15:19:12 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [com.monocept.project.exception.AuthenticationException: Invalid credentials]
+2026-09-17 15:19:15 INFO  c.m.p.s.AuthServiceImplementation - Login attempt for ad***@gmail.com
+2026-09-17 15:19:15 WARN  c.m.p.s.AuthServiceImplementation - LOG-003 Login failed. No account for ad***@gmail.com
+2026-09-17 15:19:15 WARN  c.m.p.e.GlobalExceptionHandler - Authentication failed: Invalid credentials
+2026-09-17 15:19:15 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [com.monocept.project.exception.AuthenticationException: Invalid credentials]
+2026-09-17 15:23:04 INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-09-17 15:23:04 INFO  o.s.boot.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-09-17 15:23:04 INFO  o.s.boot.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-09-17 15:23:04 INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-09-17 15:23:04 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-09-17 15:23:04 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2026-09-17 15:23:04 INFO  c.m.p.InsurancePolicyAndClaimManagementSystemApplication - Starting InsurancePolicyAndClaimManagementSystemApplication using Java 25.0.2 with PID 15468 (D:\Spring Workspace\Insurance-Policy-and-Claim-Management-System\target\classes started by Dell in D:\Spring Workspace\Insurance-Policy-and-Claim-Management-System)
+2026-09-17 15:23:04 DEBUG c.m.p.InsurancePolicyAndClaimManagementSystemApplication - Running with Spring Boot v4.1.0, Spring v7.0.8
+2026-09-17 15:23:04 INFO  c.m.p.InsurancePolicyAndClaimManagementSystemApplication - No active profile set, falling back to 1 default profile: "default"
+2026-09-17 15:23:10 INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-09-17 15:23:10 INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 103 ms. Found 12 JPA repository interfaces.
+2026-09-17 15:23:10 INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-09-17 15:23:10 INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-09-17 15:23:10 INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/11.0.22]
+2026-09-17 15:23:10 INFO  o.s.b.w.c.s.WebApplicationContextInitializer - Root WebApplicationContext: initialization completed in 6166 ms
+2026-09-17 15:23:11 INFO  org.hibernate.orm.jpa - HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-09-17 15:23:11 INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-09-17 15:23:11 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Starting...
+2026-09-17 15:23:11 INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-2 - Added connection com.mysql.cj.jdbc.ConnectionImpl@3fc77d7c
+2026-09-17 15:23:11 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Start completed.
+2026-09-17 15:23:11 INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/insurance_db]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 8.0.46
+	Default catalog/schema: insurance_db/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-09-17 15:23:12 INFO  org.hibernate.orm.core - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-09-17 15:23:12 INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-09-17 15:23:13 WARN  o.s.b.j.a.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-09-17 15:23:13 DEBUG c.m.p.s.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2026-09-17 15:23:14 INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+2026-09-17 15:23:15 INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2026-09-17 15:23:15 INFO  c.m.p.InsurancePolicyAndClaimManagementSystemApplication - Started InsurancePolicyAndClaimManagementSystemApplication in 10.98 seconds (process running for 86649.595)
+2026-09-17 15:23:15 INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2026-09-17 15:23:22 INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-09-17 15:23:22 INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-09-17 15:23:22 INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 9 ms
+2026-09-17 15:23:23 INFO  c.m.p.s.AuthServiceImplementation - Login attempt for ad***@gmail.com
+2026-09-17 15:23:23 WARN  c.m.p.s.AuthServiceImplementation - LOG-003 Login failed. Wrong password for user id: 2
+2026-09-17 15:23:23 WARN  c.m.p.e.GlobalExceptionHandler - Authentication failed: Invalid credentials
+2026-09-17 15:23:23 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [com.monocept.project.exception.AuthenticationException: Invalid credentials]
+2026-09-17 15:23:32 INFO  c.m.p.s.AuthServiceImplementation - Login attempt for ad***@gmail.com
+2026-09-17 15:23:32 WARN  c.m.p.s.AuthServiceImplementation - LOG-003 Login failed. Wrong password for user id: 2
+2026-09-17 15:23:32 WARN  c.m.p.e.GlobalExceptionHandler - Authentication failed: Invalid credentials
+2026-09-17 15:23:33 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [com.monocept.project.exception.AuthenticationException: Invalid credentials]
+2026-09-17 15:24:42 INFO  o.s.b.a.SpringApplicationAdminMXBeanRegistrar$SpringApplicationAdmin - Application shutdown requested.
+2026-09-17 15:24:42 INFO  o.s.boot.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-09-17 15:24:42 INFO  o.s.boot.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-09-17 15:24:42 INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-09-17 15:24:42 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown initiated...
+2026-09-17 15:24:42 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown completed.
+2026-09-17 15:25:07 INFO  c.m.p.InsurancePolicyAndClaimManagementSystemApplication - Starting InsurancePolicyAndClaimManagementSystemApplication using Java 25.0.2 with PID 22500 (D:\Spring Workspace\Insurance-Policy-and-Claim-Management-System\target\classes started by Dell in D:\Spring Workspace\Insurance-Policy-and-Claim-Management-System)
+2026-09-17 15:25:07 DEBUG c.m.p.InsurancePolicyAndClaimManagementSystemApplication - Running with Spring Boot v4.1.0, Spring v7.0.8
+2026-09-17 15:25:07 INFO  c.m.p.InsurancePolicyAndClaimManagementSystemApplication - No active profile set, falling back to 1 default profile: "default"
+2026-09-17 15:25:07 INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-09-17 15:25:07 INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-09-17 15:25:11 INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-09-17 15:25:11 INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 211 ms. Found 12 JPA repository interfaces.
+2026-09-17 15:25:13 INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-09-17 15:25:13 INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-09-17 15:25:13 INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/11.0.22]
+2026-09-17 15:25:13 INFO  o.s.b.w.c.s.WebApplicationContextInitializer - Root WebApplicationContext: initialization completed in 6645 ms
+2026-09-17 15:25:14 INFO  org.hibernate.orm.jpa - HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-09-17 15:25:15 INFO  org.hibernate.orm.core - HHH000001: Hibernate ORM core version 7.4.1.Final
+2026-09-17 15:25:17 INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-09-17 15:25:17 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-09-17 15:25:18 INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@26439073
+2026-09-17 15:25:18 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-09-17 15:25:19 INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/insurance_db]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 8.0.46
+	Default catalog/schema: insurance_db/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-09-17 15:25:23 INFO  org.hibernate.orm.core - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-09-17 15:25:24 INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-09-17 15:25:24 INFO  o.s.d.j.r.q.QueryEnhancerFactories - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-09-17 15:25:25 WARN  o.s.b.j.a.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-09-17 15:25:26 DEBUG c.m.p.s.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2026-09-17 15:25:32 INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+2026-09-17 15:25:34 INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2026-09-17 15:25:34 INFO  c.m.p.InsurancePolicyAndClaimManagementSystemApplication - Started InsurancePolicyAndClaimManagementSystemApplication in 28.793 seconds (process running for 32.355)
+2026-09-17 15:25:49 INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-09-17 15:25:49 INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-09-17 15:25:49 INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 5 ms
+2026-09-17 15:25:50 INFO  c.m.p.s.AuthServiceImplementation - Login attempt for ad***@gmail.com
+2026-09-17 15:25:50 WARN  c.m.p.s.AuthServiceImplementation - LOG-003 Login failed. Wrong password for user id: 2
+2026-09-17 15:25:50 WARN  c.m.p.e.GlobalExceptionHandler - Authentication failed: Invalid credentials
+2026-09-17 15:25:50 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [com.monocept.project.exception.AuthenticationException: Invalid credentials]
+2026-09-17 15:26:17 INFO  c.m.p.s.AuthServiceImplementation - Login attempt for ad***@gmail.com
+2026-09-17 15:26:18 INFO  c.m.p.s.AuthServiceImplementation - LOG-002 Login successful for user id: 2
+2026-09-17 15:26:18 INFO  c.m.p.s.PolicyPlanServiceImplementation - Fetching all policy plans
+2026-09-17 15:26:18 INFO  c.m.p.s.CustomerServiceImplementation - Fetching all customers
+2026-09-17 15:26:18 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 15:26:18 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 15:26:18 INFO  c.m.p.s.CustomerServiceImplementation - Fetching all customers
+2026-09-17 15:26:18 INFO  c.m.p.s.PolicyPlanServiceImplementation - Fetching all policy plans
+2026-09-17 15:26:26 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching products with status: true
+2026-09-17 15:26:26 INFO  c.m.p.s.UserServiceImplementation - Fetching users with role: INTERNAL_STAFF
+2026-09-17 15:26:26 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching products with status: true
+2026-09-17 15:26:26 INFO  c.m.p.s.UserServiceImplementation - Fetching users with role: INTERNAL_STAFF
+2026-09-17 15:27:58 INFO  c.m.p.s.UserServiceImplementation - Creating internal staff with email: ki***@gmail.com
+2026-09-17 15:27:58 INFO  c.m.p.s.UserServiceImplementation - Internal Staff created successfully with id: 3
+2026-09-17 15:27:58 INFO  c.m.p.s.UserServiceImplementation - Fetching users with role: INTERNAL_STAFF
+2026-09-17 15:27:58 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching products with status: true
+2026-09-17 15:28:14 INFO  c.m.p.s.AuthServiceImplementation - Login attempt for ad***@gmail.com
+2026-09-17 15:28:14 INFO  c.m.p.s.AuthServiceImplementation - LOG-002 Login successful for user id: 2
+2026-09-17 15:28:14 INFO  c.m.p.s.CustomerServiceImplementation - Fetching all customers
+2026-09-17 15:28:14 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 15:28:14 INFO  c.m.p.s.PolicyPlanServiceImplementation - Fetching all policy plans
+2026-09-17 15:28:14 INFO  c.m.p.s.CustomerServiceImplementation - Fetching all customers
+2026-09-17 15:28:14 INFO  c.m.p.s.InsuranceProductServiceImplementation - Fetching all insurance products
+2026-09-17 15:28:14 INFO  c.m.p.s.PolicyPlanServiceImplementation - Fetching all policy plans
+2026-09-17 15:28:58 INFO  c.m.p.s.AuthServiceImplementation - LOG-001 Registration started for ni***@gmail.com
+2026-09-17 15:28:58 INFO  c.m.p.s.OtpServiceImplementation - Sending phone OTP to ******2713
+2026-09-17 15:29:00 ERROR c.m.p.s.OtpServiceImplementation - Twilio error while sending phone OTP
+com.twilio.exception.ApiException: The phone number is unverified. Trial accounts cannot send messages to unverified numbers; verify it at twilio.com/user/account/phone-numbers/verified
+	at com.twilio.rest.verify.v2.service.VerificationCreator.create(VerificationCreator.java:201)
+	at com.twilio.rest.verify.v2.service.VerificationCreator.create(VerificationCreator.java:32)
+	at com.twilio.base.Creator.create(Creator.java:40)
+	at com.monocept.project.service.OtpServiceImplementation.sendPhoneOtp(OtpServiceImplementation.java:73)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:359)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:715)
+	at com.monocept.project.service.OtpServiceImplementation$$SpringCGLIB$$0.sendPhoneOtp(<generated>)
+	at com.monocept.project.service.AuthServiceImplementation.registerCustomer(AuthServiceImplementation.java:110)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:359)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.invokeJoinpoint(ReflectiveMethodInvocation.java:190)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:158)
+	at org.springframework.transaction.interceptor.TransactionInterceptor$1.proceedWithInvocation(TransactionInterceptor.java:133)
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:371)
+	at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:130)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:179)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:719)
+	at com.monocept.project.service.AuthServiceImplementation$$SpringCGLIB$$0.registerCustomer(<generated>)
+	at com.monocept.project.controller.AuthController.registerCustomer(AuthController.java:41)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:252)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:184)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:117)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:934)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:853)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:86)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:963)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:866)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1000)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:903)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:649)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:874)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:710)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:128)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:53)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108)
+	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$2(FilterChainProxy.java:235)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:376)
+	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:101)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:132)
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:86)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:181)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:110)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:96)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90)
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:237)
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:195)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.filter.ServletRequestPathFilter.doFilter(ServletRequestPathFilter.java:52)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74)
+	at org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebSecurityConfiguration.java:317)
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:355)
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:272)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:199)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:165)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:77)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:492)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:113)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:83)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:72)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:341)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:1272)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1801)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:946)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:480)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:57)
+	at java.base/java.lang.Thread.run(Thread.java:1474)
+2026-09-17 15:29:00 ERROR c.m.p.e.GlobalExceptionHandler - Twilio API error (code 21608): The phone number is unverified. Trial accounts cannot send messages to unverified numbers; verify it at twilio.com/user/account/phone-numbers/verified
+2026-09-17 15:29:00 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [com.twilio.exception.ApiException: The phone number is unverified. Trial accounts cannot send messages to unverified numbers; verify it at twilio.com/user/account/phone-numbers/verified]
+2026-09-17 15:33:23 INFO  c.m.p.s.AuthServiceImplementation - LOG-001 Registration started for ni***@gmail.com
+2026-09-17 15:33:23 INFO  c.m.p.s.OtpServiceImplementation - Sending phone OTP to ******2713
+2026-09-17 15:33:24 ERROR c.m.p.s.OtpServiceImplementation - Twilio error while sending phone OTP
+com.twilio.exception.ApiException: The phone number is unverified. Trial accounts cannot send messages to unverified numbers; verify it at twilio.com/user/account/phone-numbers/verified
+	at com.twilio.rest.verify.v2.service.VerificationCreator.create(VerificationCreator.java:201)
+	at com.twilio.rest.verify.v2.service.VerificationCreator.create(VerificationCreator.java:32)
+	at com.twilio.base.Creator.create(Creator.java:40)
+	at com.monocept.project.service.OtpServiceImplementation.sendPhoneOtp(OtpServiceImplementation.java:73)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:359)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:715)
+	at com.monocept.project.service.OtpServiceImplementation$$SpringCGLIB$$0.sendPhoneOtp(<generated>)
+	at com.monocept.project.service.AuthServiceImplementation.registerCustomer(AuthServiceImplementation.java:110)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:359)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.invokeJoinpoint(ReflectiveMethodInvocation.java:190)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:158)
+	at org.springframework.transaction.interceptor.TransactionInterceptor$1.proceedWithInvocation(TransactionInterceptor.java:133)
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:371)
+	at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:130)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:179)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:719)
+	at com.monocept.project.service.AuthServiceImplementation$$SpringCGLIB$$0.registerCustomer(<generated>)
+	at com.monocept.project.controller.AuthController.registerCustomer(AuthController.java:41)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:252)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:184)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:117)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:934)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:853)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:86)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:963)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:866)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1000)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:903)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:649)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:874)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:710)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:128)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:53)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108)
+	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$2(FilterChainProxy.java:235)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:376)
+	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:101)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:132)
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:86)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:181)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:110)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:96)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90)
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:237)
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:195)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.filter.ServletRequestPathFilter.doFilter(ServletRequestPathFilter.java:52)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74)
+	at org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebSecurityConfiguration.java:317)
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:355)
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:272)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:199)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:165)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:77)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:492)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:113)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:83)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:72)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:341)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:1272)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1801)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:946)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:480)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:57)
+	at java.base/java.lang.Thread.run(Thread.java:1474)
+2026-09-17 15:33:24 ERROR c.m.p.e.GlobalExceptionHandler - Twilio API error (code 21608): The phone number is unverified. Trial accounts cannot send messages to unverified numbers; verify it at twilio.com/user/account/phone-numbers/verified
+2026-09-17 15:33:24 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [com.twilio.exception.ApiException: The phone number is unverified. Trial accounts cannot send messages to unverified numbers; verify it at twilio.com/user/account/phone-numbers/verified]
+2026-09-17 15:33:35 INFO  c.m.p.s.AuthServiceImplementation - LOG-001 Registration started for ni***@gmail.com
+2026-09-17 15:33:35 INFO  c.m.p.s.OtpServiceImplementation - Sending phone OTP to ******2713
+2026-09-17 15:33:36 ERROR c.m.p.s.OtpServiceImplementation - Twilio error while sending phone OTP
+com.twilio.exception.ApiException: The phone number is unverified. Trial accounts cannot send messages to unverified numbers; verify it at twilio.com/user/account/phone-numbers/verified
+	at com.twilio.rest.verify.v2.service.VerificationCreator.create(VerificationCreator.java:201)
+	at com.twilio.rest.verify.v2.service.VerificationCreator.create(VerificationCreator.java:32)
+	at com.twilio.base.Creator.create(Creator.java:40)
+	at com.monocept.project.service.OtpServiceImplementation.sendPhoneOtp(OtpServiceImplementation.java:73)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:359)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:715)
+	at com.monocept.project.service.OtpServiceImplementation$$SpringCGLIB$$0.sendPhoneOtp(<generated>)
+	at com.monocept.project.service.AuthServiceImplementation.registerCustomer(AuthServiceImplementation.java:110)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:359)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.invokeJoinpoint(ReflectiveMethodInvocation.java:190)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:158)
+	at org.springframework.transaction.interceptor.TransactionInterceptor$1.proceedWithInvocation(TransactionInterceptor.java:133)
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:371)
+	at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:130)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:179)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:719)
+	at com.monocept.project.service.AuthServiceImplementation$$SpringCGLIB$$0.registerCustomer(<generated>)
+	at com.monocept.project.controller.AuthController.registerCustomer(AuthController.java:41)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:252)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:184)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:117)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:934)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:853)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:86)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:963)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:866)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1000)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:903)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:649)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:874)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:710)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:128)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:53)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108)
+	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$2(FilterChainProxy.java:235)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:376)
+	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:101)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:132)
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:86)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:181)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:110)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:96)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90)
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:237)
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:195)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.filter.ServletRequestPathFilter.doFilter(ServletRequestPathFilter.java:52)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74)
+	at org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebSecurityConfiguration.java:317)
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:355)
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:272)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:199)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:165)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:77)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:492)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:113)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:83)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:72)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:341)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:1272)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1801)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:946)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:480)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:57)
+	at java.base/java.lang.Thread.run(Thread.java:1474)
+2026-09-17 15:33:36 ERROR c.m.p.e.GlobalExceptionHandler - Twilio API error (code 21608): The phone number is unverified. Trial accounts cannot send messages to unverified numbers; verify it at twilio.com/user/account/phone-numbers/verified
+2026-09-17 15:33:36 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [com.twilio.exception.ApiException: The phone number is unverified. Trial accounts cannot send messages to unverified numbers; verify it at twilio.com/user/account/phone-numbers/verified]
+2026-09-17 15:33:45 INFO  c.m.p.s.AuthServiceImplementation - LOG-001 Registration started for ni***@gmail.com
+2026-09-17 15:33:45 INFO  c.m.p.s.OtpServiceImplementation - Sending phone OTP to ******2713
+2026-09-17 15:33:45 ERROR c.m.p.s.OtpServiceImplementation - Twilio error while sending phone OTP
+com.twilio.exception.ApiException: The phone number is unverified. Trial accounts cannot send messages to unverified numbers; verify it at twilio.com/user/account/phone-numbers/verified
+	at com.twilio.rest.verify.v2.service.VerificationCreator.create(VerificationCreator.java:201)
+	at com.twilio.rest.verify.v2.service.VerificationCreator.create(VerificationCreator.java:32)
+	at com.twilio.base.Creator.create(Creator.java:40)
+	at com.monocept.project.service.OtpServiceImplementation.sendPhoneOtp(OtpServiceImplementation.java:73)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:359)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:715)
+	at com.monocept.project.service.OtpServiceImplementation$$SpringCGLIB$$0.sendPhoneOtp(<generated>)
+	at com.monocept.project.service.AuthServiceImplementation.registerCustomer(AuthServiceImplementation.java:110)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:359)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.invokeJoinpoint(ReflectiveMethodInvocation.java:190)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:158)
+	at org.springframework.transaction.interceptor.TransactionInterceptor$1.proceedWithInvocation(TransactionInterceptor.java:133)
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:371)
+	at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:130)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:179)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:719)
+	at com.monocept.project.service.AuthServiceImplementation$$SpringCGLIB$$0.registerCustomer(<generated>)
+	at com.monocept.project.controller.AuthController.registerCustomer(AuthController.java:41)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:252)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:184)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:117)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:934)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:853)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:86)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:963)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:866)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1000)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:903)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:649)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:874)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:710)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:128)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:53)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108)
+	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$2(FilterChainProxy.java:235)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:376)
+	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:101)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:132)
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:86)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:181)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:110)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:96)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90)
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:237)
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:195)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.filter.ServletRequestPathFilter.doFilter(ServletRequestPathFilter.java:52)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74)
+	at org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebSecurityConfiguration.java:317)
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:355)
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:272)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:199)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:165)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:77)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:492)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:113)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:83)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:72)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:341)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:1272)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1801)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:946)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:480)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:57)
+	at java.base/java.lang.Thread.run(Thread.java:1474)
+2026-09-17 15:33:45 ERROR c.m.p.e.GlobalExceptionHandler - Twilio API error (code 21608): The phone number is unverified. Trial accounts cannot send messages to unverified numbers; verify it at twilio.com/user/account/phone-numbers/verified
+2026-09-17 15:33:45 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [com.twilio.exception.ApiException: The phone number is unverified. Trial accounts cannot send messages to unverified numbers; verify it at twilio.com/user/account/phone-numbers/verified]
+2026-09-17 15:37:51 INFO  c.m.p.s.AuthServiceImplementation - LOG-001 Registration started for ni***@gmail.com
+2026-09-17 15:37:51 INFO  c.m.p.s.OtpServiceImplementation - Sending phone OTP to ******2713
+2026-09-17 15:37:52 ERROR c.m.p.s.OtpServiceImplementation - Twilio error while sending phone OTP
+com.twilio.exception.ApiException: The phone number is unverified. Trial accounts cannot send messages to unverified numbers; verify it at twilio.com/user/account/phone-numbers/verified
+	at com.twilio.rest.verify.v2.service.VerificationCreator.create(VerificationCreator.java:201)
+	at com.twilio.rest.verify.v2.service.VerificationCreator.create(VerificationCreator.java:32)
+	at com.twilio.base.Creator.create(Creator.java:40)
+	at com.monocept.project.service.OtpServiceImplementation.sendPhoneOtp(OtpServiceImplementation.java:73)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:359)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:715)
+	at com.monocept.project.service.OtpServiceImplementation$$SpringCGLIB$$0.sendPhoneOtp(<generated>)
+	at com.monocept.project.service.AuthServiceImplementation.registerCustomer(AuthServiceImplementation.java:110)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:359)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.invokeJoinpoint(ReflectiveMethodInvocation.java:190)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:158)
+	at org.springframework.transaction.interceptor.TransactionInterceptor$1.proceedWithInvocation(TransactionInterceptor.java:133)
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:371)
+	at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:130)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:179)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:719)
+	at com.monocept.project.service.AuthServiceImplementation$$SpringCGLIB$$0.registerCustomer(<generated>)
+	at com.monocept.project.controller.AuthController.registerCustomer(AuthController.java:41)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:252)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:184)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:117)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:934)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:853)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:86)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:963)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:866)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1000)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:903)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:649)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:874)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:710)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:128)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:53)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108)
+	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$2(FilterChainProxy.java:235)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:376)
+	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:101)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:132)
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:86)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:181)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:110)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:96)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90)
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:385)
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:237)
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:195)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.filter.ServletRequestPathFilter.doFilter(ServletRequestPathFilter.java:52)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74)
+	at org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebSecurityConfiguration.java:317)
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:355)
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:272)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:199)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:165)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:77)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:492)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:113)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:83)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:72)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:341)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:1272)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1801)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:946)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:480)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:57)
+	at java.base/java.lang.Thread.run(Thread.java:1474)
+2026-09-17 15:37:52 ERROR c.m.p.e.GlobalExceptionHandler - Twilio API error (code 21608): The phone number is unverified. Trial accounts cannot send messages to unverified numbers; verify it at twilio.com/user/account/phone-numbers/verified
+2026-09-17 15:37:52 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [com.twilio.exception.ApiException: The phone number is unverified. Trial accounts cannot send messages to unverified numbers; verify it at twilio.com/user/account/phone-numbers/verified]
+2026-09-17 15:37:57 INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-09-17 15:37:57 INFO  o.s.boot.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-09-17 15:37:57 INFO  o.s.boot.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-09-17 15:37:57 INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-09-17 15:37:57 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-09-17 15:37:57 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2026-09-17 15:37:57 INFO  c.m.p.InsurancePolicyAndClaimManagementSystemApplication - Starting InsurancePolicyAndClaimManagementSystemApplication using Java 25.0.2 with PID 22500 (D:\Spring Workspace\Insurance-Policy-and-Claim-Management-System\target\classes started by Dell in D:\Spring Workspace\Insurance-Policy-and-Claim-Management-System)
+2026-09-17 15:37:57 DEBUG c.m.p.InsurancePolicyAndClaimManagementSystemApplication - Running with Spring Boot v4.1.0, Spring v7.0.8
+2026-09-17 15:37:57 INFO  c.m.p.InsurancePolicyAndClaimManagementSystemApplication - No active profile set, falling back to 1 default profile: "default"
+2026-09-17 15:37:59 INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-09-17 15:37:59 INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 182 ms. Found 12 JPA repository interfaces.
+2026-09-17 15:38:00 INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-09-17 15:38:00 INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-09-17 15:38:00 INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/11.0.22]
+2026-09-17 15:38:00 INFO  o.s.b.w.c.s.WebApplicationContextInitializer - Root WebApplicationContext: initialization completed in 2929 ms
+2026-09-17 15:38:00 INFO  org.hibernate.orm.jpa - HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-09-17 15:38:01 INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-09-17 15:38:01 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Starting...
+2026-09-17 15:38:01 INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-2 - Added connection com.mysql.cj.jdbc.ConnectionImpl@689c3090
+2026-09-17 15:38:01 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Start completed.
+2026-09-17 15:38:01 INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/insurance_db]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 8.0.46
+	Default catalog/schema: insurance_db/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-09-17 15:38:02 INFO  org.hibernate.orm.core - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-09-17 15:38:02 INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-09-17 15:38:03 WARN  o.s.b.j.a.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-09-17 15:38:04 DEBUG c.m.p.s.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2026-09-17 15:38:05 INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+2026-09-17 15:38:05 INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2026-09-17 15:38:05 INFO  c.m.p.InsurancePolicyAndClaimManagementSystemApplication - Started InsurancePolicyAndClaimManagementSystemApplication in 8.429 seconds (process running for 783.943)
+2026-09-17 15:38:06 INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2026-09-17 15:38:39 INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-09-17 15:38:39 INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-09-17 15:38:39 INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 6 ms
+2026-09-17 15:38:39 INFO  c.m.p.s.AuthServiceImplementation - LOG-001 Registration started for ni***@gmail.com
+2026-09-17 15:38:39 INFO  c.m.p.s.OtpServiceImplementation - Sending phone OTP to ******2713
+2026-09-17 15:38:40 INFO  c.m.p.s.OtpServiceImplementation - Phone OTP dispatch status: pending
+2026-09-17 15:38:40 INFO  c.m.p.s.OtpServiceImplementation - Sending email OTP to ni***@gmail.com
+2026-09-17 15:38:45 INFO  c.m.p.s.OtpServiceImplementation - Email OTP sent successfully to ni***@gmail.com
+2026-09-17 15:48:11 INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-09-17 15:48:11 INFO  o.s.boot.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-09-17 15:48:11 INFO  o.s.boot.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-09-17 15:48:11 INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-09-17 15:48:11 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown initiated...
+2026-09-17 15:48:11 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown completed.
+2026-09-17 15:48:12 INFO  c.m.p.InsurancePolicyAndClaimManagementSystemApplication - Starting InsurancePolicyAndClaimManagementSystemApplication using Java 25.0.2 with PID 22500 (D:\Spring Workspace\Insurance-Policy-and-Claim-Management-System\target\classes started by Dell in D:\Spring Workspace\Insurance-Policy-and-Claim-Management-System)
+2026-09-17 15:48:12 DEBUG c.m.p.InsurancePolicyAndClaimManagementSystemApplication - Running with Spring Boot v4.1.0, Spring v7.0.8
+2026-09-17 15:48:12 INFO  c.m.p.InsurancePolicyAndClaimManagementSystemApplication - No active profile set, falling back to 1 default profile: "default"
+2026-09-17 15:48:13 INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-09-17 15:48:13 INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 108 ms. Found 12 JPA repository interfaces.
+2026-09-17 15:48:14 INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-09-17 15:48:14 INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-09-17 15:48:14 INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/11.0.22]
+2026-09-17 15:48:14 INFO  o.s.b.w.c.s.WebApplicationContextInitializer - Root WebApplicationContext: initialization completed in 2157 ms
+2026-09-17 15:48:14 INFO  org.hibernate.orm.jpa - HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-09-17 15:48:14 INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-09-17 15:48:14 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Starting...
+2026-09-17 15:48:14 INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-3 - Added connection com.mysql.cj.jdbc.ConnectionImpl@3c6a3413
+2026-09-17 15:48:14 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Start completed.
+2026-09-17 15:48:14 INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/insurance_db]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 8.0.46
+	Default catalog/schema: insurance_db/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-09-17 15:48:16 INFO  org.hibernate.orm.core - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-09-17 15:48:16 INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-09-17 15:48:16 WARN  o.s.b.j.a.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-09-17 15:48:17 DEBUG c.m.p.s.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2026-09-17 15:48:17 INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+2026-09-17 15:48:18 INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2026-09-17 15:48:18 INFO  c.m.p.InsurancePolicyAndClaimManagementSystemApplication - Started InsurancePolicyAndClaimManagementSystemApplication in 6.505 seconds (process running for 1396.644)
+2026-09-17 15:48:18 INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2026-09-17 15:48:26 INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-09-17 15:48:26 INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-09-17 15:48:26 INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 17 ms
+2026-09-17 15:48:26 INFO  c.m.p.s.OtpServiceImplementation - Sending phone OTP to ******2713
+2026-09-17 15:48:27 INFO  c.m.p.s.OtpServiceImplementation - Phone OTP dispatch status: pending
+2026-09-17 15:48:27 INFO  c.m.p.s.OtpServiceImplementation - Sending email OTP to ni***@gmail.com
+2026-09-17 15:48:31 INFO  c.m.p.s.OtpServiceImplementation - Email OTP sent successfully to ni***@gmail.com
+2026-09-17 15:48:31 INFO  c.m.p.s.AuthServiceImplementation - Registration OTP resent for ni***@gmail.com
+2026-09-17 15:50:48 INFO  c.m.p.s.OtpServiceImplementation - Sending phone OTP to ******2713
+2026-09-17 15:50:48 INFO  c.m.p.s.OtpServiceImplementation - Phone OTP dispatch status: pending
+2026-09-17 15:50:48 INFO  c.m.p.s.OtpServiceImplementation - Sending email OTP to ni***@gmail.com
+2026-09-17 15:50:52 INFO  c.m.p.s.OtpServiceImplementation - Email OTP sent successfully to ni***@gmail.com
+2026-09-17 15:50:52 INFO  c.m.p.s.AuthServiceImplementation - Registration OTP resent for ni***@gmail.com
+2026-09-17 15:51:31 INFO  c.m.p.s.AuthServiceImplementation - Verifying registration OTPs for ni***@gmail.com
+2026-09-17 15:51:31 INFO  c.m.p.s.OtpServiceImplementation - Verifying email OTP for ni***@gmail.com
+2026-09-17 15:51:31 INFO  c.m.p.s.OtpServiceImplementation - Email verified successfully: ni***@gmail.com
+2026-09-17 15:51:31 INFO  c.m.p.s.OtpServiceImplementation - Verifying phone OTP for ******2713
+2026-09-17 15:51:31 INFO  c.m.p.s.OtpServiceImplementation - Phone verified successfully: ******2713
+2026-09-17 15:51:31 INFO  c.m.p.s.AuthServiceImplementation - LOG-001 Customer registration completed. User id: 4
+2026-09-17 15:52:02 INFO  c.m.p.s.AuthServiceImplementation - Login attempt for ni***@gmail.com
+2026-09-17 15:52:02 WARN  c.m.p.s.AuthServiceImplementation - LOG-003 Login failed. Wrong password for user id: 4
+2026-09-17 15:52:02 WARN  c.m.p.e.GlobalExceptionHandler - Authentication failed: Invalid credentials
+2026-09-17 15:52:02 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [com.monocept.project.exception.AuthenticationException: Invalid credentials]
+2026-09-17 15:52:14 INFO  c.m.p.s.AuthServiceImplementation - Login attempt for ni***@gmail.com
+2026-09-17 15:52:15 INFO  c.m.p.s.AuthServiceImplementation - LOG-002 Login successful for user id: 4
+2026-09-17 15:52:15 INFO  c.m.p.s.CustomerServiceImplementation - Checking if profile exists for user ID: 4
+2026-09-17 15:52:21 INFO  c.m.p.s.CustomerServiceImplementation - Fetching customer profile for user id: 4
+2026-09-17 15:52:21 WARN  c.m.p.e.GlobalExceptionHandler - Resource not found: Customer not found for user id: 4
+2026-09-17 15:52:21 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [com.monocept.project.exception.ResourceNotFoundException: Customer not found for user id: 4]
+2026-09-17 15:52:21 INFO  c.m.p.s.CustomerServiceImplementation - Fetching customer profile for user id: 4
+2026-09-17 15:52:21 WARN  c.m.p.e.GlobalExceptionHandler - Resource not found: Customer not found for user id: 4
+2026-09-17 15:52:21 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [com.monocept.project.exception.ResourceNotFoundException: Customer not found for user id: 4]
+2026-09-17 15:52:23 INFO  c.m.p.s.CustomerServiceImplementation - Fetching customer profile for user id: 4
+2026-09-17 15:52:23 WARN  c.m.p.e.GlobalExceptionHandler - Resource not found: Customer not found for user id: 4
+2026-09-17 15:52:23 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [com.monocept.project.exception.ResourceNotFoundException: Customer not found for user id: 4]
+2026-09-17 15:52:23 INFO  c.m.p.s.CustomerServiceImplementation - Fetching customer profile for user id: 4
+2026-09-17 15:52:23 WARN  c.m.p.e.GlobalExceptionHandler - Resource not found: Customer not found for user id: 4
+2026-09-17 15:52:23 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [com.monocept.project.exception.ResourceNotFoundException: Customer not found for user id: 4]
+2026-09-17 15:52:27 INFO  c.m.p.s.CustomerServiceImplementation - Fetching customer profile for user id: 4
+2026-09-17 15:52:27 WARN  c.m.p.e.GlobalExceptionHandler - Resource not found: Customer not found for user id: 4
+2026-09-17 15:52:27 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [com.monocept.project.exception.ResourceNotFoundException: Customer not found for user id: 4]
+2026-09-17 15:52:27 INFO  c.m.p.s.CustomerServiceImplementation - Fetching customer profile for user id: 4
+2026-09-17 15:52:27 WARN  c.m.p.e.GlobalExceptionHandler - Resource not found: Customer not found for user id: 4
+2026-09-17 15:52:27 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [com.monocept.project.exception.ResourceNotFoundException: Customer not found for user id: 4]
+2026-09-17 15:52:29 INFO  c.m.p.s.CustomerServiceImplementation - Checking if profile exists for user ID: 4
+2026-09-17 15:52:29 INFO  c.m.p.s.CustomerServiceImplementation - Checking if profile exists for user ID: 4
+2026-09-17 15:52:34 INFO  c.m.p.s.CustomerServiceImplementation - Fetching customer profile for user id: 4
+2026-09-17 15:52:34 WARN  c.m.p.e.GlobalExceptionHandler - Resource not found: Customer not found for user id: 4
+2026-09-17 15:52:34 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [com.monocept.project.exception.ResourceNotFoundException: Customer not found for user id: 4]
+2026-09-17 15:52:34 INFO  c.m.p.s.CustomerServiceImplementation - Fetching customer profile for user id: 4
+2026-09-17 15:52:34 WARN  c.m.p.e.GlobalExceptionHandler - Resource not found: Customer not found for user id: 4
+2026-09-17 15:52:34 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [com.monocept.project.exception.ResourceNotFoundException: Customer not found for user id: 4]
+2026-09-17 15:52:35 INFO  c.m.p.s.CustomerServiceImplementation - Checking if profile exists for user ID: 4
+2026-09-17 15:52:35 INFO  c.m.p.s.CustomerServiceImplementation - Checking if profile exists for user ID: 4
+2026-09-17 15:52:36 INFO  c.m.p.s.CustomerServiceImplementation - Checking if profile exists for user ID: 4
+2026-09-17 15:52:37 INFO  c.m.p.s.CustomerServiceImplementation - Checking if profile exists for user ID: 4
+2026-09-17 15:52:38 INFO  c.m.p.s.CustomerServiceImplementation - Checking if profile exists for user ID: 4
+2026-09-17 15:52:38 INFO  c.m.p.s.CustomerServiceImplementation - Checking if profile exists for user ID: 4
+2026-09-17 15:53:14 WARN  c.m.p.e.GlobalExceptionHandler - Validation failed
+2026-09-17 15:53:14 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [org.springframework.web.bind.MethodArgumentNotValidException: Validation failed for argument [1] in public org.springframework.http.ResponseEntity<com.monocept.project.dto.CustomerResponseDTO> com.monocept.project.controller.CustomerController.createProfile(com.monocept.project.security.CustomUserDetails,com.monocept.project.dto.CustomerRequestDTO) with 3 errors: [Field error in object 'customerRequestDTO' on field 'email': rejected value [null]; codes [NotBlank.customerRequestDTO.email,NotBlank.email,NotBlank.java.lang.String,NotBlank]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [customerRequestDTO.email,email]; arguments []; default message [email]]; default message [Email is required]] [Field error in object 'customerRequestDTO' on field 'fullName': rejected value [null]; codes [NotBlank.customerRequestDTO.fullName,NotBlank.fullName,NotBlank.java.lang.String,NotBlank]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [customerRequestDTO.fullName,fullName]; arguments []; default message [fullName]]; default message [Full name is required]] [Field error in object 'customerRequestDTO' on field 'mobileNumber': rejected value [null]; codes [NotBlank.customerRequestDTO.mobileNumber,NotBlank.mobileNumber,NotBlank.java.lang.String,NotBlank]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [customerRequestDTO.mobileNumber,mobileNumber]; arguments []; default message [mobileNumber]]; default message [Mobile number is required]] ]
+2026-09-17 15:53:28 WARN  c.m.p.e.GlobalExceptionHandler - Validation failed
+2026-09-17 15:53:28 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [org.springframework.web.bind.MethodArgumentNotValidException: Validation failed for argument [1] in public org.springframework.http.ResponseEntity<com.monocept.project.dto.CustomerResponseDTO> com.monocept.project.controller.CustomerController.createProfile(com.monocept.project.security.CustomUserDetails,com.monocept.project.dto.CustomerRequestDTO) with 3 errors: [Field error in object 'customerRequestDTO' on field 'email': rejected value [null]; codes [NotBlank.customerRequestDTO.email,NotBlank.email,NotBlank.java.lang.String,NotBlank]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [customerRequestDTO.email,email]; arguments []; default message [email]]; default message [Email is required]] [Field error in object 'customerRequestDTO' on field 'fullName': rejected value [null]; codes [NotBlank.customerRequestDTO.fullName,NotBlank.fullName,NotBlank.java.lang.String,NotBlank]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [customerRequestDTO.fullName,fullName]; arguments []; default message [fullName]]; default message [Full name is required]] [Field error in object 'customerRequestDTO' on field 'mobileNumber': rejected value [null]; codes [NotBlank.customerRequestDTO.mobileNumber,NotBlank.mobileNumber,NotBlank.java.lang.String,NotBlank]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [customerRequestDTO.mobileNumber,mobileNumber]; arguments []; default message [mobileNumber]]; default message [Mobile number is required]] ]
+2026-09-17 15:53:37 WARN  c.m.p.e.GlobalExceptionHandler - Validation failed
+2026-09-17 15:53:37 WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [org.springframework.web.bind.MethodArgumentNotValidException: Validation failed for argument [1] in public org.springframework.http.ResponseEntity<com.monocept.project.dto.CustomerResponseDTO> com.monocept.project.controller.CustomerController.createProfile(com.monocept.project.security.CustomUserDetails,com.monocept.project.dto.CustomerRequestDTO) with 3 errors: [Field error in object 'customerRequestDTO' on field 'email': rejected value [null]; codes [NotBlank.customerRequestDTO.email,NotBlank.email,NotBlank.java.lang.String,NotBlank]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [customerRequestDTO.email,email]; arguments []; default message [email]]; default message [Email is required]] [Field error in object 'customerRequestDTO' on field 'fullName': rejected value [null]; codes [NotBlank.customerRequestDTO.fullName,NotBlank.fullName,NotBlank.java.lang.String,NotBlank]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [customerRequestDTO.fullName,fullName]; arguments []; default message [fullName]]; default message [Full name is required]] [Field error in object 'customerRequestDTO' on field 'mobileNumber': rejected value [null]; codes [NotBlank.customerRequestDTO.mobileNumber,NotBlank.mobileNumber,NotBlank.java.lang.String,NotBlank]; arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [customerRequestDTO.mobileNumber,mobileNumber]; arguments []; default message [mobileNumber]]; default message [Mobile number is required]] ]
+2026-09-17 15:56:19 INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 2 class path changes (0 additions, 0 deletions, 2 modifications)
+2026-09-17 15:56:19 INFO  o.s.boot.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-09-17 15:56:20 INFO  o.s.boot.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-09-17 15:56:20 INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-09-17 15:56:20 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Shutdown initiated...
+2026-09-17 15:56:20 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Shutdown completed.

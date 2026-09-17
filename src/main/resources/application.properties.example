@@ -1,0 +1,56 @@
+# ==========================================================================
+# TEMPLATE ONLY — copy this file to `application.properties` in the same
+# folder and fill in your own real values. `application.properties` is
+# gitignored on purpose and must NEVER be committed with real secrets.
+#
+#   cp application.properties.example application.properties
+# ==========================================================================
+
+spring.application.name=Insurance-Policy-and-Claim-Management-System
+
+# --- Database ---
+spring.datasource.url=jdbc:mysql://localhost:3306/insurance_db
+spring.datasource.username=YOUR_DB_USERNAME
+spring.datasource.password=YOUR_DB_PASSWORD
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+
+server.port=8080
+
+springdoc.swagger-ui.path=/swagger-ui.html
+
+logging.level.root=INFO
+logging.level.com.monocept.project=DEBUG
+
+# --- JWT ---
+# Use a long, random string in your real file (e.g. `openssl rand -hex 32`)
+jwt.secret=REPLACE_WITH_A_LONG_RANDOM_SECRET
+jwt.expiration=86400000
+
+# --- Cloudinary (for claim document uploads) ---
+cloudinary.cloud-name=YOUR_CLOUDINARY_CLOUD_NAME
+cloudinary.api-key=YOUR_CLOUDINARY_API_KEY
+cloudinary.api-secret=YOUR_CLOUDINARY_API_SECRET
+
+# --- Resend (transactional email) ---
+resend.api.key=YOUR_RESEND_API_KEY
+app.frontend.reset-url=http://localhost:5173/forgot-password
+
+# --- Twilio (OTP verification) ---
+twilio.account.sid=YOUR_TWILIO_ACCOUNT_SID
+twilio.auth.token=YOUR_TWILIO_AUTH_TOKEN
+twilio.verify.sid=YOUR_TWILIO_VERIFY_SID
+
+# --- Mail (SMTP) ---
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=YOUR_EMAIL_ADDRESS
+# Use a Gmail "App Password", not your real account password:
+# https://myaccount.google.com/apppasswords
+spring.mail.password=YOUR_GMAIL_APP_PASSWORD
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+
+logging.level.org.springframework.security=TRACE

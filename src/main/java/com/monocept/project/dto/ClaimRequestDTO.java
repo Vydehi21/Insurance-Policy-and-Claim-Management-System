@@ -1,0 +1,56 @@
+package com.monocept.project.dto;
+
+import java.math.BigDecimal;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class ClaimRequestDTO {
+
+    @NotNull(message = "Policy reference is required")
+    private Long policyId;
+
+    @NotNull(message = "Claim amount is required")
+    @DecimalMin(value = "1.0", message = "Claim amount must be greater than zero")
+    @Digits(integer = 10, fraction = 0, message = "Claim amount must be a whole number (no decimals)")
+    private BigDecimal claimAmount;
+
+    @NotBlank(message = "Claim reason is required")
+    @Size(min = 10, max = 1000, message = "Claim reason must be between 10 and 1000 characters")
+    @Pattern(regexp = ".*[A-Za-z]{3,}.*", message = "Claim reason must contain meaningful text")
+    private String claimReason;
+
+    @NotNull(message = "Incident date is required")
+    @PastOrPresent(message = "Incident date cannot be in the future")
+    private LocalDate incidentDate;
+
+
+    // @Valid cascades validation into each document (name/type/reference);
+    // without it a blank documentName reached the database and failed as a
+    // misleading 409 "duplicate" error.
+    @NotEmpty(message = "At least one supporting document is required")
+    @Valid
+    private List<ClaimDocumentDTO> supportingDocuments;
+
+    public void setClaimReason(String claimReason) {
+        this.claimReason = com.monocept.project.util.TextNormalizationUtil.trimAndCollapseSpaces(claimReason);
+    }
+}
